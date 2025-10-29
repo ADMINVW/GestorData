@@ -1,0 +1,6 @@
+/venv
+/ewsite/settings.py
+/staticfiles
+# Ignorar archivos compilados de Python
+*.pyc
+__pycache__/

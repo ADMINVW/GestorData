@@ -1,0 +1,45 @@
+{% extends "base.html" %} 
+{% block titulo %}Consultar Centro de Gastos{% endblock %}
+{% block contenido %}
+        <div class="col-12 col-md-10 offset-md-1">
+            <form id="form-cgastos" class="form-horizontal" method="post">
+                {% csrf_token %}
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">Consulta Centro de Gastos</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="container">
+                            <div class="row">
+                                <div class="table-responsive">
+                                    <table id="datatable-consultagastos" class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Codigo</th>
+                                                <th>Descripción</th>
+                                                <th></th>
+                                                <th></th>                                                
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tablebody_gastos">
+                                            <!--Se rellena mediante js-->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-primary" type="button" id="consultar-btn">Consultar</button>
+                        <a class="btn btn-danger" role="button" id="cancelar-btn">Cancelar</a>
+                        <a class="btn btn-success" role="button" id="nuevo-btn" href="/comprasapp/cargarTmplCentroGastos/">Nuevo</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    
+
+{% endblock %}
+{% block footer_scripts %}
+<script src="/static/js/funcionesConsultaG.js" defer></script>
+{% endblock %}

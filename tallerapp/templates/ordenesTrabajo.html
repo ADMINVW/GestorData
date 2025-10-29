@@ -1,0 +1,22 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{% block title %} {% endblock %}</title>
+        <link type='text/css' href='{% static "css/menuMain.css" %}' rel='stylesheet'/>
+        
+    </head>
+    <body>
+        {% include "menuGeneral.html" %}
+        
+           
+        {% block content %}
+        <p> Inicio de ordenes</p>
+        {% endblock %}
+        <p> <u1 style='color:rgba(20, 208, 10, 0.73);'>Mauricio Rosero</u1>
+
+        </p>
+    </body>
+</html>
+
+

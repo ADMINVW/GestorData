@@ -1,0 +1,124 @@
+<html>
+<div class="modal-dialog modal-lg">
+    <div class="modal-content">
+        <div class="modal-header"> <!-- Header -->
+            <h4 class="modal-title" id="myModalLabel">Detalle Orden N° {{nnumOrden}}</h4>
+        </div>
+        <!-- div que continen toda la ventana modal -->
+        <input id="iva" name="iva" type="hidden" value="{{niva}}">
+        <div class="col-12  table-responsive">
+            <table class="table table-striped" id="listDetalle">
+                <thead>
+                    <tr>
+                        <th style="align-content: center; text-align: center">
+                            Cantidad
+                        </th>
+                        <th style="align-content: center; text-align: center">
+                            Codigo
+                        </th>
+                        <th style="align-content: center; text-align: center">
+                            Descripción
+                        </th>
+                        <th style="align-content: center; text-align: center">
+                            % Iva
+                        </th>
+                        <th style="align-content: center; text-align: center">
+                            Tipo Item
+                        </th>
+                        <th style="align-content: center; text-align: center">
+                            Descto
+                        </th>
+                        <th style="align-content: center; text-align: center">
+                            Precio Unitario
+                        </th>
+                        <th style="align-content: center; text-align: center">
+                            Subtotal
+                        </th>
+                        <th style="align-content: center; text-align: center">
+                            Centro Gastos
+                        </th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detalle in ndetalleOrden %}
+                    <tr>
+                        <td style="text-align: center; white-space: nowrap; overflow-x: auto">
+                            {{detalle.od_canped}}
+                        </td>
+                        <td style="text-align: left">
+                            {{detalle.od_codigo}}
+                        </td>
+                        <td style="text-align: left">
+                            {{detalle.od_descri1}}
+                        </td>
+                        <td>
+                            {% if detalle.od_poriva != None %} {{detalle.od_poriva}} {%else%} - {% endif %}
+                        </td>
+                        <td>
+                            {% if detalle.od_observ != None %} {{detalle.od_observ}} {% endif %}
+                        </td>
+                        <td style="text-align: left; white-space: nowrap; overflow-x: auto">
+                            {{detalle.od_descto}}
+                        </td>
+                        <td>
+                            {{detalle.od_preest|floatformat:2}}
+                        </td>
+                        <td style="text-align: center">
+                            {{detalle.total|floatformat:2}}
+                        </td>
+                        <td>
+                            {{detalle.ct_descripcion}}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="row">
+            <div class="col-5">
+
+            </div>
+            <div class="col-7">
+                <div class="table-responsive">
+                    <table class="table" id="listTotales">
+                        <tbody>
+                            <tr>
+                                <th style="width: 50% ">Subtotal Sin Impuestos</th>
+                                <td style="text-align: right">
+                                    <b>
+                                        <p id="subtotal"> 0.0</p>
+                                    </b>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th style="width: 50% ">Valor Iva </th>
+                                <td style="text-align: right">
+                                    <b>
+                                        <p id="totaliva">0.0</p>
+                                    </b>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th style="width: 50% ">Valor Total</th>
+                                <td style="text-align: right">
+                                    <b>
+                                        <p id="total"> 0.0</p>
+                                    </b>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer"> <!-- Footer -->
+            <button type="button" class="btn btn-danger" onclick="return cerrar_modal()">
+                <i class="fa fa-times"></i> Cerrar
+            </button>
+        </div>
+    </div>
+</div>
+
+</html>

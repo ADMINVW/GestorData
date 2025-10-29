@@ -1,0 +1,242 @@
+{% extends "base.html" %} {% block titulo %}Consultar Plantillas {% endblock %}
+{% block contenido %}
+
+    <div class="col-12 col-md-11 offset-md-1">
+        <form id="form-plantilla" class="form-horizontal" method="post">
+            {% csrf_token %}
+            <div>
+                <input id="proceso" name="proceso" type="hidden" value="{{nproceso}}">
+            </div>
+            <div class="col-12">
+                <br>
+                <div class="card">
+                    <div class="card-header">
+                        <h5>
+                            CODIGO PLANTILLA 
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group row mt-3">
+                            <label for="codPlantilla" class="col-sm-2 col-form-label">Plantilla</label>
+                            <div class="col-sm-2">
+                                <input type="text" class="form-control" id="codPlantilla" name="ncodPlan" style="text-transform: uppercase;"
+                                    maxlength="2" placeholder="CODIGO"   {% if nplantilla %}value="{{nplantilla.pc_codigo}}" readonly {% endif %}  
+                                    {% if nproceso == 'C' %}onchange="validarExistencia(this.value)" {% endif %} required 
+                                    {% if nproceso == 'U' %}disabled{% endif %}/>
+                            </div>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" id="nomPlantilla" name="nnomPlantilla" style="text-transform: uppercase;"
+                                    maxlength="40" placeholder="CONCEPTO" value="{{nplantilla.pc_concepto}}" required /> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <div class="card">
+                    <div class="card-header">
+                        <h5>
+                            DETALLE PLANTILLA
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group row">
+                            <label for="codSolicitante" class="col-sm-2 col-form-label">Solicitante</label>
+                            <div class="col-sm-4">
+                                <select class="form-select" id="codSolicitante" name="ncodSolicita" required>
+                                    <option value="">Seleccione el solicitante</option>
+                                    {% if nsolicitantes %}
+                                    {% for solicitante in nsolicitantes %}
+                                    <option value="{{solicitante.so_codigo}}" {% if nplantilla and nplantilla.pc_solicit == solicitante.so_codigo %}selected{% endif %}>
+                                        {{solicitante.so_nombres}}</option>
+                                    {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label" >Tipo</label>
+                            <input id="tipo" name="tipo" type="hidden" value="{{nplantilla.pc_subtipo}}">
+                            <div class="col-sm-2">
+                                <input class="form-check-input " type="checkbox" id="checkTipoB"
+                                {% if nplantilla and nplantilla.pc_subtipo == 'B' %}checked{% endif%}> BIENES
+                            </div>
+                            <div class="col-sm-2">
+                                <input class="form-check-input " type="checkbox" id="checkTipoS"
+                                {% if nplantilla and nplantilla.pc_subtipo == 'S' %}checked{% endif%}> SERVICIOS
+                            </div>
+                        </div>
+                        <br>
+                        <div class="form-group row">
+                            <label for="codSubtipo" class="col-sm-2 col-form-label">Subtipo</label>
+                            <div class="col-sm-4">
+                                <select class="form-select" id="codSubtipo" name="ncodSub" required>
+                                    <option value="">Seleccione subtipo</option>
+                                    {% if nsubtipos %}
+                                    {% for subtipo in nsubtipos %}
+                                    <option value="{{subtipo.to_tipo}}" {% if nplantilla and nplantilla.pc_tipo == subtipo.to_tipo %}selected{% endif %}>
+                                        {{ subtipo.to_descrip }}</option>
+                                    {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="form-group row">
+                            <label for="codProveedor" class="col-sm-2 col-form-label">Proveedor</label>
+                            <div class="col-sm-2">
+                                <input type="text" class="form-control" id="codProveedor" name="ncodProv" readonly disabled
+                                     {% if ndatosProveedor %}value="{{nplantilla.pc_codpro}}"{% endif %}  
+                                      />
+                            </div>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" id="nomProveedor" name="nnomProveedor" style="text-transform: uppercase;"
+                                 {% if ndatosProveedor %}value="{{ndatosProveedor.nombre}}"{% endif %} />
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row" style="font-size: smaller;">
+                            <div class="col-sm-2"></div>
+                            <label class="col-sm-2"><input class="form-check-input " type="checkbox" id="contribEsp"
+                                onclick="return false;"> Contribuyente
+                                Especial</label>
+                            <label class="col-sm-2" for=""><input class="form-check-input " type="checkbox" id="rimpe"
+                                onclick="return false;"> Rimpe
+                                {% if nrimpe == 'E' %} EMPRENDEDOR{% endif%}
+                                {% if nrimpe == 'G' %} NEGOCIO POPULAR{% endif %}</label>
+                            <label class="col-sm-2" for=""><input class="form-check-input " type="checkbox" id="granContrib"
+                                onclick="return false;"> Gran Contribuyente
+                            </label>
+                            <label class="col-sm-2" for=""><input class="form-check-input " type="checkbox" id="retIva"
+                                onclick="return false;"> Retiene IVA
+                            </label>
+                            <label class="col-sm-2" for=""><input class="form-check-input " type="checkbox" id="retFte"
+                                onclick="return false;"> Retiene FUENTE
+                            </label>
+                        </div>
+                        <br>
+                        <div class="form-group row">
+                            <label for="descripcion" class="col-sm-2 col-form-label">Descripción</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="descripcion" name="descripcion" style="text-transform: uppercase;"
+                                   maxlength="60" value="{{nplantilla.pc_obser1}}" required />
+                            </div>
+                        </div>
+                        <br>
+                        <div class="form-group row">
+                            <label for="codComprob" class="col-sm-2 col-form-label">Tipo Comprobante</label>
+                            <div class="col-sm-1">
+                                <input type="text" class="form-control" id="codComprob" name="codComprob" readonly disabled required
+                                {% if nplantilla %}value="{{nplantilla.pc_cod_tip}}"{% endif %} />
+                            </div>
+                            <div class="col-sm-5">
+                                <select class="form-select" id="selectComprob" name="selectComprob" required>
+                                    <option value="">Seleccione tipo comprobante</option>
+                                    {% if ntipoComprobantes %}
+                                    {% for tipo in ntipoComprobantes %}
+                                    <option value="{{tipo.tip_codigo}}" {% if nplantilla and nplantilla.pc_cod_tip == tipo.tip_codigo %}selected{% endif %}>
+                                        {{tipo.tip_comprobante}}</option>
+                                    {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="form-group row">
+                            <label for="codCredito" class="col-sm-2 col-form-label">Tipo Credito</label>
+                            <div class="col-sm-1">
+                                <input type="text" class="form-control" id="codCredito" name="codCredito" readonly disabled required
+                                 {% if nplantilla %}value="{{nplantilla.pc_ide_cre}}"{% endif %} />
+                            </div>
+                            <div class="col-sm-5">
+                                <select class="form-select" id="selectCredito" name="selectCredito" required>
+                                    <option value="">Seleccione tipo credito</option>
+                                    {% if ntipoCreditos %}
+                                    {% for tipoC in ntipoCreditos %}
+                                    <option value="{{tipoC.cre_codigo}}" {% if nplantilla and nplantilla.pc_ide_cre == tipoC.cre_codigo %}selected{% endif %}>
+                                        {{ tipoC.cre_descrip }}</option>
+                                    {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label" for="checkIva">% Retencion Iva </label>
+                            <div class="col-sm-1">
+                                 
+                                <input class="form-check-input " type="checkbox" id="checkIva" 
+                                {% if nplantilla and nplantilla.pc_secuencia_iva > 0 %} checked {% endif %} >
+                            </div>
+                            <div class="col-sm-1">
+                                <input type="text" class="form-control" id="porcenIva" name="porcenIva" readonly disabled
+                                 {% if nplantilla and nplantilla.pc_secuencia_iva > 0 %}value={{nplantilla.pc_porc_ivaret}}{% endif %} />
+                            </div>
+                            <div class="col-sm-5">
+                                <select class="form-select" id="selectIva" name="selectIva" 
+                                {% if nplantilla %}
+                                    {% if nplantilla.pc_secuencia_iva == 0 %} disabled {% endif %}
+                                {% else %}
+                                    disabled
+                                {% endif %}>
+                                    <option value="">Seleccione retención IVA </option>
+                                    {% if nitemsIva %}
+                                    {% for itemI in nitemsIva %}
+                                    <option value="{{itemI.rt_secuencia}}" data-porcentaje="{{itemI.rt_porcen}}" data-titem="{{itemI.rt_subtipo}}"
+                                    {% if nplantilla and itemI.rt_secuencia == nplantilla.pc_secuencia_iva %}selected{% endif %}>
+                                        {{itemI.rt_descrip}}
+                                    </option>
+                                    {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label" for="checkFte">% Retencion Fuente </label>
+                            <div class="col-sm-1">
+                                <input class="form-check-input " type="checkbox" id="checkFte"
+                                 {% if nplantilla and nplantilla.pc_secuencia_renta > 0 %} checked {% endif %} >
+                            </div>
+                            <div class="col-sm-1">
+                                <input type="text" class="form-control" id="porcenFte" name="porcenFte" readonly disabled
+                                {% if nplantilla and nplantilla.pc_secuencia_renta > 0 %}value={{nplantilla.pc_porc_rentaret}}{% endif %} />
+                            </div>
+                            <div class="col-sm-5">
+                                <select class="form-select" id="selectFte" name="selectFte"  
+                                {% if nplantilla %}
+                                    {% if nplantilla.pc_secuencia_renta == 0 %} disabled {% endif %}
+                                {% else %}
+                                    disabled
+                                {% endif %}>
+                                    <option value="">Seleccione retención FUENTE</option>
+                                    {% if nitemsFte %}
+                                    {% for itemF in nitemsFte %}
+                                    <option value="{{itemF.rt_secuencia}}" data-porcentaje="{{itemF.rt_porcen}}"  data-titem="{{itemF.rt_subtipo}}" 
+                                    {% if nplantilla and itemF.rt_secuencia == nplantilla.pc_secuencia_renta %}selected{% endif %}>
+                                        {{ itemF.rt_descrip }}
+                                    </option>
+                                    {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-primary" type="submit" id="guardar-btn">Guardar</button>
+                         {% if nplantilla != None %} 
+                         <button type="button" class="btn btn-secondary" id="eliminar-btn">Eliminar</button>
+                         {% endif %}
+                        <a class="btn btn-danger" role="button" data-url="/comprasapp/cargarTmplPlantillas" 
+                            id="cancelar-btn">Cancelar</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+    </div>
+
+{% endblock %}
+{% block footer_scripts %}
+<script src="/static/js/funcionesPlantilla.js" defer></script>
+{% endblock %}

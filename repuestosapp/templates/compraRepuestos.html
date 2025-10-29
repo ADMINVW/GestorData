@@ -1,0 +1,257 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        
+        <title>{% block title %} {% endblock %}</title>
+        <!--
+          <link type='text/css' href='{% static "css/menuMain.css" %}' rel='stylesheet'/>
+        -->
+        <link rel="stylesheet" href="{% static 'css/tablaImpuesto.css' %}">
+        <script src="/static/js/funcionesRepuestos.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        
+    </head>
+    <body>
+        {% include "menuBarraNav.html" %}
+           
+        {% block content %}
+          <div class="input-group" style="width: 1600px;">
+            <input type="file" class="form-control" id="inputGroupFileFactura" aria-describedby="inputGroupFileAddonSube" aria-label="Upload" onchange="leerArchivoXML()" >
+            <div class="row align-items-start">
+              
+              <div class="col-md-2 position-relative d-inline-block" style="width: auto;">
+                  <select onchange="obtenerSeleccion()" id="selSolicita" class="form-select form-select-sm" aria-label="Small select example" style="width: 250px;">
+                    <option selected>Escoja solicitante</option>
+                    {% if nsolicita %}
+                      {% for solicita in nsolicita %}
+                      <option value= "{{solicita.so_codigo}}">{{solicita.so_nombres}}</option>
+                      
+                      {% endfor %}
+                    {% endif %} 
+                  </select>
+              </div>
+              <!--
+              <div class="col-md-2 position-relative">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" role="switch" id="PeriodicasSwitchCheck" checked>
+                  <label class="form-check-label" for="PeriodicasSwitchCheck">Periodicas</label>
+                </div>
+              </div>  
+              -->
+              <div class="col-md-1 position-relative">
+                <input type="text" class="form-control" id="userName" readonly  style="font-size: large; font-style: oblique; font: bold; width: 150px;">
+                <div class="valid-tooltip">
+                  Usuario
+                </div>
+              </div>
+            </div>
+          </div>
+        <hr class="border border-primary border-3 opacity-75">
+        <div class="input-group" style="color: cornflowerblue;" >
+          
+            <div class="col-md-1 position-relative" style="margin: 10px;">
+              <label for="rucProveedor" class="form-label">Cédula/Ruc</label>
+              <input type="text" class="form-control" id="rucProveedor" value="" required readonly>
+              <div class="valid-tooltip">
+                Ruc Proveedor 
+              </div>
+            </div>
+            <div class="col-md-3 position-relative" style="margin: 10px;">
+              <label for="nombreProveedor" class="form-label">Proveedor</label>
+              <input type="text" class="form-control" id="nombreProveedor" value="" required readonly>
+              <div class="valid-tooltip">
+                Nombre Proveedor
+              </div>
+            </div>
+            <div class="col-md-4 position-relative" style="margin: 10px;">
+              <label for="autorizacionSri" class="form-label">Autorización SRI</label>
+              <input type="text" class="form-control" id="autorizacionSri" value="" required readonly>
+              <div class="valid-tooltip">
+                Autorización SRI
+              </div>
+            </div>
+            
+            <div class="col-md-1 position-relative" style="margin: 10px;">
+              <label for="ordenCompra" class="form-label">No. Orden OC</label>
+              <input type="text" class="form-control" id="ordenCompra" value="" readonly>
+              <div class="valid-tooltip">
+                Orden Compra
+              </div>
+            </div>
+          
+        </div>  
+
+        <div class="input-group" style="color: cornflowerblue;">   
+          <div class="col-md-5 position-relative" style="margin: 10px;">
+            <label for="descripcionFactura" class="form-label">Descripción</label>
+            <input type="text" class="form-control" id="descripcionFactura" value="" required style="text-transform: uppercase; ">
+            <div class="invalid-feedback">
+                Descripción Factura
+            </div>
+          </div>
+           
+          <div class="col-md-1 position-relative" style="margin: 10px;">
+            <label for="plazoPago" class="form-label">Plazo Pago</label>
+            <input type="text" class="form-control" id="plazoPago" value="0"  required>
+            <div class="invalid-feedback">
+                Plazo Pago
+            </div>
+          </div>
+
+          <div class="col-md-1 position-relative" style="margin: 10px;">
+            <label for="serieFactura" class="form-label">Serie</label>
+            <input type="text" class="form-control" id="serieFactura"  required readonly>
+            <div class="invalid-tooltip">
+                Serie Factura
+            </div>
+          </div>
+
+          <div class="col-md-1 position-relative" style="margin: 10px;">
+            <label for="numeroFactura" class="form-label">numeroFactura</label>
+            <input type="text" class="form-control" id="numeroFactura"  required>
+            <div class="invalid-tooltip">
+                Número Factura
+            </div>
+          </div>
+
+          <div class="col-md-2 position-relative" style="margin: 10px;">
+            <label for="tipoCreditoSelect" class="form-label">Tipo Credito</label>
+            <select id="tipoCreditoSelect" class="form-select form-select-sm" aria-label="Small select example">
+              <option selected>Escoja tipo de credito</option>
+              {% if ntcredito %}
+                {% for credito in ntcredito %}
+                  <option value= "{{credito.cre_codigo}}"
+                  {% if credito.cre_codigo == "06" %}selected{% endif %}>
+                  {{credito.cre_codigo}} {{credito.cre_descrip}}</option>
+               
+                {% endfor %}
+              {% endif %} 
+            </select>
+          </div>
+        </div>
+
+        <div class="input-group" style="color: cornflowerblue;" >
+          <div class="col-md-2 position-relative" style="margin: 10px;" >
+            <label for="fechaIngresoHora" class="form-label">Fecha Ingreso</label>
+            <input type="datetime" class="form-control" id="fechaIngresoHora" readonly name="trip-start" /> 
+          </div>
+            
+          <div class="col-md-2 position-relative" style="margin: 10px;" >
+            <label for="fechaEmision" class="form-label">Fecha Factura</label>
+            <input type="text" class="form-control" id="fechaEmision" readonly >
+            <div class="invalid-tooltip">
+                Fecha de Factura
+            </div>
+          </div>
+
+          <div class="col-md-1 position-relative" style="margin: 10px;" >
+            <label for="factorVenta" class="form-label">Factor Venta</label>
+            <input type="text" class="form-control" id="factorVenta" value="0"  required>
+            <div class="invalid-tooltip">
+                Factor de Venta
+            </div>
+          </div>
+          <!--
+          <div class="col-md-2 position-relative" style="margin: 10px;" >
+            <label for="PlantillaSelect" class="form-label">Plantillas</label>
+            <select class="form-select form-select-sm" id="PlantillaSelect" >
+              <option selected >Elija Plantilla</option>
+            </select>
+          </div>
+          -->
+          <div class="col-md-1 position-relative" style="margin: 10px;" >
+            <label for="codigoPorcentaje" class="form-label">Codigo Iva</label>
+            <input type="text" class="form-control" id="codigoPorcentaje" readonly >
+            <div class="invalid-tooltip">
+                Codigo de porcentaje Iva
+            </div>
+          </div>
+          
+        </div>
+
+        <div class="container">
+          <table id="tablaDetalle" class="table">
+            <thead>
+              
+            </thead>
+            <tbody>
+
+            </tbody>
+          </table>
+          <table id="tablaIva" class="table" hidden></table>
+        </div>
+      
+        <div class="col-md-4 offset-md-4" > 
+         
+          <div class="row g-2 " style="text-align: right;">
+            <table id="tablaSumaBase" class="table" style="text-align: right;" >
+              <thead>
+              
+              </thead>
+              <tbody>
+
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="row g-2 " >
+            <label for="subtotalSinImpuestos" class="columna-impuesto" style="text-align: right;"  >SUBTOTAL SIN IMPUESTOS</label>
+            <div class="col-md-1"  >
+              <input type="text" class="columna-valor" id="subtotalSinImpuestos" readonly style="border: 0cap; ">
+            </div>
+          </div>
+          <hr style="margin-top: 0; margin-bottom: 0;">
+
+          <div class="row g-2 " >
+            <label for="totalDescuento" class="columna-impuesto" style="text-align: right;">DESCUENTO</label>
+            <div class="col-md-1" >
+              <input type="text" class="columna-valor" id="totalDescuento" readonly style="border: 0cap;" >
+            </div>
+          </div>
+
+          <hr style="margin-top: 7px; margin-bottom: 7px;">
+          <div class="row g-2 align-items-center">
+            <table id="tablaSumaIva" class="table" style="text-align: right";>
+              <thead>
+              
+              </thead>
+              <tbody>
+
+              </tbody>
+            </table>
+          </div>
+
+          <div class="row g-2 align-items-center">
+            <label for="importeTotal" class="columna-impuesto" style="text-align: right;" >VALOR TOTAL</label>
+            <div class="col-md-1">
+              <input type="text" class="columna-valor" id="importeTotal" readonly style="border: 0cap; font-weight: bold;">
+            </div>
+          </div>
+      </div>  
+       
+      <div class="col-12">
+        <button id="botonGuardar" onclick="enviarDatosFactura()" class="btn btn-primary" type="button">Guardar factura</button>
+      </div>
+      {% endblock %}
+        
+      <script>
+          document.addEventListener('DOMContentLoaded', function () {
+            const username = localStorage.getItem('username');
+            if (username) {
+                
+                document.getElementById('userName').value = username;
+            } else {
+                document.getElementById('userName').value = 'Invitado';
+            }
+            });
+      </script>
+
+        <p> <u1 style='color:blue;'>ECUAWAGEN TI</u1>
+
+        </p>
+        
+    </body>
+</html>

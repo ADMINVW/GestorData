@@ -1,0 +1,61 @@
+{% extends "base.html" %} {% block titulo %}Consultar Plantillas {% endblock %}
+{% block contenido %}
+        <div class="col-12 col-md-10 offset-md-1">
+            <form id="form-consulta" class="form-horizontal" method="post">
+                {% csrf_token %}
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">Consulta Plantillas Ordenes Periódicas</h3>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="form-group row mt-3">
+                            <label for="codPlantilla" class="col-sm-2 col-form-label">Plantilla</label>
+                            <div class="col-sm-2">
+                                <input type="text" class="form-control" id="codPlantilla" name="ncodPlan"  style="text-transform: uppercase;"/>
+                            </div>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" id="nomPlantilla" name="nnomPlantilla" style="text-transform: uppercase;"/>
+                            </div>
+                        </div>
+                        <hr class="hr hr-blurry my-5" />
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                                    <div class="table-responsive">
+                                        <table id="datatable-consultaplantillas" class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Codigo</th>
+                                                    <th>Concepto</th>
+                                                    <th>Proveedor</th>
+                                                    <th></th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tablebody_plantillas">
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <!-- type="button" solo ejecuta el onclick sin enviar el formulario o recargar pagina esto lo hace con type ="submit"-->
+                        <button class="btn btn-primary" type="button" id="consultar-btn"
+                            onclick="iniciarDataTable()">Consultar</button>
+                        <a class="btn btn-danger" role="button" href="{% url 'mimenu' %}" id="cancelar-btn">Cancelar</a>
+                        <a class="btn btn-success" role="button" href="{% url 'crearPlantilla' %}"
+                            id="nuevo-btn">Nueva</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+{% endblock %} {% block footer_scripts %}
+
+<script src="/static/js/funcionesPeriodicas.js" defer></script>
+{% endblock %}

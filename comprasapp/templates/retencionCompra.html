@@ -1,0 +1,467 @@
+{% extends "base.html" %} {% block titulo %}Generar Retencion{% endblock %}
+{% block contenido %}  
+  <!--CLASS TOTAL CENTRO MARGEN -->
+    <div class="col-12 col-md-10 offset-md-1">
+      <form id="form-retencion" class="form-horizontal" method="post">
+        <div>
+          <input id="user" name="user" type="hidden"><input id="compania" name="compania" type="hidden"><input
+            id="agencia" name="agencia" type="hidden"><input id="bodega" name="bodega" type="hidden">
+          <input id="division" name="division" type="hidden" value="{{ndivision}}">
+        </div>
+        {% csrf_token %}
+        <!-- <input type="hidden" name="order_token" value="{{ order_token }}"> -->
+        <div class="card card-info">
+          <div class="card-header">
+            <h3 class="card-title">Datos Retención</h3>
+          </div>
+          <div class="card-body">
+            <div class="form-group row">
+              <label for="codProveedor" class="col-sm-2 col-form-label">Proveedor</label>
+              <div class="col-sm-2">
+                <input type="text" class="form-control" id="codProveedor" value="{{ncodProv}}"
+                  data-granContrib="{{ngranContrib}}" data-rimpe="{{nrimpe}}" data-contribEsp="{{ncontribEsp}}"
+                  data-retIva="{{nretIva}}" data-retFte="{{nretFte}}" readonly name="ncodProv" />
+              </div>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" id="nomProveedor" value="{{nnomProveedor}}" readonly
+                  name="nnomProveedor" />
+              </div>
+            </div>
+            <br>
+            <div class="row" style="font-size: smaller;">
+              <div class="col-sm-2"></div>
+
+              <label class="col-sm-2"><input class="form-check-input " type="checkbox" id="contribEsp"
+                  onclick="return false;"> Contribuyente
+                Especial</label>
+              <label class="col-sm-2" for=""><input class="form-check-input " type="checkbox" id="rimpe"
+                  onclick="return false;"> Rimpe
+                {% if nrimpe == 'E' %} EMPRENDEDOR{% endif%}
+                {% if nrimpe == 'G' %} NEGOCIO POPULAR{% endif %}</label>
+              <label class="col-sm-2" for=""><input class="form-check-input " type="checkbox" id="granContrib"
+                  onclick="return false;"> Gran Contribuyente
+              </label>
+              <label class="col-sm-2" for=""><input class="form-check-input " type="checkbox" id="retIva"
+                  onclick="return false;"> Retiene IVA
+              </label>
+              <label class="col-sm-2" for=""><input class="form-check-input " type="checkbox" id="retFte"
+                  onclick="return false;"> Retiene FUENTE
+              </label>
+
+            </div>
+            <br />
+            <div class="form-group row">
+              <label for="numFactura" class="col-sm-2 col-form-label">Factura</label>
+              <div class="col-sm-2">
+                <input type="text" class="form-control" id="numFactura" value="{{nnumFac}}" readonly name="nnumFac" />
+              </div>
+              <label for="valOriginal" class="col-sm-2 col-form-label">Valor Original</label>
+              <div class="col-sm-2">
+                <input type="text" class="form-control" id="valOriginal" value="{{nvalorOriginal}}" readonly
+                  name="nvalorOriginal" />
+              </div>
+              <label for=" valActual" class="col-sm-2 col-form-label">Valor Actual</label>
+              <div class="col-sm-2">
+                <input type="text" class="form-control" id="valActual" value="{{nvalorActual}}" readonly
+                  name="nvalorActual" />
+              </div>
+            </div>
+            <br />
+            <div class="form-group row justify-content-end">
+              <!-- <input id="ocompra"
+            name="ocompra" value="{{norden}}" type="hidden"> -->
+              <label for="numOrden" class="col-sm-2 col-form-label">Orden N°</label>
+              <div class="col-sm-2">
+                <input type="text" class="form-control" id="ocompra" value="{{norden}}" readonly name="ocompra" />
+              </div>
+
+              <label for="numRetencion" class="col-sm-2 col-form-label"><strong>Número Retención</strong>
+              </label>
+              <div class="col-sm-2">
+                <input type="text" class="form-control is-valid" id="numRetencion" placeholder="Numero Retención"
+                  readonly />
+              </div>
+
+              <label for="totRetencion" class="col-sm-2 col-form-label"><strong>Total Retención</strong>
+              </label>
+              <div class="col-sm-2">
+                <input type="text" class="form-control is-valid" id="totRetencion" placeholder="Valor Retención"
+                  name="totRetencion" readonly />
+              </div>
+            </div>
+            <hr class="hr hr-blurry my-5" />
+
+            <div class="card">
+              <ul class="list-group list-group-flush">
+                <!--Para uso en caso de ordenes periodicas-->
+                <input type="hidden" data-secuencia_iva="{{nivaPeriodica}}" data-secuencia_renta="{{nftePeriodica}}"
+                  name="dataPeriodica" id="dataPeriodica" />
+
+                <li class="list-group-item">
+                  <h5 class="card-title">Retención IVA</h5>
+                  <div class="row justify-content-around">
+                    <div class="col-3">
+                      <label for="baseIvaS" class="col-form-label text-end">Base Servicios</label>
+                      <input type="text" class="form-control" id="baseIvaS" value="{{nbaseIvaS}}" readonly
+                        name="baseIvaS" />
+                    </div>
+                    <div class="col-3">
+                      <label for="baseIvaB" class="col-form-label text-end">Base Bienes</label>
+                      <input type="text" class="form-control" id="baseIvaB" value="{{nbaseIvaB}}" readonly
+                        name="baseIvaB" />
+                    </div>
+                    <div class="col-3">
+                      <label for="baseIva" class="col-form-label text-end"><strong>Total Base Iva</strong></label>
+                      <input type="text" class="form-control" id="baseIva" value="{{nbaseIva}}" readonly />
+                    </div>
+                  </div>
+                  <div class="row justify-content-around">
+
+                    <div class="col-3">
+                      <label for="valRetenidoIvaS" class="col-form-label text-end">Retenido Servicios</label>
+                      <input type="text" class="form-control" id="valRetenidoIvaS" placeholder="Valor Retenido" readonly
+                        name="valRetenidoIvaS" />
+                    </div>
+                    <div class="col-3">
+                      <label for="valRetenidoIvaB" class="col-form-label text-end">Retenido Bienes</label>
+                      <input type="text" class="form-control" id="valRetenidoIvaB" placeholder="Valor Retenido"
+                        readonly />
+                    </div>
+                    <div class="col-3">
+                      <label for="valRetenidoIva" class="col-form-label text-end"><strong>Total Valor
+                          Retenido</strong></label>
+                      <input type="text" class="form-control" id="valRetenidoIva" placeholder="Valor Retenido"
+                        readonly />
+                    </div>
+                  </div>
+                  <br />
+                  <!--Si proveedor aplica a retencion de iva se muestra items-->
+                  {% if nretIva == 'S' and nbaseIva > 0 %}
+                  <div class="contenedorTabi">
+                    <!--Separo bienes y servicios-->
+                    <ul class="nav nav-tabs nav-fill">
+                      <li class="litabi nav-item">
+                        <a class="atabi nav-link active" href="#">Servicios</a>
+                      </li>
+                      <li class="litabi nav-item ">
+                        <a class="atabi nav-link" href="#">Bienes</a>
+                      </li>
+                    </ul>
+                    <div class="subcontenedorTabi">
+                      <div class="bloquetabi active">
+                        <div class="table-responsive">
+                          <table class="table table-hover  table-sm" id="listIvaS">
+                            <thead class="border-bottom font-weight-bold">
+                              <tr>
+                                <th style="text-align: center">
+                                  Selección
+                                </th>
+                                <th style="text-align: center">
+                                  Tipo
+                                </th>
+                                <th style="text-align: center">%</th>
+                                <th style="text-align: left; white-space: nowrap; overflow-x: auto">
+                                  Descripción
+                                </th>
+                                <th style="text-align: center">
+                                  Código
+                                </th>
+                                <th style="text-align: center">
+                                  Valor Retenido
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {% for retencion in nretencionesI %}
+                              {% if retencion.rt_subtipo == 'S' or retencion.rt_subtipo == 'M' %}
+                              <tr>
+                                <td style="text-align: center">
+                                  <input type="checkbox" id="checkIS" class="form-check-input checkIS" />
+                                </td>
+                                <td style="text-align: center">
+                                  {{retencion.rt_tipo}}
+                                </td>
+                                <td>
+                                  <input type="text" id="porcenIvaS" readonly value="{{retencion.rt_porcen}}"
+                                    style="border: 0;text-align: center" class="porcenIvaS" />
+                                </td>
+                                <td style="text-align: left; white-space: nowrap; overflow-x: auto">
+                                  {{retencion.rt_descrip}}
+                                </td>
+                                <td>
+                                  <input type="text" id="codInterno" readonly value="{{retencion.rt_secuencia}}"
+                                    style="border: 0;text-align: center" class="codInterno" />
+                                </td>
+                                <td style="text-align: center">
+                                  <label id="txtvalorIS">
+                                    <input type="text" id="txtvalorI" class="txtvalorIS" readonly />
+                                  </label>
+                                </td>
+                              </tr>
+                              {% endif %}
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                      <div class="bloquetabi ">
+                        <div class="table-responsive">
+                          <table class="table table-hover  table-sm" id="listIvaB">
+                            <thead class="border-bottom font-weight-bold">
+                              <tr>
+                                <th style="text-align: center">
+                                  Selección
+                                </th>
+                                <th style="text-align: center">
+                                  Tipo
+                                </th>
+                                <th style="text-align: center">%</th>
+                                <th style="text-align: left; white-space: nowrap; overflow-x: auto">
+                                  Descripción
+                                </th>
+                                <th style="text-align: center">
+                                  Código
+                                </th>
+                                <th style="text-align: center">
+                                  Valor Retenido
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {% for retencion in nretencionesI %}
+                              {% if retencion.rt_subtipo == 'B' or retencion.rt_subtipo == 'M' %}
+                              <tr>
+                                <td style="text-align: center">
+                                  <input type="checkbox" id="checkIB" class="form-check-input checkIB" />
+                                </td>
+                                <td style="text-align: center">
+                                  {{retencion.rt_tipo}}
+                                </td>
+                                <td>
+                                  <input type="text" id="porcenIvaB" readonly value="{{retencion.rt_porcen}}"
+                                    style="border: 0;text-align: center" class="porcenIvaB" />
+                                </td>
+                                <td style="text-align: left;white-space: nowrap; overflow-x: auto">
+                                  {{retencion.rt_descrip}}
+                                </td>
+                                <td>
+                                  <input type="text" id="codInterno" readonly value="{{retencion.rt_secuencia}}"
+                                    style="border: 0;text-align: center" class="codInterno" />
+                                </td>
+                                <td style="text-align: center">
+
+                                  <input type="text" id="txtvalorI" class="txtvalorIB" readonly />
+
+                                </td>
+                              </tr>
+                              {% endif %}
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                  {% endif %}
+                  {% if nretIva == 'N' %}
+                  <div class="alert alert-warning alert-dismissible">
+                    NOTA: Proveedor no aplica a retencion de iva
+                  </div>
+                  {% endif %}
+                  {% if nretIva == 'S' and nbaseIva == 0 %}
+                  <div class="alert alert-warning alert-dismissible">
+                    NOTA: Factura con iva 0, no aplica retencion
+                  </div>
+                  {% endif %}
+                </li>
+
+                <li class="list-group-item">
+                  <h5 class="card-title">Retención FUENTE</h5>
+                  <div class="row justify-content-around">
+                    <div class="col-3">
+                      <label for="baseFuenteS" class="col-form-label text-end">Base Servicios</label>
+                      <input type="text" class="form-control" id="baseFuenteS" value="{{nbaseFuenteS}}" readonly />
+                    </div>
+                    <div class="col-3">
+                      <label for="baseFuenteB" class="col-form-label text-end">Base Bienes</label>
+                      <input type="text" class="form-control" id="baseFuenteB" value="{{nbaseFuenteB}}" readonly />
+                    </div>
+                    <div class="col-3">
+                      <label for="baseFuente" class="col-form-label text-end"><strong>Total Base Fuente</strong>
+                      </label>
+                      <input type="text" class="form-control" id="baseFuente" value="{{nbaseFuente}}" readonly />
+                    </div>
+                  </div>
+                  <div class="row justify-content-around">
+                    <div class="col-3">
+                      <label for="valRetenidoFteS" class="col-form-label text-end">Retenido Servicios</label>
+                      <input type="text" class="form-control" id="valRetenidoFteS" placeholder="Valor Retenido"
+                        readonly />
+                    </div>
+                    <div class="col-3">
+                      <label for="valRetenidoFteB" class="col-form-label text-end">Retenido Bienes</label>
+                      <input type="text" class="form-control" id="valRetenidoFteB" placeholder="Valor Retenido"
+                        readonly />
+                    </div>
+                    <div class="col-3">
+                      <label for="valRetenidoFte" class="col-form-label text-end"><strong>Total Valor
+                          Retenido</strong> </label>
+                      <input type="text" class="form-control" id="valRetenidoFte" placeholder="Valor Retenido"
+                        readonly />
+                    </div>
+                  </div>
+                  <br />
+
+                  <!--Si proveedor aplica a retencion de Fte muestra items, 
+                  Proveedor del tipo Gran Contrib. no retienen fte tampoco pero solo se controla con campo de retencion fte (pv_serie) -->
+                  {% if nretFte == 'S' %}
+                  <div class="contenedorTabf">
+                    <!--Separo bienes y servicios-->
+                    <ul class="nav nav-tabs nav-fill">
+                      <li class="litabf nav-item">
+                        <a class="atabf nav-link active" href="#">Servicios</a>
+                      </li>
+                      <li class="litabf nav-item ">
+                        <a class="atabf nav-link" href="#">Bienes</a>
+                      </li>
+                    </ul>
+                    <div class="subcontenedorTabf">
+                      <div class="bloquetabf active">
+                        <div class="table-responsive">
+                          <table class="table table-hover table-sm mitabla" id="listFuenteS">
+                            <thead class="border-bottom font-weight-bold">
+                              <tr>
+                                <th style="text-align: center">
+                                  Selección
+                                </th>
+                                <th style="text-align: center">
+                                  Tipo
+                                </th>
+                                <th style="text-align: center">%</th>
+                                <th>
+                                  Descripción
+                                </th>
+                                <th style="text-align: center">
+                                  Código
+                                </th>
+                                <th style="text-align: center">
+                                  Valor Retenido
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {% for retencion in nretencionesF %}
+                              {% if retencion.rt_subtipo == 'S' or retencion.rt_subtipo == 'M' %}
+                              <tr>
+                                <td style="text-align: center">
+                                  <input type="checkbox" id="checkFS" class="form-check-input checkFS" />
+                                </td>
+                                <td style="text-align: center">
+                                  {{retencion.rt_tipo}}
+                                </td>
+                                <td>
+                                  <input type="text" id="porcenFteS" readonly value="{{retencion.rt_porcen}}"
+                                    style="border: 0; text-align: center" class="porcenFteS" />
+                                </td>
+                                <td>
+                                  {{retencion.rt_descrip}}
+                                </td>
+                                <td>
+                                  <input type="text" id="codInterno" readonly value="{{retencion.rt_secuencia}}"
+                                    style="border: 0;text-align: center" class="codInterno" />
+                                </td>
+                                <td style="text-align: center">
+                                  <input type="text" id="txtvalorFS" readonly class="txtvalorFS" />
+                                </td>
+                              </tr>
+                              {% endif %}
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                      <div class="bloquetabf ">
+                        <div class="table-responsive">
+                          <table class="table table-hover table-sm" id="listFuenteB">
+                            <thead class="border-bottom font-weight-bold">
+                              <tr>
+                                <th style="text-align: center">
+                                  Selección
+                                </th>
+                                <th style="text-align: center">
+                                  Tipo
+                                </th>
+                                <th style="text-align: center">%</th>
+                                <th style="text-align: left; white-space: nowrap; overflow-x: auto">
+                                  Descripción
+                                </th>
+                                <th style="text-align: center">
+                                  Código
+                                </th>
+                                <th style="text-align: center">
+                                  Valor Retenido
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {% for retencion in nretencionesF %}
+                              {% if retencion.rt_subtipo == 'B' or retencion.rt_subtipo == 'M' %}
+                              <tr>
+                                <td style="text-align: center">
+                                  <input type="checkbox" id="checkFB" class="form-check-input checkFB" />
+                                </td>
+                                <td style="text-align: center">
+                                  {{retencion.rt_tipo}}
+                                </td>
+                                <td>
+                                  <input type="text" id="porcenFteB" readonly value="{{retencion.rt_porcen}}"
+                                    style="border: 0;text-align: center" class="porcenFteB" />
+                                </td>
+                                <td style="text-align: left;white-space: nowrap; overflow-x: auto">
+                                  {{retencion.rt_descrip}}
+                                </td>
+                                <td>
+                                  <input type="text" id="codInterno" readonly value="{{retencion.rt_secuencia}}"
+                                    style="border: 0;text-align: center" class="codInterno" />
+                                </td>
+                                <td style="text-align: center">
+                                  <input type="text" id="txtvalorFB" readonly class="txtvalorFB" />
+                                </td>
+                              </tr>
+                              {% endif %}
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {% endif %}
+
+                  {% if ngranContrib == 'S' %}
+                  <div class="alert alert-warning alert-dismissible">
+                    NOTA: Proveedor del tipo GRAN CONTRIBUYENTE, no se retiene fuente
+                  </div>
+                  {% endif %}
+                  {% if ngranContrib == 'N' and nretFte == 'N' %}
+                  <div class="alert alert-warning alert-dismissible">
+                    NOTA: Proveedor no aplica a retencion de fuente
+                  </div>
+                  {% endif %}
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="card-footer">
+            <button class="btn btn-primary" type="submit" id="guardar-btn">Guardar</button>
+            <a class="btn btn-danger" role="button" data-url="../../../verTransaccion/{{norden}}"
+              id="cancelar-btn">Cancelar</a>
+          </div>
+        </div>
+      </form>
+      <div id="respuesta"></div>
+    </div>
+{% endblock %} {% block footer_scripts %}
+<script src="/static/js/funcionesRetenciones.js" defer></script>
+{% endblock %}

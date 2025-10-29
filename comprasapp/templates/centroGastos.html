@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block titulo %}Centro de Gastos{% endblock %}
+{% block contenido %}
+ <div class="col-12 col-md-11 offset-md-1">
+    <form id="form-cgasto" method="post" class="form-horizontal">
+        {% csrf_token %}
+        <div class="col-12">
+            <div class="card">
+              
+                <div class="card-header">
+                    <h5>Centro de Gastos</h5>
+                </div>
+                <div {% if nproceso == 'C' %} class="card-body disabled-div" {% else %} class="card-body" {% endif %}>
+                         <div class="form-group row mt-3">
+                            <label for="codGastos" class="col-sm-2 col-form-label">Codigo </label>
+                            
+                            <div class="col-sm-2">
+                                <input type="text" class="form-control" id="codGastos" name="ncodGastos"  style="text-transform: uppercase;" 
+                                placeholder="Ingrese codigo" {% if nproceso == 'U' %} value={{ncodigoCentro}} readonly disabled {% endif %}/>
+                            </div>
+                            <div class="col-sm-8">
+                                
+                            </div>
+                        </div>
+                         <div class="form-group row mt-3">
+                            <label for="nomGastos" class="col-sm-2 col-form-label">Nombre </label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="nomGastos" name="nnomGastos" style="text-transform: uppercase;"
+                                placeholder="Ingrese nombre" {% if nproceso == 'U' %} value={{nnombreCentro}} {% endif %} maxlength="50"/>
+                            </div>
+                        </div>
+                        <hr class="hr hr-blurry my-4" />
+                        <div class="form-group row mt-3">
+                            <div class="col-12 col-sm-1">
+                                <label for="subgrupo" class="col-form-label">Subgrupo </label>
+                            </div>
+                            <div class="col-12 col-sm-2">
+                                <input type="text" class="form-control" id="subgrupo" name="nsubgrupo" style="text-transform: uppercase;"
+                                placeholder="Ingrese codigo "/>
+                            </div>
+                            <div class="col-12 col-sm-3">
+                                <input type="text" class="form-control cuenta" id="ctaContable" name="nctaContable" style="text-transform: uppercase;"
+                                placeholder="Ingrese cuenta contable"/>
+                            </div>
+                            <div class="col-12 col-sm-4">
+                                <input type="text" class="form-control nombreCta" id="nomCuenta" name="nnomCuenta" style="text-transform: uppercase;" disabled readonly/>
+                            </div>
+                             <div class="col-12 col-sm-2 d-grid">
+                                <a role="button" class="btn btn-success w-100">Añadir</a>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="table-responsive" id="tableSubcentrosG">
+                          <table class="table table-hover  table-sm" id="listSubcentrosG">
+                            <thead class="border-bottom font-weight-bold">
+                              <tr>
+                                <th style="text-align: center">
+                                  SubGrupo
+                                </th>
+                                <th style="text-align: left">
+                                  Cuenta
+                                </th>
+                                <th style="text-align: left">
+                                  Descripción
+                                </th>
+                                <th>
+
+                                </th>
+                                 <th>
+
+                                </th>
+                              </tr>
+                            </thead>
+                           
+                            <tbody id="listSubcentroG_body">
+                              {% for detalle in ndataSubgrupos %}
+                              <tr>
+                                <td style="text-align: center">
+                                   <input type="number" min="0" class="secgrp" id ="secgrp" style="border: 0;text-align: center" 
+                                   {% if detalle.ct_secgrp != None %} value="{{detalle.ct_secgrp}}" disabled {% endif %}/>
+                                </td>
+                                <td style="text-align: center">
+                                    <input type="text"  class="cuenta" id ="cuenta" style="border: 0;text-align: center"  maxlength="15"
+                                   {% if detalle.ct_cuenta != None %} value="{{detalle.ct_cuenta|cut:" "}}" disabled {% endif %}/>
+                                </td>
+                                <td class="nombreCta">
+                                  {{detalle.ct_descripcion}}
+                                </td>
+                                <td>
+                                  <a class='btn btn-sm btn-primary btnEditar' style='text-decoration: none;' id="editar-btn" title="Editar">
+                                    <i class="fa-solid fa-edit btnEditar" aria-hidden="true"></i>
+                                  </a>
+                                </td>
+                                <td><a href="" class='btn btn-sm btn-danger' style='text-decoration: none;' id='eliminar-btn' title="Eliminar" >
+                                      <i class='fa fa-trash'  aria-hidden="true"></i>
+                                    </a>
+                                </td>
+                              </tr>
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                        </div>
+                </div>
+               
+                <div class="card-footer">
+                  {% if nproceso == 'C' %} 
+                      <a class="btn btn-danger" role="button" data-url="/comprasapp/cargarTmplCentroGastos" id="cancelar-btn">Cancelar</a>
+                  {% else %}
+                      <button class="btn btn-primary" type="submit" id="guardar-btn">Guardar</button>
+                      {% if nplantillaCtb != None %} 
+                        <button type="button" class="btn btn-secondary" id="eliminar-btn">Eliminar</button>
+                      {% endif %}
+                      <a class="btn btn-danger" role="button" data-url="/comprasapp/cargarTmplCentroGastos" id="cancelar-btn">Cancelar</a>
+                  {% endif %}
+                </div>
+                
+            </div>
+        </div>
+    </form>
+ </div>
+{% endblock %}
+{% block footer_scripts %}
+<script src="/static/js/funcionesCentroGastos.js" defer ></script>
+{% endblock %}

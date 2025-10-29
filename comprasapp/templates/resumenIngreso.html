@@ -1,0 +1,268 @@
+{% extends "base.html" %} {% block titulo %} Resumen Ingreso Factura {% endblock %}
+{% load static %}
+{% block contenido %}
+  <div class="col-12 col-md-11 offset-md-1">
+    <div class="col-12">
+      <h5 class="text-center mb-40 mt-50 " style="color: cornflowerblue;">Resumen Factura Ingresada</h5>
+      <br>
+      <div class="card">
+        <div class="card-header">
+          <h5>
+            PROVEEDOR
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <p class="col-9"><b>Razón Social / Nombres y Apellidos: </b>{{ndataProveedor.nombre}}</p>
+            <p class="col-3"> <b>Código: </b>{{ndataProveedor.codigo}}</p>
+            <p class="col-4"><b>RUC: </b>{{ndataProveedor.identificacion}}</p>
+            <p class="col-8"><b>Email: </b>{{ndataProveedor.email}} </p>
+            <input type="hidden" data-granContrib="{{ndataProveedor.granContrib}}" data-rimpe="{{ndataProveedor.rimpe}}"
+              data-contribEsp="{{ndataProveedor.contribEsp}}" data-retIva="{{ndataProveedor.retIva}}"
+              data-retFte="{{ndataProveedor.retFte}}" name="dataProveedor" id="dataProveedor" />
+          </div>
+          <div class="row">
+            <label class="col-sm-3" for=""><input class="form-check-input " type="checkbox" id="contribEsp"
+                onclick="return false;"> Contribuyente Especial</label>
+            <label class="col-sm-2" for=""><input class="form-check-input " type="checkbox" id="rimpe"
+                onclick="return false;"> Rimpe
+              {% if nDataProveedor.rimpe == 'E' %} EMPRENDEDOR{% endif%}
+              {% if nDataProveedor.rimpe == 'G' %} NEGOCIO POPULAR{% endif %}</label>
+            <label class="col-sm-3" for=""><input class="form-check-input " type="checkbox" id="granContrib"
+                onclick="return false;"> Gran Contribuyente
+            </label>
+            <label class="col-sm-2" for=""><input class="form-check-input " type="checkbox" id="retIva"
+                onclick="return false;"> Retiene IVA
+            </label>
+            <label class="col-sm-2" for=""><input class="form-check-input " type="checkbox" id="retFte"
+                onclick="return false;"> Retiene FUENTE
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <br />
+    <div class="card">
+      <div class="card-header">
+        <h5>
+          ORDEN DE COMPRA N° {{nnumOrden}}
+        </h5>
+      </div>
+
+      <div class="card-body">
+        <div class="row">
+          <p class="col-3"><b>Agencia : </b>{{ncodAgencia}} - {{nnombreAgencia}}</p>
+          <p class="col-3"><b>División : </b>{{ndivision}}</p>
+          <input type="hidden" id="codDivision" name="codProveedor" value={{ncodDiv}}>
+          {% if ncodDiv == 't' and ntipo == 'T' or ncodDiv == 't' and ntipo == 'R' %} <p class="col-3"><b>Orden Taller: </b>{{nordenTaller}}</p> {% endif %}
+          {% if ncodDiv == 'r' and ntipo == 'I' or ncodDiv == 'v' and ntipo == 'E' %} <p class="col-3"><b>Compra Local: </b>{{ndataFactura.compraLocal}}</p> {% endif %}
+        </div>
+        <div class="row">
+          <p class="col-3"><b>Tipo: </b>{{nnombreTipo}}</p>
+          <p class="col-3"><b>Solicitante: </b>{{nnombreSol}}</p>
+        </div>
+        <div class="row">
+          <p class="col-10"><b>Descripción: </b>{{ndescripcion}}</p>
+          
+          <p class="col-2">
+            {% if ncodDiv == 't' %}
+            <a href="#" data-url="{% url 'detalleOrdenT' numOrden=nnumOrden codAge=ncodAgencia %}"
+              onclick="return abrir_modal(this.dataset.url)"> Ver Detalle</a>
+            {% endif %}
+            {% if ncodDiv == 'r' %}
+              <a href="#" data-url="{% url 'detalleOrdenR' numOrden=nnumOrden codAge=ncodAgencia %}"
+              onclick="return abrir_modal(this.dataset.url)"> Ver Detalle</a>
+            {% endif %}
+            {% if ncodDiv == 'd' %} <a href="#"
+              data-url="{% url 'detalleOrden' numOrden=nnumOrden codAge=ncodAgencia codDiv=ncodDiv periodica=nperiodica verificada=nverificada %}"
+              onclick="return abrir_modal(this.dataset.url)"> Ver Detalle</a>
+            {% endif %}
+          </p>
+        </div>
+        {% if nperiodica == 1 %} 
+         <div class=" row">
+          <input type="hidden" name="periodica" id="periodica" value="{{nperiodica}}" />
+          <p><label class="col-1" for=""><b>Periodica</b></label><input class="form-check-input col-1" type="checkbox"
+              onclick="return false;" id="periodicacheck">
+            {{nnombrePlantilla}}</p>
+        </div>
+        {% endif %}
+       
+
+        <div class="row">
+
+          <p class="col-5"><b>Numero Diario: </b>
+            {% if nnumDiarioOc != None %}
+            DC/{{nnumDiarioOc}}
+            {% else %}
+            SIN REGISTRO CONTABLE
+            {% endif %}
+          </p>
+        </div>
+      </div>
+    </div>
+    <br />
+    <div class="card">
+      <div class="card-header">
+        <h5>
+          FACTURA N° {{nfactura}}
+        </h5>
+      </div>
+
+      <div class="card-body">
+        <div class="row">
+          <p class="col-4"><b>Fecha Ingreso: </b>{{ndataFactura.fechaIng.date|date:"d/m/Y"}}</p>
+          <p class="col-4"><b>Fecha Factura: </b>{{ndataFactura.fechaFactura|date:"d/m/Y" }}</p>
+          <p class="col-4"><b>Fecha Vcto.: </b>{{ndataFactura.fechaVcto|date:"d/m/Y"}}</p>
+        </div>
+        <div class="row">
+          <p class="col-3"><b>Valor Original: </b>{{ndataFactura.valOriginal}}</p>
+          <p class="col-3"><b>Valor Actual: </b>{{ndataFactura.valActual}}</p>
+        </div>
+        <div class=" row">
+          <!--Hay de ver la manera de desplegar cuando es MIXTA desplegar % ivas -->
+          <p class="col-3"><b>Iva % : </b>{{ndataFactura.iva}}</p>
+          <p class="col-3"><b>Dscto % : </b>{{ndescuento}}</p>
+          <p class="col-3"><b>Recargo % : </b>{{nrecargo}}</p>
+        </div>
+        <div class=" row">
+          <p class="col-3"><b>Serie: </b>{{nserie}}</p>
+          <p class="col-9"><b>Autorizacion SRI: </b>{{nautorizacion}}</p>
+
+        </div>
+        <div class=" row">
+          <p class="col-3"><b>Ult.Mov: </b>{{ndataFactura.tipUltMov}} - {{ndataFactura.numUltMov}}</p>
+        </div>
+      </div>
+    </div>
+
+    <br />
+    <input type="hidden" name="retencion" id="retencion" value="{{nnumRetencion}}" />
+    {% if nnumRetencion > 0 %}
+    <div class="card">
+      <div class="card-header">
+        <h5>
+          RETENCION N° {{nnumRetencion}}
+        </h5>
+
+      </div>
+
+      <div class="card-body">
+        <div class="row">
+          <p class="col-3 "><b>Base Fte Bienes: </b>$ {{nvaloresBase.baseFuenteB|floatformat:2}}</p>
+          <p class="col-3 "><b>Base Iva Bienes: </b>$ {{nvaloresBase.baseIvaB|floatformat:2}}</p>
+          <p class="col-3 "><b>Base Fte Servicios: </b>$ {{nvaloresBase.baseFuenteS|floatformat:2}}</p>
+          <p class="col-3 "><b>Base Iva Servicios: </b>$ {{nvaloresBase.baseIvaS|floatformat:2}}</p>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-12 table-responsive">
+            <table class="table table-striped" id="tableRet">
+              <thead>
+                <tr>
+                  <th>Impuesto</th>
+                  <th>Base Imponible</th>
+                  <th>Porcentaje %</th>
+                  <th>Descripcion</th>
+                  <th>Valor Retenido</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for retencion in ndataRetencion %}
+                <tr>
+                  <td class="col-md-1" style="text-align: left">
+                    {% if retencion.rt_tipo == 'F' %}
+                    <p class="tipRet"> FUENTE</p>
+                    {% else %}
+                    <p class="tipRet"> IVA</p>
+                    {% endif %}
+                  </td>
+                  <td class="col-md-1" style="text-align: left">
+                    <p class="val">{{retencion.rt_base}}</p>
+                  </td>
+                  <td class="col-md-1" style="text-align: left">
+                    <p>{{retencion.rt_porcen}}</p>
+                  </td>
+                  <td class="col-md-1" style="text-align: left">
+                    <p>{{retencion.rt_descrip}}</p>
+                  </td>
+                  <td class="col-md-1" style="text-align: center">
+                    <p class="val">{{retencion.valret|floatformat:2}}</p>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-7">
+            <p><b>Numero Diario: </b>DC/{{nnumDiario}}</p>
+            <p class="text-muted well well-sm shadow-none" style="margin-top: 10px">
+              Datos de autorización se deberá revisar en documento emitido por SRI mediante la unidad de Repositorio o
+              <a href="https://ecuador.e-factura.net" target="_blank">Seres.net</a>
+            </p>
+          </div>
+
+          <div class="col-5">
+            <div class="table-responsive">
+              <table class="table" id="listRet">
+                <tbody>
+                  <tr>
+                    <th style="width: 45% ">Retenido Fte:</th>
+                    <td style="text-align: center">
+                      <b>
+                        <p id="totalFte">0.0</p>
+                      </b>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th style="width: 45% ">Retenido Iva:</th>
+                    <td style="text-align: center">
+                      <b>
+                        <p id="totalIva"> 0.0</p>
+                      </b>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th style="width: 45% ">Total Retenido:</th>
+                    <td style="text-align: center">
+                      <b>
+                        <p id="totalRet"> 0.0</p>
+                      </b>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    {% else %}
+    <div class="alert alert-warning alert-dismissible">
+      NOTA: Factura no generó retencion
+    </div>
+    {% endif %}
+    <br>
+    <div class="row">
+
+      <div class="col-10"><b>Procesado por: </b>{{nnombreUser}} ( {{nuser}} )</div>
+      <div class="col-2 text-end">
+        <a class="btn btn-primary " role="button"   
+         {% if ncodDiv == 'd' %} href="/comprasapp/templates/ordenCompra" {% endif %}
+         {% if ncodDiv == 'r' %} href="/repuestosapp/templates/compraRepuestos" {% endif %}
+         id="cancelar-btn">Nueva Orden
+        </a>
+      </div>
+
+
+
+    </div>
+  </div>
+{% endblock %}
+{% block footer_scripts %}
+<script src="/static/js/funcionesFormato.js" defer></script>
+{% endblock %}
