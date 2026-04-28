@@ -10,8 +10,9 @@
           <link type='text/css' href='{% static "css/menuMain.css" %}' rel='stylesheet'/>
         -->
         <link rel="stylesheet" href="{% static 'css/tablaImpuesto.css' %}">
-        <script src="/static/js/funcionesCompras.js"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="/static/js/funcionesCompras.js"></script>
+        
         
     </head>
     <body>
@@ -242,15 +243,27 @@
         {% endblock %}
         
         <script>
-          document.addEventListener('DOMContentLoaded', function () {
-            const username = localStorage.getItem('username');
-            if (username) {
-                
-                document.getElementById('userName').value = username;
-            } else {
-                document.getElementById('userName').value = 'Invitado';
-            }
-            });
+            document.addEventListener('DOMContentLoaded', function () {
+              const username = "{{ username|default:'Invitado' }}";
+              document.getElementById('userName').value = username;
+              if (username !== 'Invitado') {
+                sessionStorage.setItem('username', username);
+              }
+
+              // ← Agregar: actualizar company_key y links del navbar
+              var ck = "{{ company_key|default:'' }}";
+              if (ck) sessionStorage.setItem('company_key', ck);
+
+              var ckNav = sessionStorage.getItem('company_key');
+              if (ckNav) {
+                document.querySelectorAll('.navbar a[href]').forEach(function (link) {
+                  var href = link.getAttribute('href');
+                  if (href && href !== '#' && !href.includes('company=') && !href.includes('company_select')) {
+                    link.setAttribute('href', href + (href.includes('?') ? '&' : '?') + 'company=' + ckNav);
+                  }
+                });
+              }
+          });
         </script>
 
         <p> <u1 style='color:blue;'>ECUAWAGEN TI</u1>
