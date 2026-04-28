@@ -49,6 +49,24 @@
 <body>
     {% include "menuBarraNav.html" %}
 
+    <script>
+        // Guardar datos de sesión desde Django al sessionStorage
+        var companyKey = "{{ company_key|default:'' }}";
+        if (companyKey) {
+            sessionStorage.setItem("company_key", companyKey);
+        }
+        var username = "{{ username|default:'' }}";
+        var compania = "{{ compania|default:'' }}";
+        var agencia = "{{ agencia|default:'' }}";
+        var bodega = "{{ bodega|default:'' }}";
+        
+        if (username && sessionStorage.getItem("username") !== username) {
+            sessionStorage.setItem("username", username);
+            sessionStorage.setItem("compania", compania);
+            sessionStorage.setItem("agencia", agencia);
+            sessionStorage.setItem("bodega", bodega);
+        }
+    </script>
 
     {% block content %}
     <div id="loginModal">
@@ -61,56 +79,23 @@
         var urlAnterior = document.referrer;
         //SIN VALOR: se resetea valores de login y se despliega modal login
         if (urlAnterior == ''){
-            if (localStorage.getItem("username") != null) {
-                localStorage.removeItem("username");
-                localStorage.removeItem("compania");
-                localStorage.removeItem("agencia");
-                localStorage.removeItem("bodega");
+            if (sessionStorage.getItem("username") != null) {
+                sessionStorage.removeItem("username");
+                sessionStorage.removeItem("compania");
+                sessionStorage.removeItem("agencia");
+                sessionStorage.removeItem("bodega");
             }
             loadLoginModal()
         }
         //CON VALOR: opcion "Cerrar Sesión" vuelve a este menú pero solo en este caso debe cargar modal login
         else {
             //Opcion "Cerrar Sesión" resetea valores de login, por tanto se valida este valor para desplegar modal login
-             if (localStorage.getItem("username") == null) {
+             if (sessionStorage.getItem("username") == null) {
                 loadLoginModal()
              }
             //Demas opciones tendrán seteado login y no desplegarán modal login
         }
         
-
-        // Función para cargar el contenido de login.html en el modal
-        function loadLoginModal() {
-            fetch('/login/')
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById('loginModalContent').innerHTML = data;
-                    document.getElementById('loginModal').style.display = 'block';
-                    document.getElementById('loginButton').addEventListener('click', function () {
-                        // Aquí puedes manejar la lógica de autenticación antes de cerrar el modal
-                        // Por ejemplo, puedes validar los campos del formulario
-                        validaLogin().then(function (result) {
-                            if (result) {
-                                // Cerrar el modal si la validación es exitosa
-                                document.getElementById('loginModal').style.display = 'none';
-                                alert('Bienvenido')
-                                // Luego, cierra el modal
-                                document.getElementById('loginModal').style.display = 'none';
-                            } else {
-                                console.warn("La validación falló.");
-                                alert('La validación falló.')
-                            }
-                        }).catch(function (error) {
-                            console.error("Error durante la validación:", error);
-                            alert('Error durante la validación.')
-                        });
-
-
-                    });
-
-                })
-                .catch(error => console.error('Error al cargar login.html:', error));
-        }
     </script>
     <img src='{% static "imagenes/ECUAWAGEN.jpg" %}' href="/menuprapp/templates/menuPrincipal.html" />
     {% endblock %}
@@ -118,6 +103,19 @@
         <u1 style='color:blue;'>ECUAWAGEN TI</u1>
 
     </p>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var ck = sessionStorage.getItem('company_key');
+            if (!ck) return;
+            document.querySelectorAll('.navbar a[href]').forEach(function (link) {
+                var href = link.getAttribute('href');
+                if (href && href !== '#' && !href.includes('company=') && !href.includes('company_select')) {
+                    link.setAttribute('href', href + (href.includes('?') ? '&' : '?') + 'company=' + ck);
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

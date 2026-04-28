@@ -22,10 +22,10 @@ function validaLogin() {
 
                     if (data.ndatuser && data.ndatuser.length > 0) {
                         data.ndatuser.forEach(function (item) {
-                            localStorage.setItem('username', item.ur_user);
-                            localStorage.setItem('compania', item.ur_cia);
-                            localStorage.setItem('agencia', item.ur_age);
-                            localStorage.setItem('bodega', item.ur_bodprn);
+                            sessionStorage.setItem('username', item.ur_user);
+                            sessionStorage.setItem('compania', item.ur_cia);
+                            sessionStorage.setItem('agencia', item.ur_age);
+                            sessionStorage.setItem('bodega', item.ur_bodprn);
                         });
                         resolve(true);
 
