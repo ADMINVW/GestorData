@@ -6,7 +6,7 @@ let retIva = "N"
 let retFte = "N"
 let nombreProveedor = ""
 let proceso = ""
-let user = localStorage.getItem('username');
+let user = sessionStorage.getItem('username');
 
 document.addEventListener("DOMContentLoaded", function (event) {
     proceso = document.getElementById("proceso").value;
@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         let proveedor = document.getElementById("codProveedor").value;
         consultarProveedor(proveedor)
     }
-    localStorage.removeItem("form_enviado");
+    sessionStorage.removeItem("form_enviado");
 });
 
 //funciones ejecutadas al cargar el DOM
@@ -374,7 +374,7 @@ document.getElementById("form-plantilla").addEventListener("submit", function (e
     }
 
     //CONTROL TRANSACCION ENVIADA
-    if (localStorage.getItem("form_enviado")) {
+    if (sessionStorage.getItem("form_enviado")) {
         swal.fire("Oops!", "Plantilla ya registrada!", "warning");
         document.getElementById("guardar-btn").disabled = true;
         return
@@ -434,7 +434,7 @@ document.getElementById("form-plantilla").addEventListener("submit", function (e
         .then(data => {
 
             if (data.status == 'success') {
-                localStorage.setItem("form_enviado", "true"); //se debe setear al cargar forma nuevamente
+                sessionStorage.setItem("form_enviado", "true"); //se debe setear al cargar forma nuevamente
                 swal.fire({
                     title: "Proceso satisfactorio",
                     text: "Plantilla guardada correctamente",
@@ -499,7 +499,7 @@ document.getElementById('eliminar-btn').addEventListener('click', async function
         const data = await response.json();
 
         if (data.status == "success") {
-            localStorage.setItem("form_enviado", "true");
+            sessionStorage.setItem("form_enviado", "true");
             await swal.fire({
                 title: "Proceso satisfactorio",
                 text: "Plantilla eliminada correctamente",

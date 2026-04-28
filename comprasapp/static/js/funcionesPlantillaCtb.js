@@ -14,7 +14,7 @@ $(function () {
 
 
 document.addEventListener("DOMContentLoaded", function (event) {
-    localStorage.removeItem("form_enviado");
+    sessionStorage.removeItem("form_enviado");
 });
 
 
@@ -303,7 +303,7 @@ document.getElementById("form-plantillaCtb").addEventListener("submit", function
         })
         .then(data => {
             if (data.status == "success") {
-                localStorage.setItem("form_enviado", "true");
+                sessionStorage.setItem("form_enviado", "true");
                 swal.fire({
                     title: "Proceso satisfactorio",
                     text: "Plantilla guardada correctamente",
@@ -368,7 +368,7 @@ document.getElementById('eliminar-btn').addEventListener('click', async function
         const data = await response.json();
 
         if (data.status == "success") {
-            localStorage.setItem("form_enviado", "true");
+            sessionStorage.setItem("form_enviado", "true");
             await swal.fire({
                 title: "Proceso satisfactorio",
                 text: "Plantilla eliminada correctamente",
