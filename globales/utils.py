@@ -1,11 +1,14 @@
 from django.http import JsonResponse 
 from .validators import CONSULTAS
-from django.db import connection, transaction
+from django.db import connections
+from core.db_context import get_db, get_db_from_request
 
-def consultarRegistros(sql, parametros=None):
+def consultarRegistros(sql, parametros=None, db_alias=None):
     #retorna registros en forma de diccionario con nombre de campos
+    if db_alias is None:
+        db_alias = get_db_from_request() or 'default'
     try: 
-        with connection.cursor() as cur:
+        with connections[db_alias].cursor() as cur:
             cur.execute(sql,parametros or [])
             nombreCampo = [col[0] for col in cur.description]
             resultado = [
@@ -44,9 +47,11 @@ def consultarRegistrosTemplate(entidad, codigo):
     else:
         return {"error": "No existe registro"}, 400
     
-def consultarDato(ssql, parametros=None):
+def consultarDato(request, ssql, parametros=None, db_alias=None):
+    if db_alias is None:
+        db_alias = get_db_from_request() or 'default'
     #retorna un dato simple
-    with connection.cursor() as cur:
+    with connections[db_alias].cursor() as cur:
         cur.execute(ssql,parametros or [])
         dato = cur.fetchone()
         if (dato != None):
