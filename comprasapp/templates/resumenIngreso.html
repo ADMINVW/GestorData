@@ -252,7 +252,7 @@
       <div class="col-10"><b>Procesado por: </b>{{nnombreUser}} ( {{nuser}} )</div>
       <div class="col-2 text-end">
         <a class="btn btn-primary " role="button"   
-         href="{% url 'mimenu' %}"
+         href="{% url 'mimenu' %}?company={{ request.GET.company|default:'' }}"
          id="cancelar-btn">Nueva Orden
         </a>
       </div>
