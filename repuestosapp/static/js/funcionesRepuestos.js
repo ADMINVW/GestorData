@@ -1,9 +1,16 @@
 var factura = [];
 
+$.ajaxSetup({
+    beforeSend: function (xhr) {
+        var ck = sessionStorage.getItem('company_key');
+        if (ck) xhr.setRequestHeader('X-Company-Key', ck);
+    }
+});
+
 function leerArchivoXML() {
     //mine
-    localStorage.removeItem("form_enviado");
-    // console.log("fomr", localStorage.removeItem("form_enviado"))
+    sessionStorage.removeItem("form_enviado");
+    // console.log("fomr", sessionStorage.removeItem("form_enviado"))
     // 
     var inputElement = document.getElementById('inputGroupFileFactura');
 
@@ -294,9 +301,9 @@ async function enviarDatosFactura() {
 
     var datos = {
         //Periodicas : periodicas.checked,
-        Compania: localStorage.getItem('compania'),
-        Agencia: localStorage.getItem('agencia'),
-        Bodega: localStorage.getItem('bodega'),
+        Compania: sessionStorage.getItem('compania'),
+        Agencia: sessionStorage.getItem('agencia'),
+        Bodega: sessionStorage.getItem('bodega'),
         Division: "r", //document.getElementById("divisionSelect").value,
         SubTipo: "I", //document.getElementById("subTipoSelect").value,
         Solicitante: document.getElementById("selSolicita").value,
@@ -401,14 +408,17 @@ async function enviarDatosFactura() {
 
 async function validaExisteFactura() {
 
-    var Cia = String(localStorage.getItem('compania'));
-    var Agencia = localStorage.getItem('agencia');
+    var Cia = String(sessionStorage.getItem('compania'));
+    var Agencia = sessionStorage.getItem('agencia');
     var Division = "r"; //document.getElementById("divisionSelect").value;
     var Ruc = document.getElementById("rucProveedor").value;
     var NumeroFactura = document.getElementById("numeroFactura").value;
+    var ck = sessionStorage.getItem('company_key') || '';
 
     try {
-        let response = await fetch(`/comprasapp/existe_factura/?NumeroFactura=${NumeroFactura}&Division=${Division}&Agencia=${Agencia}&Cia=${Cia}&Ruc=${Ruc}`);
+        let response = await fetch(`/comprasapp/existe_factura/?NumeroFactura=${NumeroFactura}&Division=${Division}&Agencia=${Agencia}&Cia=${Cia}&Ruc=${Ruc}`,
+            { headers: { 'X-Company-Key': ck } }
+        );
         let data = await response.json();
         //console.log("Respuesta del servidor:", data);
 
@@ -505,10 +515,12 @@ function actualizarPrecio(index) {
     var cantidadInput = document.getElementById('cantidad-' + index);
     var cantidad = cantidadInput.value;
     var precioTotal = factura[index].getElementsByTagName("precioTotalSinImpuesto")[0].textContent;
-    var nuevoPrecioUnitario = precioTotal / cantidad;
+    var descuento = factura[index].getElementsByTagName("descuento")[0].textContent;
+    var nuevoPrecioUnitario  = parseFloat(precioTotal) + parseFloat(descuento);
+    nuevoPrecioUnitario = nuevoPrecioUnitario / cantidad;
 
     cantidadInput.value = cantidad;
-    document.getElementById('precioUnitario-' + index).textContent = nuevoPrecioUnitario.toFixed(2);
+    document.getElementById('precioUnitario-' + index).textContent = nuevoPrecioUnitario.toFixed(5);
 
 }
 
