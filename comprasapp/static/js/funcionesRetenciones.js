@@ -1,4 +1,9 @@
-
+$.ajaxSetup({
+    beforeSend: function (xhr) {
+        var ck = sessionStorage.getItem('company_key');
+        if (ck) xhr.setRequestHeader('X-Company-Key', ck);
+    }
+});
 //Eventos al cargar plantilla
 document.addEventListener("DOMContentLoaded", function (event) {
   //Formateo valores decimales
@@ -9,10 +14,10 @@ document.addEventListener("DOMContentLoaded", function (event) {
   baseFuenteS.value = formateoDecimal(baseFuenteS.value);
   baseFuente.value = formateoDecimal(baseFuente.value);
   //Obtengo valores Generales
-  user.value = localStorage.getItem('username');
-  compania.value = localStorage.getItem("compania");
-  agencia.value = localStorage.getItem("agencia");
-  bodega.value = localStorage.getItem("bodega");
+  user.value = sessionStorage.getItem('username');
+  compania.value = sessionStorage.getItem("compania");
+  agencia.value = sessionStorage.getItem("agencia");
+  bodega.value = sessionStorage.getItem("bodega");
 
 
   //TRATAMIENTO ORDEN PERIODICA, SE PONE AUTOMATICAMENTE CHECK EN ITEMS
@@ -313,7 +318,7 @@ function sumarValoresFte() {
 document.getElementById('cancelar-btn').addEventListener('click', function () {
   let url = this.getAttribute("data-url"); //Obtengo nombre vista a direccionar añadida como atributo en el boton
 
-  let agencia = localStorage.getItem("agencia");
+  let agencia = sessionStorage.getItem("agencia");
   let division = document.getElementById("division").value;
   //probar
   let urlParam = `${url}/?agencia=` + agencia + `&division=` + division + `+&proceso=I`;
@@ -455,7 +460,7 @@ document.getElementById("form-retencion").addEventListener("submit", function (e
   }
 
   //CONTROL TRANSACCION ENVIADA
-  if (localStorage.getItem("form_enviado")) {
+  if (sessionStorage.getItem("form_enviado")) {
     swal.fire("Oops!", "Retencion de factura ya registrada!", "warning");
     document.getElementById("guardar-btn").disabled = true;
     return
@@ -469,12 +474,15 @@ document.getElementById("form-retencion").addEventListener("submit", function (e
     jsonData[key] = value;
   });
 
+  var ck = sessionStorage.getItem('company_key') || '';
+
   //ENVIO DATOS
   fetch("/comprasapp/guardarRetencion/", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+      'X-Company-Key': ck,
     },
     body: JSON.stringify({ tabla: filas, forma: jsonData }),
 
@@ -490,7 +498,7 @@ document.getElementById("form-retencion").addEventListener("submit", function (e
     .then(data => {
       if (data.redirect_url) {
         // Redirige al usuario a la URL devuelta por el servidor
-        localStorage.setItem("form_enviado", "true");
+        sessionStorage.setItem("form_enviado", "true");
         //swal.fire("Oops!", "Retención generada", "success"); -->muestra pero no espera confirmacion, desaparce y va al resumen
         window.location.href = data.redirect_url;
       } else {
