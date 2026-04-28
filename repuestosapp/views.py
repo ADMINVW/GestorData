@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from connect.views import conn
+from core.db_context import get_db, get_db_from_request
+from django.db import connections
 import xml.etree.ElementTree as ET
 
 from django.http import JsonResponse 
@@ -24,25 +25,53 @@ from comprasapp.views import *
 
 # Create your views here.
 def comprasRepuestos(request):
-   
-    with conn.cursor() as cur:
+
+    from core.models import Company
+
+    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    
+    try:
+        company = Company.objects.get(key=company_key)
+    except Company.DoesNotExist:
+        company = None
+
+    db_alias = get_db_from_request(request)
+
+    if db_alias not in connections.databases:
+        print(f"ERROR: La conexión '{db_alias}' no está configurada")
+        return render(request, 'ordenCompra.html', {
+            'nempresa': [], 'nsolicita': [], 'ntcredito': [],
+            'company': company, 'company_key': company_key,
+        })
+
+    with connections[db_alias].cursor() as cur:
 
         cur.execute("SELECT * FROM ocxxt006 WHERE so_estado = 'A'")
-        solicita = cur.fetchall()
+        rows = cur.fetchall()
+        column_names = [desc[0] for desc in cur.description]
+        solicita = [dict(zip(column_names, row)) for row in rows]
 
         cur.execute("SELECT * FROM coat007 WHERE cre_codigo <> '00'")
-        tcredito = cur.fetchall()
+        rows = cur.fetchall()
+        column_names = [desc[0] for desc in cur.description]
+        tcredito = [dict(zip(column_names, row)) for row in rows]
 
-    conn.close
-    return render(request,'compraRepuestos.html',{'nsolicita':solicita ,'ntcredito':tcredito} )
+    return render(request,'compraRepuestos.html',{
+        'nsolicita':solicita ,
+        'ntcredito':tcredito,
+        'username':   request.session.get(f'user_{company_key}'),
+        'company': company,
+        'company_key': company_key,
+    })
 
 @require_GET
 def mapeaItem(request):
+    db_alias = get_db_from_request(request)
     codigo = request.GET.get("codigo", "").strip()
     resultado = None
 
     if codigo:
-        with conn.cursor() as cur:
+        with connections[db_alias].cursor() as cur:
             cur.execute("SELECT it_codigo,it_descrip FROM inrrt003 WHERE it_codigo = '" + codigo.strip() + "'" )
             row = cur.fetchone()
             if row:
@@ -63,6 +92,8 @@ def guardaFacturaRepuestos(request):
     Bodega = "AX"
     porcenIva = "0"
     ordinal = 1
+
+    db_alias = get_db_from_request(request)
    
     
     if request.method == 'POST':
@@ -103,7 +134,7 @@ def guardaFacturaRepuestos(request):
         
             # OBTENGO SECUENCIA DE LA COMPRA
            
-        with conn.cursor() as cur:    
+        with connections[db_alias].cursor() as cur:    
             cur.execute("SELECT sq_numero FROM ciatt008 WHERE sq_cia = '" + Compania + "' AND sq_div = '" + Division + "' AND sq_agencia = '" + Agencia + "' AND sq_tipo = '" + tipoDoc + "'")
             secuencia = cur.fetchone() 
                       
@@ -204,7 +235,7 @@ def guardaFacturaRepuestos(request):
                 print ("fila nueva :", fila[9] + "/" + str(fila[5]) + "/" + str(fila[15]) + "/" + str(valDescuento))
             
             #CABECERA
-            cur.execute("INSERT INTO inrrt015 VALUES ('" + str(TipoTran) + "'," + str(Secuencia) + ",'" + NombreProveedor + "'," + str(CodigoProveedor) + ",0,0," + str(OcNumero) + ",'" + FechaIngreso + "',2,null,'" + DescripcionFactura + "','" + NumeroFactura + "',null,'" + Usuario + "'," + FactorVenta + ",0,null,'" + Bodega + "'," + str(TotalFactura) + ",'X',0,'DO',1,null)" ) 
+            cur.execute("INSERT INTO inrrt015 VALUES ('" + str(TipoTran) + "'," + str(Secuencia) + ",'" + NombreProveedor + "'," + str(CodigoProveedor) + ",0,0," + str(OcNumero) + ",'" + FechaIngreso + "',2,null,'" + DescripcionFactura + "','" + NumeroFactura + "',null,'" + Usuario + "'," + FactorVenta + ",0,null,'" + Bodega + "'," + str(TotalFactura) + ",'X'," + porcenIva + ",'DO',1,null)" ) 
 
             #DETALLE
             for fila in datos_tabla:
@@ -229,17 +260,19 @@ def guardaFacturaRepuestos(request):
 
                 # CALCULO PORCENTAJE DESCUENTO
                 totParcial = 0 
-                print("pre: ", fila[5], "cant: " , fila[0])
+                #print("pre: ", fila[5], "cant: " , fila[0])
                 #totParcial = float(fila[4]) * float(fila[0])          
                 #fila[5] = (float(fila[5]) / totParcial) * 100
                 fob = 0
 
-                print ("ERROR: ", str(fila[5]), "/", totParcial, "/", fila[0], "/", fila[10] , "/", fila[12])
+                #print ("ERROR: ", str(fila[5]), "/", totParcial, "/", fila[0], "/", fila[10] , "/", fila[12])
                 CenGastos = "0" 
-                cur.execute("INSERT INTO inrrt016 VALUES('" + str(TipoTran) +  "'," + str(Secuencia) + ",'" + fila[2] + "','" + fila[14] + "'," + str(fila[0]) + "," + str(fila[0]) + "," + str(float(fila[4])*float(FactorVenta)) + "," + str(fila[4]) + "," + str(fob) + ",'" + str(round(fila[5])) + "','" + fila[10] + "','" + fila[12] + "',null,'" + fila[9] + "',null," + str(fila[11]) + ")")
+                valDescuento = float(fila[4]) *float(fila[5])/100
+                cur.execute("INSERT INTO inrrt016 VALUES('" + str(TipoTran) +  "'," + str(Secuencia) + ",'" + fila[2] + "','" + fila[14] + "'," + str(fila[0]) + "," + str(fila[0]) + "," + str((float(fila[4])-valDescuento)*float(FactorVenta)) + "," + str(fila[4]) + "," + str(fob) + ",'" + str(round(fila[5])) + "','" + fila[10] + "','" + fila[12] + "',null,'" + fila[9] + "',null," + str(fila[11]) + "," + fila[7] + ")")
 
+                print ("Precio ganancia :" + str(float(fila[4])-valDescuento) + " x " + str(float(FactorVenta)))
                 #ACTUALIZO ITEM DE STOCK CABECERA
-                cur.execute("UPDATE inrrt003 SET it_costpro = " + str(fila[16]) + ", it_costult = " + str(fila[11]) + ", it_precio = " + str(float(fila[4])*float(FactorVenta)) + ",it_preant = " + str(fila[15]) + " WHERE it_codigo = '" + fila[2] + "'" )
+                cur.execute("UPDATE inrrt003 SET it_costpro = " + str(fila[16]) + ", it_costult = " + str(fila[11]) + ", it_precio = " + str((float(fila[4])-valDescuento)*float(FactorVenta)) + ",it_preant = " + str(fila[15]) + " WHERE it_codigo = '" + fila[2] + "'" )
 
                 #ACTUALIZO ITEM DE STOCK DETALLE
                 cur.execute("UPDATE inrrt004 SET st_stockant = st_stockact , st_stockact = st_stockact + " + str(fila[0]) + ",st_fulmov = '" + FechaIngreso + "', st_documov = '" + str(Secuencia) + "',st_tipumov = '" + tipoDoc.strip() + "' WHERE st_codigo = '" + fila[2] + "' AND st_bodega = '" + Bodega + "'")
@@ -255,20 +288,22 @@ def guardaFacturaRepuestos(request):
                 ordinal = ordinal + 1
             print("paso 4 detalle:",ordinal)
 
-        cur.close
+        cur.close()
         ##MineOctubre
         print(OcNumero)
-        ordenCompra =  obtenerOrdenCompra(Agencia, Division, OcNumero)   
-        guardarCtaPagar(ordenCompra)
+        ordenCompra =  obtenerOrdenCompra(db_alias, Agencia, Division, OcNumero)   
+        if ordenCompra is None:
+            return JsonResponse({'error': f'No se pudo recuperar la orden de compra {OcNumero}'}, status=400)
+        guardarCtaPagar(request, db_alias, ordenCompra)
 
         #Actualizacion compra local en cuenta por pagar --debe reflejarse en resumen
-        with connection.cursor() as cur:
+        with connections[db_alias].cursor() as cur:
             documento = TipoTran +  str(Secuencia).zfill(6)
             print ("documento", documento)
             ssql = "UPDATE cpxxt001 SET dc_numcpr = ? WHERE dc_division = ? AND dc_agencia = ? AND dc_codpro = ? AND dc_numdoc = ?"
             parametros = [documento, Division, Agencia, CodigoProveedor, NumeroFactura]
             cur.execute(ssql,parametros)
-            cur.close
+            cur.close()
         
         #return JsonResponse({"Secuencia":Secuencia})
         
@@ -278,191 +313,3 @@ def guardaFacturaRepuestos(request):
         return JsonResponse({'status': 'fail', 'message': 'Método no permitido'}, status=405)
     
 
-@csrf_exempt
-def guardaFacturaRepuestosTemp(request):
-    Compania = "x"
-    Agencia = "PX"
-    tipoDoc = "OC"
-    Bodega = "AX"
-    porcenIva = "0"
-    ordinal = 1
-   
-    
-    if request.method == 'POST':
-        #datos = json.loads(request.body)
-        body_unicode = request.body.decode('utf-8')
-        body_data = json.loads(body_unicode)
-        datos = body_data['datos']
-        datos_tabla = body_data['datosTabla']
-        Compania = datos.get("Compania")
-        Agencia = datos.get("Agencia")
-        Bodega = datos.get("Bodega")
-       
-        Division = datos.get("Division")
-        Solicitante = "AD" #datos.get("Solicitante")
-        Usuario = datos.get('Usuario')
-        RucProveedor = datos.get("RucProveedor")
-        FechaIngreso = datos.get("FechaIngreso")
-        FechaEmision = datos.get("FechaEmision")
-        SubTipo = datos.get("SubTipo")
-       
-        TotalDescuento = datos.get("TotalDescuento")
-        #Iva = datos.get("Iva")
-        TotalFactura = datos.get("TotalFactura")
-        PlazoPago = datos.get("PlazoPago")
-        SerieFactura = datos.get("SerieFactura")
-        NumeroFactura = datos.get("NumeroFactura")
-        TipoCredito = datos.get("TipoCredito")
-        AutorizacionSri = datos.get("AutorizacionSri")
-        DescripcionFactura = datos.get("DescripcionFactura")
-
-        #if float(SubTotalIva) > 0:
-        porcenIva = "15" #(Iva/SubTotalSinImpuestos)*100
-
-        FechaIngresoHora = datos.get("FechaIngresoHora")
-        
-        
-        
-            # OBTENGO SECUENCIA DE LA COMPRA
-           
-        with conn.cursor() as cur:    
-            cur.execute("SELECT sq_numero FROM ciatt008 WHERE sq_cia = '" + Compania + "' AND sq_div = '" + Division + "' AND sq_agencia = '" + Agencia + "' AND sq_tipo = '" + tipoDoc + "'")
-            secuencia = cur.fetchone() 
-                      
-            if secuencia:
-                Secuencia = secuencia[0] + 1
-
-            print("paso 1 seq:",Secuencia)    
-            # OBTENGO CODIGO DEL PROVEEDOR
-            cur.execute("SELECT pv_codigo,pv_nombre FROM ciatt011 WHERE pv_cia = '" + Compania + "' AND pv_cedruc = '" + RucProveedor + "'")
-
-            codigoprovedor = cur.fetchone() 
-            if codigoprovedor:
-                CodigoProveedor = codigoprovedor[0]
-                NombreProveedor = codigoprovedor[1]
-            
-            #NO PERIODICAS
-            Plantillas = ',null,'
-
-            # GUARDO LA CABECERA DE LA COMPRA
-            
-
-            
-            OcNumero = Secuencia
-
-            print("paso 3 cabecera:",Usuario)
-            # GUARDO EL DETALLE DE LA COMPRA
-            for fila in datos_tabla:
-                CenGastos = ''
-                # cantidad fila[0]
-                # codigo item fila[1]
-                # codigo local fila[2]
-                # descripcion fila[3]
-                # precio unitario fila[4]
-                # descuento fila[5]
-                # precio total sin impuestos fila[6]
-                # porcentaje iva fila[7]
-                # valor iva fila[8]
-                
-                # CALCULO PORCENTAJE DESCUENTO
-                totParcial = 0 
-                print("pre: ", fila[3], "cant: " , fila[0])
-                totParcial = float(fila[4]) * float(fila[0])          
-                fila[5] = (float(fila[5]) / totParcial) * 100
-
-                #if not Periodicas:
-                CenGastos = "0" 
-
-                #cur.execute("INSERT INTO ocxxt002 VALUES('" + Compania + "','" + Division + "','" + Agencia + "'," + str(Secuencia) + "," + str(ordinal) + ",'" + fila[1] + "'," + fila[0] + "," + fila[0] + ",'" + fila[3] + "',''," + str(fila[4]) + ",''," + str(fila[5]) + ",'','" + str(CenGastos) + "'," + fila[7] + "," + fila[8] + ")")
-
-                #GUARDO CODIGO DE ITEM DISTINTO EN LA TABLA MAPEO
-                
-                ordinal = ordinal + 1
-            print("paso 4 CODIGO:",fila[2])
-
-            #GUARDA COMPRA LOCAL REPUESTOS
-            tipoDoc = "16"
-            #OBTENGO LA SECUENCIA
-            cur.execute("SELECT sq_numero FROM ciatt008 WHERE sq_cia = '" + Compania + "' AND sq_div = '" + Division + "' AND sq_agencia = '" + Agencia + "' AND sq_tipo = '" + tipoDoc + "'")
-            secuencia = cur.fetchone() 
-                      
-            if secuencia:
-                Secuencia = secuencia[0] + 1
-            # ACTUALIZO LA SECUENCIA
-            
-            cur.execute("UPDATE ciatt008 SET sq_numero = " + str(Secuencia) + " WHERE sq_cia = '" + Compania + "' AND sq_div = '" + Division + "' AND sq_agencia = '" + Agencia + "' AND sq_tipo = '" + tipoDoc + "'")  
-            FactorVenta = 1.5
-            TipoTran = Bodega.strip() + tipoDoc.strip() 
-
-            #OBTENGO INFORMACION ADICIONAL DE LOS REPUESTOS
-            for fila in datos_tabla:
-                cur.execute("SELECT it_linea,it_clase, it_costpro,st_ubica,st_stockact,it_descrip FROM inrrt003,inrrt004 WHERE it_codigo = '" + fila[2].strip() + "' AND it_codigo = st_codigo AND st_bodega = '" + Bodega + "'")
-                nuevaInfo = cur.fetchone()
-                        
-                if nuevaInfo:
-                    fila.append(nuevaInfo[0]) 
-                    fila.append(nuevaInfo[1])
-                    fila.append(nuevaInfo[2]) 
-                    fila.append(nuevaInfo[3])
-                    fila.append(nuevaInfo[4])
-                    fila.append(nuevaInfo[5])
-
-                #OBTENGO EL STOCK TOTAL DEL ITEM EN TODAS LAS BODEGAS     
-                cur.execute("SELECT SUM(st_stockact) FROM inrrt004 WHERE st_codigo = '" + fila[2].strip() + "'")
-                nuevaInfo = cur.fetchone() 
-                if nuevaInfo:  
-                    totalItem = nuevaInfo[0]
-                valDescuento = float(fila[4]) *float(fila[5])/100 
-                fila.append((float(fila[0])*(float(fila[4])-valDescuento) + float(totalItem)*float(fila[11]))/(float(fila[0])+float(totalItem)))
-                
-                    
-            for fila in datos_tabla:
-                print ("fila nueva :", fila[9] + "/" + str(fila[5]) + "/" + str(fila[15]) + "/" + str(valDescuento))
-                
-            #CABECERA
-            cur.execute("INSERT INTO inrrt015 VALUES (" + str(TipoTran) + "," + Secuencia + ",'" + NombreProveedor + "'," + str(CodigoProveedor) + ",0,0," + OcNumero + ",'" + FechaIngreso + "',2,null,'" + DescripcionFactura + "','" + NumeroFactura + "',null,'" + Usuario + ",'" + FactorVenta + ",0,null,'" + Bodega + "'," + TotalFactura + ",'X',0,'DO',1,null)" ) 
-
-            #DETALLE
-            for fila in datos_tabla:
-                CenGastos = ''
-                # cantidad fila[0]
-                # codigo item fila[1]
-                # codigo local fila[2]
-                # descripcion fila[3]
-                # precio unitario fila[4]
-                # descuento fila[5]
-                # precio total sin impuestos fila[6]
-                # porcentaje iva fila[7]
-                # valor iva fila[8]
-                # linea fila[9]
-                # clase fila[10]
-                # costo promedio fila[11]
-                # stock actual fila[12]
-                # ubicacion fila[13]
-
-                
-                # CALCULO PORCENTAJE DESCUENTO
-                totParcial = 0 
-                print("pre: ", fila[3], "cant: " , fila[0])
-                totParcial = float(fila[4]) * float(fila[0])          
-                fila[5] = (float(fila[5]) / totParcial) * 100
-                costoRepuesto = 0 #calcular el promedio
-                fob = 0
-
-                CenGastos = "0" 
-
-                cur.execute("INSERT INTO inrrt016 VALUES('" + str(TipoTran) +  "'," + str(Secuencia) + "," + ",'" + fila[2] + "'," + fila[3] + "," + fila[0] + ",'" + fila[0] + "',''," + str(fila[4]*FactorVenta) + "," + costoRepuesto + "," + fob + "," + str(fila[5]) + ",'','" + str(CenGastos) + "'," + fila[7] + "," + fila[8] + ")")
-
-                #GUARDO CODIGO DE ITEM DISTINTO EN LA TABLA MAPEO
-                
-            print("paso 4 detalle:",ordinal)
-
-        cur.close
-        #ordenCompra, valorBienes, valorServicios = obtenerOrdenCompra(Agencia, Division, Secuencia)   
-        #guardarCtaPagar(ordenCompra)
-        return JsonResponse({"Secuencia":Secuencia})
-        
-        #return JsonResponse({'redirect_url': f'retencionCompra/{Secuencia}/{Division}/?Agencia={Agencia}'})
-    else:
-            
-        return JsonResponse({'status': 'fail', 'message': 'Método no permitido'}, status=405)
