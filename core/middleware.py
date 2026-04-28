@@ -27,25 +27,29 @@ class DynamicConnectionMiddleware:
                 db_alias = company_info['db_alias']
                 db_user  = request.session.get(f'user_{company_key}')
                 db_pass  = request.session.get(f'pass_{company_key}')
-                if db_alias in connections.databases and db_user and db_pass:
-                    conn = connections[db_alias]
-                    if conn.settings_dict.get('USER') != db_user:
-                        conn.close()
-                        conn.settings_dict['USER']     = db_user
-                        conn.settings_dict['PASSWORD'] = db_pass
-                set_db_credentials(db_alias, db_user, db_pass)
-
-            # fallback si company_key es un db_alias válido directo
             elif company_key in connections.databases:
+                db_alias = company_key
                 db_user = request.session.get(f'user_{company_key}')
                 db_pass = request.session.get(f'pass_{company_key}')
-                set_db_credentials(company_key, db_user, db_pass)
                 print(f"MIDDLEWARE - fallback directo a db_alias: {company_key}")
-
             else:
-                set_db_credentials('default', None, None)
+                db_alias, db_user, db_pass = 'default', None, None
+        else:
+            db_alias, db_user, db_pass = 'default', None, None    
 
-            return self.get_response(request)
+        # Guardar en el request directamente ← clave del fix
+        request.db_alias = db_alias
+        request.db_user  = db_user
 
-        set_db_credentials('default', None, None)
+        # También en thread locals para compatibilidad con get_db()
+        set_db_credentials(db_alias, db_user, db_pass)
+
+        # Actualizar credenciales de conexión si cambiaron
+        if db_alias in connections.databases and db_user:
+            conn = connections[db_alias]
+            if conn.settings_dict.get('USER') != db_user:
+                conn.close()
+                conn.settings_dict['USER']     = db_user
+                conn.settings_dict['PASSWORD'] = db_pass
+
         return self.get_response(request)
