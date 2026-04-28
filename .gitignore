@@ -2,6 +2,7 @@
 /staticfiles
 .env
 db.sqlite3
+new_data.xml
 .vscode/
 *.pyc
 __pycache__/
