@@ -634,6 +634,11 @@ def ingresarRetencion(request,id,codDiv):
 
 def guardarRetencion(request):
     db_alias = get_db_from_request(request)
+    company_key = (
+        request.POST.get('company')
+        or request.headers.get('X-Company-Key')
+        or request.GET.get('company')
+    )
     
     if request.method == 'POST':
         try:
@@ -688,8 +693,9 @@ def guardarRetencion(request):
             # return JsonResponse({'error': str(e)}, status=400)
             print(f"Error al guardar retencion : {e}")
             raise 
-        #Probar
-        return JsonResponse({'redirect_url': f'../../../verTransaccion/{ocompra}/?agencia={agencia}&division={division}&proceso=I'})
+        return JsonResponse(
+            {'redirect_url': f'/comprasapp/templates/verTransaccion/{ocompra}/?agencia={agencia}&division={division}&proceso=I&company={company_key}'}
+        )
     else:
         return JsonResponse({'ERROR': 'Método no permitido'}, status=405)
 

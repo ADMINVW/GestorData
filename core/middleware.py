@@ -10,7 +10,6 @@ class DynamicConnectionMiddleware:
             request.GET.get('company')
             or request.headers.get('X-Company-Key')
             or request.POST.get('company')
-            or request.session.get('active_company_key')
         )
 
         print(f"MIDDLEWARE - path: {request.path}")
