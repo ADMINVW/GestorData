@@ -6,10 +6,12 @@ class DynamicConnectionMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        # Primero buscar en parámetros de request, luego en sesión como fallback
         company_key = (
             request.GET.get('company')
             or request.headers.get('X-Company-Key')
             or request.POST.get('company')
+            or request.session.get('active_company_key')  # Fallback: buscar en sesión
         )
 
         print(f"MIDDLEWARE - path: {request.path}")

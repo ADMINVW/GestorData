@@ -79,13 +79,13 @@ def company_login(request):
             if not row or row[0].lower() != company.db_name.lower():
                 conn.close()
                 error = "Error de integridad: la base de datos conectada no coincide."
-                return render(request, 'core/login_informix.html', {'error': error})
+                return render(request, 'core/login.html', {'error': error})
 
-            # ✅ Guardar credenciales POR EMPRESA (no sobreescribe otras)
+            # Guardar credenciales POR EMPRESA (no sobreescribe otras)
             request.session[f'user_{company.key}'] = user
             request.session[f'pass_{company.key}'] = pw
 
-            # ✅ Guardar lista de empresas activas en sesión
+            # Guardar lista de empresas activas en sesión
             active = request.session.get('active_companies', {})
             active[company.key] = {
                 'key':    company.key,
@@ -117,18 +117,18 @@ def company_login(request):
             request.session.pop('pending_company_name', None)
 
             messages.success(request, f"Conectado a {company.name}.")
-            # ✅ Redirigir pasando la empresa activa como query param
+            # Redirigir pasando la empresa activa como query param
             return redirect(f'/mimenu/?company={company.key}')
 
         except Company.DoesNotExist:
             error = "Empresa no encontrada."
-            return render(request, 'core/login_informix.html', {'error': error})
+            return render(request, 'core/login.html', {'error': error})
         except Exception as e:
             try:
                 connections[db_alias].close()
             except Exception:
                 pass
             error = f"Error de conexión: {str(e)}"
-            return render(request, 'core/login_informix.html', {'error': error})
+            return render(request, 'core/login.html', {'error': error})
 
     return render(request, 'core/login.html')
