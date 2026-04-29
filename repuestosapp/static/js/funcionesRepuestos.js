@@ -41,8 +41,6 @@ function leerArchivoXML() {
 
             var textoSinDeclaracion = textoSinCDATA.replace(/<\?xml\s.*?\?>/, '').replace(/<comprobante>\s*<\?xml.*?\?>/s, '<comprobante>');
 
-
-
             var parser = new DOMParser();
             var xmlDoc = parser.parseFromString(textoSinDeclaracion, 'text/xml');
 
@@ -84,10 +82,7 @@ function leerArchivoXML() {
 
             FechaIngresoHora.value = formatoFechaHora();
 
-
-
             //Detalle factura
-
             var tablaSumaIva = "" //"<tr><th>PorcentajeIva</th><th>ValorIva</th></tr>"
             var tablaSumaBase = "" //"<tr><th>PorcentajeIva</th><th>ValorBase</th></tr>"
             var sumasPorTarifa = {}; // Aquí acumulamos
@@ -171,8 +166,6 @@ function leerArchivoXML() {
                     });
                 }
 
-
-
                 for (var t in sumasPorTarifa) {
                     // Sumamamos los valores de base e Iva por tarifa y los agrupo, para mostrar en la factura
                     tablaSumaBase += "<tr>";
@@ -192,25 +185,26 @@ function leerArchivoXML() {
 
             }).catch(error => {
                 console.error('Error al obtener las opciones del proveedor:', error);
-            });
-
+            })
         }
-
         lector.readAsText(archivo);
     }
 }
-
 
 function fetchCuentaProv() {
     return new Promise((resolve, reject) => {
         var tabla = document.getElementById("tablaDetalle");
         var selectElement = document.getElementById("rucProveedor");
         var rucprov = selectElement.value;
+        var ck = sessionStorage.getItem('company_key') || '';
 
         if (rucprov) {
             $.ajax({
                 url: '/comprasapp/cuentaProv/',
                 method: 'GET',
+                headers: {
+                    'X-Company-Key': ck
+                },
                 data: {
                     'rucprov': rucprov
                 },
@@ -294,7 +288,6 @@ async function enviarDatosFactura() {
         return;  // Esto devuelve `true` correctamente
     }
 
-
     //const periodicas = document.getElementById('PeriodicasSwitchCheck');
     var DescripTemp = document.getElementById("descripcionFactura");
     DescripTemp.value = DescripTemp.value.toUpperCase();
@@ -370,11 +363,15 @@ async function enviarDatosFactura() {
         };
     }
 
+    var ck = sessionStorage.getItem('company_key') || '';
+
     console.log("Enviar")
     $.ajax({
         url: '/repuestosapp/guardaFacturaRepuestos/',
         method: 'POST',
-
+        headers: {
+            'X-Company-Key': ck
+        },
         data: JSON.stringify(datosFactura),
         contentType: 'application/json',
         dataType: 'json',
@@ -397,14 +394,12 @@ async function enviarDatosFactura() {
             } else {
                 console.error('No se recibió URL de redirección');
             }
-
         },
         error: function (xhr, status, error) {
             console.error('Ha ocurrido un error:', error);
         }
     });
 }
-
 
 async function validaExisteFactura() {
 
@@ -433,11 +428,7 @@ async function validaExisteFactura() {
         console.error("Error:", error);
         return false;
     }
-
-
 }
-
-
 
 async function validaDatosFactura() {
 
@@ -449,15 +440,12 @@ async function validaDatosFactura() {
     const factorventa = document.getElementById('factorVenta');
     const factura = document.getElementById('numeroFactura');
 
-
-
     // Validación de campo de texto
     if (validaCodigo() == false) {
         alert('El Código Local no puede estar vacio');
         //selsolicita.focus();
         return false;
     }
-
 
     if (selsolicita.selectedIndex == 0) {
         alert('El campo Solicitante es obligatorio.');
@@ -499,16 +487,8 @@ async function validaDatosFactura() {
     } else {
         return true;  // Esto devuelve `true` correctamente
     }
-
-
     //Si todos los campos requeridos están llenos, puedes proceder con el envío o la acción de guardar
-
-
 }
-
-
-
-
 
 function actualizarPrecio(index) {
 
@@ -524,13 +504,14 @@ function actualizarPrecio(index) {
 
 }
 
-
-
 async function mapeaItem(input) {
     let codigoIngresado = input.value.trim();
+    var ck = sessionStorage.getItem('company_key') || '';
 
     try {
-        let response = await fetch(`/repuestosapp/mapeaItem/?codigo=${codigoIngresado}`);
+        let response = await fetch(`/repuestosapp/mapeaItem/?codigo=${codigoIngresado}`,
+            { headers: { 'X-Company-Key': ck } }
+        );
         let data = await response.json();
 
         if (data.codigo) {

@@ -306,8 +306,8 @@ def guardaFacturaRepuestos(request):
             cur.close()
         
         #return JsonResponse({"Secuencia":Secuencia})
-        
-        return JsonResponse({'redirect_url': f'../../comprasapp/templates/retencionCompra/{OcNumero}/{Division}/?Agencia={Agencia}'})
+        company_key = request.headers.get('X-Company-Key', '')
+        return JsonResponse({'redirect_url': f'../../comprasapp/templates/retencionCompra/{OcNumero}/{Division}/?Agencia={Agencia}&company={company_key}'})
     else:
             
         return JsonResponse({'status': 'fail', 'message': 'Método no permitido'}, status=405)
