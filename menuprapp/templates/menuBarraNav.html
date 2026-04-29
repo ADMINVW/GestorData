@@ -69,9 +69,9 @@
               Compras
             </a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="/comprasapp/templates/ordenCompra">Orden de Compra</a></li>
-              <li><a class=" dropdown-item" href="/comprasapp/cargarTmplOrdenes">Consulta</a></li>
-              <li><a class=" dropdown-item" href="/comprasapp/cargarTmplPlantillas">Plantillas Periódicas</a></li>
+              <li><a class="dropdown-item" href="/comprasapp/templates/ordenCompra?company={{ company_key }}">Orden de Compra</a></li>
+              <li><a class=" dropdown-item" href="/comprasapp/cargarTmplOrdenes?company={{ company_key }}">Consulta</a></li>
+              <li><a class=" dropdown-item" href="/comprasapp/cargarTmplPlantillas?company={{ company_key }}">Plantillas Periódicas</a></li>
                 <li class="dropend">
                   <!--Propiedad data-bs-toggle ejecuta en evento de mostrar o ocultar menu con = dropdown -->
                   <a class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="#">
@@ -80,7 +80,7 @@
                   <!--Submenu trabaja con css propios -->
                   <ul class="dropdown-menu dropdown-submenu"> 
                   <li>
-                    <a class="dropdown-item" href="/comprasapp/cargarTmplConsultaCentroGastos">Consulta</a>
+                    <a class="dropdown-item" href="/comprasapp/cargarTmplConsultaCentroGastos?company={{ company_key }}">Consulta</a>
                   </li>
                   <li>
                     <a class="dropdown-item" href="#">Asignacion Proveedor</a>
@@ -99,10 +99,10 @@
             </a>
             <ul class="dropdown-menu">
               <li>
-                <a class="dropdown-item" href="/repuestosapp/templates/compraRepuestos">Orden de Compra</a>
+                <a class="dropdown-item" href="/repuestosapp/templates/compraRepuestos?company={{ company_key }}">Orden de Compra</a>
               </li>
               <li>
-                <a class="dropdown-item" href="/repuestosapp/pruebas">Pruebas</a>
+                <a class="dropdown-item" href="/repuestosapp/pruebas?company={{ company_key }}">Pruebas</a>
               </li>
               <li>
                 <hr class=" dropdown-divider" />

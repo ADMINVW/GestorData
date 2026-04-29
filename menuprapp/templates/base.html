@@ -101,6 +101,24 @@
   <script src="https://cdn.datatables.net/2.3.2/js/dataTables.bootstrap5.js"></script>
   <!--JS propios-->
   <script src="/static/js/funciones.js" defer></script>
+  <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var ck = "{{ company_key|default:'' }}";
+            if (ck) {
+              sessionStorage.setItem('company_key', ck);
+              // Actualizar links del navbar con company_key
+              var ckNav = sessionStorage.getItem('company_key');
+              if (ckNav) {
+                document.querySelectorAll('.navbar a[href]').forEach(function (link) {
+                  var href = link.getAttribute('href');
+                  if (href && href !== '#' && !href.includes('company=') && !href.includes('company_select')) {
+                    link.setAttribute('href', href + (href.includes('?') ? '&' : '?') + 'company=' + ckNav);
+                  }
+                });
+              }
+            }
+        });
+  </script>
   {% block footer_scripts %} {% endblock %}
 </body>
 
