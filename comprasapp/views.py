@@ -30,7 +30,8 @@ from django.contrib import messages
 def ordenCompras(request):
     from core.models import Company
 
-    company_key = request.GET.get('company') or request.session.get('company_key', '')
+    # Usar active_company_key para mantener consistencia con el login
+    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
     
     try:
         company = Company.objects.get(key=company_key)
@@ -542,6 +543,14 @@ def ingresarRetencion(request,id,codDiv):
     codAge = request.GET.get('Agencia', 'Not provided')
     print(f">>> ingresarRetencion: id={id}, codDiv={codDiv}, codAge={codAge}")
     db_alias = get_db_from_request(request)
+    
+    # Obtener company_key para el contexto
+    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    from core.models import Company
+    try:
+        company = Company.objects.get(key=company_key)
+    except Company.DoesNotExist:
+        company = None
 
     if request.method == 'GET':
         #Datos OC/Factura
@@ -625,6 +634,8 @@ def ingresarRetencion(request,id,codDiv):
             'ncompania': codcia,
             'nagencia': codAge,
             'nbodega': 'CP', 
+            'company': company,           # Para el navbar
+            'company_key': company_key,   # Para el navbar
         }
 
         print(f"CONTEXTO compania={codcia}, agencia={codAge}")
@@ -833,6 +844,15 @@ def verTransaccionResumen(request, numOrden):
     codDiv = request.GET.get('division', 'Not provided') 
     proceso = request.GET.get('proceso', 'C') 
     db_alias = get_db_from_request(request)
+    
+    # Obtener company_key para el contexto
+    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    from core.models import Company
+    try:
+        company = Company.objects.get(key=company_key)
+    except Company.DoesNotExist:
+        company = None
+    
     #with connections[db_alias].cursor() as cur:
     codcia="e"
     
@@ -941,6 +961,8 @@ def verTransaccionResumen(request, numOrden):
             'nverificada':verificada,
             'nnumDiarioOc': numDiarioOc,
             'nordenTaller' : datosOrden["oc_ordtra"],
+            'company': company,           # Para el navbar
+            'company_key': company_key,   # Para el navbar
     } 
     #Si es proceso (I)ngreso, genera XML y actualiza autorizacion en tabla, si proceso (C)onsulta no debería ingresar; tampoco si (I)ngreso no generó retención
     print (" condiciones generar xml: numRet (  ", numRet, ") y proceso (" , proceso , ")")
@@ -1009,6 +1031,15 @@ def obtenerOrdenCompra(db_alias=None, codAge=None, codDiv=None, numOrden=None):
 def obtenerDetalleOrdenCompraT(request,numOrden,codAge):
     #mine julio
     db_alias = get_db_from_request(request)
+    
+    # Obtener company_key para el contexto
+    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    from core.models import Company
+    try:
+        company = Company.objects.get(key=company_key)
+    except Company.DoesNotExist:
+        company = None
+    
     parametros = [numOrden,codAge]
     with connections[db_alias].cursor() as cur:
         ssql = """
@@ -1035,6 +1066,8 @@ def obtenerDetalleOrdenCompraT(request,numOrden,codAge):
             'ndetalleOrden':detalleOrden,
             'nnumOrden':numOrden,
             'niva':iva,
+            'company': company,           # Para el navbar
+            'company_key': company_key,   # Para el navbar
         }
     return render(request, 'detalleOrdenCompraT.html',context)
 
@@ -1043,6 +1076,15 @@ def obtenerDetalleOrdenCompraT(request,numOrden,codAge):
 def obtenerDetalleOrdenCompraR(request,numOrden,codAge):
     print("obtenerDetalleOrdenCompraR")
     db_alias = get_db_from_request(request)
+    
+    # Obtener company_key para el contexto
+    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    from core.models import Company
+    try:
+        company = Company.objects.get(key=company_key)
+    except Company.DoesNotExist:
+        company = None
+    
     parametros = [numOrden,codAge]
     with connections[db_alias].cursor() as cur:
         ssql = """
@@ -1075,12 +1117,23 @@ def obtenerDetalleOrdenCompraR(request,numOrden,codAge):
             'ndetalleOrden':detalleOrden,
             'nnumOrden':numOrden,
             'niva':iva,
+            'company': company,           # Para el navbar
+            'company_key': company_key,   # Para el navbar
         }
     return render(request, 'detalleOrdenCompraR.html',context)
     
 def obtenerDetalleOrdenCompra(request,numOrden,codAge, codDiv, periodica, verificada):
     print("obtenerDetalleOrdenCompra", periodica, verificada)
     db_alias = get_db_from_request(request)
+    
+    # Obtener company_key para el contexto
+    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    from core.models import Company
+    try:
+        company = Company.objects.get(key=company_key)
+    except Company.DoesNotExist:
+        company = None
+    
     parametros=[codAge,codDiv,numOrden]
     #Datos de la orden de compra relacionada
     with connections[db_alias].cursor() as cur:
@@ -1139,6 +1192,8 @@ def obtenerDetalleOrdenCompra(request,numOrden,codAge, codDiv, periodica, verifi
             'ndetalleOrden':detalleOrden,
             'nnumOrden':numOrden,
             'niva':iva,
+            'company': company,           # Para el navbar
+            'company_key': company_key,   # Para el navbar
         }
         return render(request, 'detalleOrdenCompra.html',context)
 
@@ -1515,7 +1570,13 @@ def prueba(request):
     return render(request,'prueba.html')
 
 def cargarTmplConsultaOrdenes(request):
-    return render(request,'consultaOrdenes.html')
+    from core.models import Company
+    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    try:
+        company = Company.objects.get(key=company_key)
+    except Company.DoesNotExist:
+        company = None
+    return render(request,'consultaOrdenes.html', {'company': company, 'company_key': company_key})
 
 def cargarAgencias(request):
     db_alias = get_db_from_request(request)
@@ -1662,7 +1723,13 @@ def cargarProveedores(request):
     return JsonResponse(listproveedores, safe=False)
 
 def cargarTmplConsultaPlantillas(request):
-    return render(request,'consultaPlantillasPeriodicas.html')
+    from core.models import Company
+    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    try:
+        company = Company.objects.get(key=company_key)
+    except Company.DoesNotExist:
+        company = None
+    return render(request,'consultaPlantillasPeriodicas.html', {'company': company, 'company_key': company_key})
 
 def consultarPlantillas(request):
     ssql_aux = "1 = 1"
@@ -1714,6 +1781,13 @@ def cargarConceptoPlantillas(request):
     return JsonResponse(listplantillas, safe=False)        
 
 def crearPlantilla(request):
+    from core.models import Company
+    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    try:
+        company = Company.objects.get(key=company_key)
+    except Company.DoesNotExist:
+        company = None
+    
     listsSelects = obtenerSelectPlantilla()
     context = {
         'nproceso' : "C",
@@ -1722,11 +1796,20 @@ def crearPlantilla(request):
         'ntipoComprobantes' : listsSelects["tipoComprobantes"],
         'ntipoCreditos' : listsSelects["tipoCreditos"],
         'nitemsIva' : listsSelects["itemsIva"],
-        'nitemsFte' : listsSelects["itemsFte"]
+        'nitemsFte' : listsSelects["itemsFte"],
+        'company': company,
+        'company_key': company_key,
     }
     return render(request,'plantillaPeriodica.html', context)
 
 def editarPlantilla(request, codigo):
+    from core.models import Company
+    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    try:
+        company = Company.objects.get(key=company_key)
+    except Company.DoesNotExist:
+        company = None
+    
     if request.method == "GET":
         parametros=["d", codigo]
         ssql = "SELECT * FROM ocxxt010 WHERE pc_division = ? AND pc_codigo = ?"
@@ -1744,7 +1827,9 @@ def editarPlantilla(request, codigo):
             'ntipoComprobantes' : listsSelects["tipoComprobantes"],
             'ntipoCreditos' : listsSelects["tipoCreditos"],
             'nitemsIva' : listsSelects["itemsIva"],
-            'nitemsFte' : listsSelects["itemsFte"]
+            'nitemsFte' : listsSelects["itemsFte"],
+            'company': company,
+            'company_key': company_key,
             }
     
     return render(request,'plantillaPeriodica.html', context)
@@ -1901,6 +1986,13 @@ def guardarPlantilla(request):
     
 
 def cargarTmplPlantillaCtb(request, codigo):
+    from core.models import Company
+    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    try:
+        company = Company.objects.get(key=company_key)
+    except Company.DoesNotExist:
+        company = None
+    
     db_alias = get_db_from_request(request)
     if request.method =="GET":
         parametros=["d", codigo]
@@ -1935,7 +2027,9 @@ def cargarTmplPlantillaCtb(request, codigo):
             'nproceso': proceso,
             'nplantillaCtb': plantillaCtb,
             'ndatosPlantilla' : datosPlantilla[0],
-            'ngrupo': grupo[0]
+            'ngrupo': grupo[0],
+            'company': company,
+            'company_key': company_key,
             }    
         else:
         #Creación
@@ -1943,6 +2037,8 @@ def cargarTmplPlantillaCtb(request, codigo):
             context={
             'nproceso': proceso,
             'ndatosPlantilla' : datosPlantilla[0],
+            'company': company,
+            'company_key': company_key,
             }    
         return render(request,'plantillaPeriodicaCtb.html', context)
 
@@ -2083,7 +2179,13 @@ def eliminarPlantilla(request):
             return JsonResponse({'status':'error', 'detallerr': str(e)}, status=400)
         
 def cargarTmplConsultaCentroGastos(request):
-    return render(request,'consultaCentroGastos.html')
+    from core.models import Company
+    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    try:
+        company = Company.objects.get(key=company_key)
+    except Company.DoesNotExist:
+        company = None
+    return render(request,'consultaCentroGastos.html', {'company': company, 'company_key': company_key})
 
 def consultarCentroGastos(request):
     db_alias = get_db_from_request(request)
@@ -2096,6 +2198,13 @@ def consultarCentroGastos(request):
     return JsonResponse(dataGastos, safe=False)
 
 def cargarTmplCentroGastos(request):
+    from core.models import Company
+    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    try:
+        company = Company.objects.get(key=company_key)
+    except Company.DoesNotExist:
+        company = None
+    
     db_alias = get_db_from_request(request)
     context ={}
     if request.method == "GET":
@@ -2115,11 +2224,15 @@ def cargarTmplCentroGastos(request):
                 'nproceso': 'U',
                 'ncodigoCentro': codigo,
                 'nnombreCentro': nombreCentro,
-                'ndataSubgrupos': subgruposGastos
+                'ndataSubgrupos': subgruposGastos,
+                'company': company,
+                'company_key': company_key,
             }
         else:
             context={
-                'nproceso':'C'
+                'nproceso':'C',
+                'company': company,
+                'company_key': company_key,
             }
 
     return render(request,'centroGastos.html',context)
