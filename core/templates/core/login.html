@@ -338,15 +338,17 @@
     <!-- STEP 2 · LOGIN -->
     <p class="section-label">2 · Credenciales Informix</p>
 
-    {% if error %}
-    <div class="error-msg visible">
-      <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-        <circle cx="7.5" cy="7.5" r="6.5" stroke="currentColor" stroke-width="1.4"/>
-        <path d="M7.5 4v3.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-        <circle cx="7.5" cy="10.5" r=".75" fill="currentColor"/>
-      </svg>
-      {{ error }}
-    </div>
+    {% if messages %}
+      {% for message in messages %}
+        <div class="error-msg visible">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+            <circle cx="7.5" cy="7.5" r="6.5" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M7.5 4v3.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            <circle cx="7.5" cy="10.5" r=".75" fill="currentColor"/>
+          </svg>
+          {{ message }}
+        </div>
+        {% endfor %}
     {% endif %}
 
     <div class="cred-block">
@@ -420,7 +422,6 @@
         method: 'POST',
         body: fd,
         headers: {
-            // Este es el encabezado que tu vista en Python busca
             'X-Requested-With': 'XMLHttpRequest',
             'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
         }
@@ -430,9 +431,7 @@
         return response.json();
     })
     .then(data => {
-        // En tu vista de Python devuelves {'ok': True} [Tu código]
         if (data.ok) {
-            // DESBLOQUEO: Asegúrate de que las IDs coincidan con tu HTML
             document.getElementById('lockOverlay').classList.add('hidden');
             document.getElementById('username').disabled = false;
             document.getElementById('password').disabled = false;

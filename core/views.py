@@ -79,7 +79,7 @@ def company_login(request):
             if not row or row[0].lower() != company.db_name.lower():
                 conn.close()
                 error = "Error de integridad: la base de datos conectada no coincide."
-                return render(request, 'core/login.html', {'error': error})
+                return redirect('company_select')
 
             # Guardar credenciales POR EMPRESA (no sobreescribe otras)
             request.session[f'user_{company.key}'] = user
@@ -122,13 +122,15 @@ def company_login(request):
 
         except Company.DoesNotExist:
             error = "Empresa no encontrada."
-            return render(request, 'core/login.html', {'error': error})
+            messages.error(request, error)
+            return redirect('company_select')
         except Exception as e:
             try:
                 connections[db_alias].close()
             except Exception:
                 pass
-            error = f"Error de conexión: {str(e)}"
-            return render(request, 'core/login.html', {'error': error})
+            error = "Error de conexión: usuario o contraseña incorrectos"
+            messages.error(request, error)
+            return redirect('company_select')
 
     return render(request, 'core/login.html')
