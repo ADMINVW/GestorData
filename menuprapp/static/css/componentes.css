@@ -1,0 +1,148 @@
+/* ═══════════════════════════════════════════════
+   GESTORDATA — componentes.css
+   ═══════════════════════════════════════════════ */
+
+/* ─── TEMAS DE EMPRESA ─── */
+
+.theme-default .navbar-brand,
+.theme-default .nav-link { color: #6c757d !important; }
+
+.theme-ecuawagen .app-navbar  { border-bottom-color: #0057b8; }
+.theme-ecuawagen .navbar-brand,
+.theme-ecuawagen .nav-link    { color: #0057b8 !important; }
+
+.theme-germanmoto .app-navbar  { border-bottom-color: #c0112c; }
+.theme-germanmoto .navbar-brand,
+.theme-germanmoto .nav-link    { color: #c0112c !important; }
+
+
+/* ═══════════════════════════════════════════════
+   PESTAÑAS IVA
+   ═══════════════════════════════════════════════ */
+
+.contenedorTabi .subcontenedorTabi {
+  min-height: 25vh;
+  position: relative;
+}
+
+.contenedorTabi .bloquetabi {
+  position: absolute;
+  margin: 1em;
+  padding: 1em;
+  top: 0;
+  display: none;
+}
+
+.contenedorTabi .atabi.active {
+  background-color: var(--accent, #0057b8) !important;
+  color: white !important;
+}
+
+.contenedorTabi .bloquetabi.active {
+  display: block;
+}
+
+
+/* ═══════════════════════════════════════════════
+   PESTAÑAS FUENTE
+   ═══════════════════════════════════════════════ */
+
+.contenedorTabf .subcontenedorTabf {
+  min-height: 150vh;
+  position: relative;
+}
+
+.contenedorTabf .bloquetabf {
+  position: absolute;
+  margin: 1em;
+  padding: 1em;
+  top: 0;
+  display: none;
+}
+
+.contenedorTabf .atabf.active {
+  background-color: var(--accent, #0057b8) !important;
+  color: white !important;
+}
+
+.contenedorTabf .bloquetabf.active {
+  display: block;
+}
+
+
+/* ═══════════════════════════════════════════════
+   UTILIDADES GENERALES
+   ═══════════════════════════════════════════════ */
+
+p.warning {
+  background: #ffe8ef;
+  border: 2px solid #fc5185;
+  border-radius: 4px;
+  box-sizing: border-box;
+  margin-bottom: 14px;
+  padding: 25px 20px 25px 62px;
+  position: relative;
+}
+
+.schema-faq-section {
+  border: 1px solid #dadce0 !important;
+  border-radius: 6px;
+  box-shadow: 0 0 10px rgba(0,0,0,.1);
+  margin-top: 30px;
+  padding-bottom: 30px;
+}
+
+.centered {
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
+.disabled-div {
+  pointer-events: none;
+  opacity: 0.7;
+  background-color: #f2f2f2;
+  cursor: not-allowed;
+}
+
+/* Columnas de totales en retenciones */
+.columna-impuesto {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-soft, #4a5263);
+  display: flex;
+  align-items: center;
+}
+
+.columna-valor {
+  text-align: right;
+  border: 0;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 400;
+  width: 140px;
+}
+
+
+/* ═══════════════════════════════════════════════
+   SUBMENÚS DROPDOWN
+   ═══════════════════════════════════════════════ */
+
+.dropdown-menu li { position: relative; }
+
+.dropdown-menu .dropdown-submenu {
+  display: none;
+  position: absolute;
+  left: 100%;
+  top: -7px;
+}
+
+.dropdown-menu .dropdown-submenu-left {
+  right: 100%;
+  left: auto;
+}
+
+.dropdown-menu > li:hover > .dropdown-submenu {
+  display: block;
+}
