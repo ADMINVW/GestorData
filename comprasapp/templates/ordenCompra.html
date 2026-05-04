@@ -3,260 +3,241 @@
 
 {% block titulo %}Orden de Compra{% endblock %}
 
-{% block contenido %}
-
-  <script src="/static/js/funcionesCompras.js"></script>
-        
-      <div class="input-group" style="width: 1600px;">
-        <input type="file" class="form-control" id="inputGroupFileFactura" aria-describedby="inputGroupFileAddonSube" aria-label="Upload" onchange="leerArchivoXML()" >
-        <div class="row align-items-start">
-          <div class="col-md-1 position-relative d-inline-block" style="width: auto;">
-            <select id="divisionSelect" onchange="fetchSubTipo()" required class="form-select form-select-sm" aria-label="Small select example" style="width: 250px;">
-              <option selected>Escoja la División</option>
-              {% if nempresa %}
-                {% for nombremp in nempresa %}
-                <option value="{{nombremp.co_div}}">{{nombremp.co_nomext}}</option>
-                {% endfor %}
-              {% endif %} 
-            </select>
-            <div class="invalid-feedback">No ha seleccionado una división</div>
-          </div>
-          <div class="col-md-2 position-relative d-inline-block" style="width: auto;" >
-            <select  id="subTipoSelect" class="form-select form-select-sm" aria-label="Small select example" style="width: 250px;">
-              <option selected>Escoja tipo de Compra</option>
-            </select>
-          </div>
-          <div class="col-md-2 position-relative d-inline-block" style="width: auto;">
-              <select onchange="obtenerSeleccion()" id="selSolicita" class="form-select form-select-sm" aria-label="Small select example" style="width: 250px;">
-                <option selected>Escoja solicitante</option>
-                {% if nsolicita %}
-                  {% for solicita in nsolicita %}
-                  <option value= "{{solicita.so_codigo}}">{{solicita.so_nombres}}</option>
-                  
-                  {% endfor %}
-                {% endif %} 
-              </select>
-          </div>
-          <div class="col-md-2 position-relative">
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" role="switch" id="PeriodicasSwitchCheck" checked>
-              <label class="form-check-label" for="PeriodicasSwitchCheck">Periodicas</label>
-            </div>
-          </div>  
-          <div class="col-md-1 position-relative">
-            <input type="text" class="form-control" id="userName" readonly  style="font-size: large; font-style: oblique; font: bold; width: 150px;">
-            <div class="valid-tooltip">
-              Usuario
-            </div>
-          </div>
-        </div>
-      </div>
-    <hr class="border border-primary border-3 opacity-75">
-    <div class="input-group" style="color: cornflowerblue;" >
-      
-        <div class="col-md-1 position-relative" style="margin: 10px;">
-          <label for="rucProveedor" class="form-label">Cédula/Ruc</label>
-          <input type="text" class="form-control" id="rucProveedor" value="" required readonly>
-          <div class="valid-tooltip">
-            Ruc Proveedor 
-          </div>
-        </div>
-        <div class="col-md-3 position-relative" style="margin: 10px;">
-          <label for="nombreProveedor" class="form-label">Proveedor</label>
-          <input type="text" class="form-control" id="nombreProveedor" value="" required readonly>
-          <div class="valid-tooltip">
-            Nombre Proveedor
-          </div>
-        </div>
-        <div class="col-md-4 position-relative" style="margin: 10px;">
-          <label for="autorizacionSri" class="form-label">Autorización SRI</label>
-          <input type="text" class="form-control" id="autorizacionSri" value="" required readonly>
-          <div class="valid-tooltip">
-            Autorización SRI
-          </div>
-        </div>
-        
-        <div class="col-md-1 position-relative" style="margin: 10px;">
-          <label for="ordenCompra" class="form-label">No. Orden OC</label>
-          <input type="text" class="form-control" id="ordenCompra" value="" readonly>
-          <div class="valid-tooltip">
-            Orden Compra
-          </div>
-        </div>
-      
-    </div>  
-
-    <div class="input-group" style="color: cornflowerblue;">   
-      <div class="col-md-5 position-relative" style="margin: 10px;">
-        <label for="descripcionFactura" class="form-label">Descripción</label>
-        <input type="text" class="form-control" id="descripcionFactura" value="" required style="text-transform: uppercase; ">
-        <div class="invalid-feedback">
-            Descripción Factura
-        </div>
-      </div>
-        
-      <div class="col-md-1 position-relative" style="margin: 10px;">
-        <label for="plazoPago" class="form-label">Plazo Pago</label>
-        <input type="text" class="form-control" id="plazoPago" value="0"  required>
-        <div class="invalid-feedback">
-            Plazo Pago
-        </div>
-      </div>
-
-      <div class="col-md-1 position-relative" style="margin: 10px;">
-        <label for="serieFactura" class="form-label">Serie</label>
-        <input type="text" class="form-control" id="serieFactura"  required readonly>
-        <div class="invalid-tooltip">
-            Serie Factura
-        </div>
-      </div>
-
-      <div class="col-md-1 position-relative" style="margin: 10px;">
-        <label for="numeroFactura" class="form-label">numeroFactura</label>
-        <input type="text" class="form-control" id="numeroFactura"  required>
-        <div class="invalid-tooltip">
-            Número Factura
-        </div>
-      </div>
-
-      <div class="col-md-2 position-relative" style="margin: 10px;">
-        <label for="tipoCreditoSelect" class="form-label">Tipo Credito</label>
-        <select id="tipoCreditoSelect" class="form-select form-select-sm" aria-label="Small select example">
-          <option selected>Escoja tipo de credito</option>
-          {% if ntcredito %}
-            {% for credito in ntcredito %}
-            <option value= "{{credito.cre_codigo}}">{{credito.cre_codigo}} {{credito.cre_descrip}}</option>
-            
-            {% endfor %}
-          {% endif %} 
-        </select>
-      </div>
-    </div>
-
-    <div class="input-group" style="color: cornflowerblue;" >
-      <div class="col-md-2 position-relative" style="margin: 10px;" >
-        <label for="fechaIngresoHora" class="form-label">Fecha Ingreso</label>
-        <input type="datetime" class="form-control" id="fechaIngresoHora" readonly name="trip-start" /> 
-      </div>
-        
-      <div class="col-md-2 position-relative" style="margin: 10px;" >
-        <label for="fechaEmision" class="form-label">Fecha Factura</label>
-        <input type="text" class="form-control" id="fechaEmision" readonly >
-        <div class="invalid-tooltip">
-            Fecha de Factura
-        </div>
-      </div>
-
-      <div class="col-md-2 position-relative" style="margin: 10px;" >
-        <label for="PlantillaSelect" class="form-label">Plantillas</label>
-        <select class="form-select form-select-sm" id="PlantillaSelect" >
-          <option selected >Elija Plantilla</option>
-        </select>
-      </div>
-
-      <div class="col-md-1 position-relative" style="margin: 10px;" >
-        <label for="codigoPorcentaje" class="form-label">Codigo Iva</label>
-        <input type="text" class="form-control" id="codigoPorcentaje" readonly >
-        <div class="invalid-tooltip">
-            Codigo de porcentaje Iva
-        </div>
-      </div>
-      
-    </div>
-
-    <div class="container">
-      <table id="tablaDetalle" class="table">
-        <thead>
-          
-        </thead>
-        <tbody>
-
-        </tbody>
-      </table>
-      <table id="tablaIva" class="table" hidden></table>
-    </div>
-  
-  <div class="col-md-4 offset-md-4" > 
-    
-    
-    <div class="row g-2 " style="text-align: right;">
-      <table id="tablaSumaBase" class="table" style="text-align: right;" >
-        <thead>
-          
-        </thead>
-        <tbody>
-
-        </tbody>
-      </table>
-    </div>
-      
-    <!-- suprimo -->  
-    <div class="row g-2 " >
-        <label for="subtotalSinImpuestos" class="columna-impuesto" style="text-align: right;"  >SUBTOTAL SIN IMPUESTOS</label>
-        <div class="col-md-1"  >
-          <input type="text" class="columna-valor" id="subtotalSinImpuestos" readonly style="border: 0cap; ">
-        </div>
-    </div>
-    <hr style="margin-top: 0; margin-bottom: 0;">
-    <div class="row g-2 " >
-        <label for="totalDescuento" class="columna-impuesto" style="text-align: right;">DESCUENTO</label>
-      <div class="col-md-1" >
-        <input type="text" class="columna-valor" id="totalDescuento" readonly style="border: 0cap;" >
-      </div>
-    </div>
-    <hr style="margin-top: 7px; margin-bottom: 7px;">
-    <div class="row g-2 align-items-center">
-      <table id="tablaSumaIva" class="table" style="text-align: right";>
-        <thead>
-          
-        </thead>
-        <tbody>
-
-        </tbody>
-      </table>
-    </div>
-
-    <div class="row g-2">
-        <label for="importeTotal" class="columna-impuesto" style="text-align: right;" >VALOR TOTAL</label>
-        <div class="col-md-1">
-          <input type="text" class="columna-valor" id="importeTotal" readonly style="border: 0cap; font-weight: bold;">
-        </div>
-      </div>
-
-    <!--suprimo hasta aqui-->
-    </div>
-    <div class="col-12">
-      <button id="botonGuardar" onclick="enviarDatosFactura()" class="btn btn-primary" type="button">Guardar factura</button>
-    </div>
-
-    <p> <u1 style='color:blue;'>ECUAWAGEN TI</u1>
-
-    </p>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-          const username = "{{ username|default:'Invitado' }}";
-          document.getElementById('userName').value = username;
-          if (username !== 'Invitado') {
-            sessionStorage.setItem('username', username);
-          }
-
-          // ← Agregar: actualizar company_key y links del navbar
-          var ck = "{{ company_key|default:'' }}";
-          if (ck) sessionStorage.setItem('company_key', ck);
-
-          var ckNav = sessionStorage.getItem('company_key');
-          if (ckNav) {
-            document.querySelectorAll('.navbar a[href]').forEach(function (link) {
-              var href = link.getAttribute('href');
-              if (href && href !== '#' && !href.includes('company=') && !href.includes('company_select')) {
-                link.setAttribute('href', href + (href.includes('?') ? '&' : '?') + 'company=' + ckNav);
-              }
-            });
-          }
-        });
-    </script>
+{% block cabcontenido %}
+<div class="app-page-title">Orden de Compra</div>
+<div class="app-breadcrumb">Compras &rsaquo; Nueva Orden</div>
 {% endblock %}
 
+{% block contenido %}
+<script src="/static/js/funcionesCompras.js"></script>
 
+<!-- ─── FILTROS SUPERIORES ─── -->
+<div class="app-card mb-4">
+  <div class="app-card-body">
+    <p class="section-label">1 · Configuración</p>
+    <div class="row g-3 align-items-end">
 
+      <div class="col-12 col-md-3">
+        <label class="form-label">División</label>
+        <select id="divisionSelect" onchange="fetchSubTipo()" required class="form-select">
+          <option selected>Escoja la División</option>
+          {% if nempresa %}
+            {% for nombremp in nempresa %}
+            <option value="{{ nombremp.co_div }}">{{ nombremp.co_nomext }}</option>
+            {% endfor %}
+          {% endif %}
+        </select>
+        <div class="invalid-feedback">No ha seleccionado una división</div>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <label class="form-label">Tipo de Compra</label>
+        <select id="subTipoSelect" class="form-select">
+          <option selected>Escoja tipo de Compra</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <label class="form-label">Solicitante</label>
+        <select onchange="obtenerSeleccion()" id="selSolicita" class="form-select">
+          <option selected>Escoja solicitante</option>
+          {% if nsolicita %}
+            {% for solicita in nsolicita %}
+            <option value="{{ solicita.so_codigo }}">{{ solicita.so_nombres }}</option>
+            {% endfor %}
+          {% endif %}
+        </select>
+      </div>
+
+      <div class="col-12 col-md-2">
+        <label class="form-label">Usuario</label>
+        <input type="text" class="form-control" id="userName" readonly>
+      </div>
+
+      <div class="col-12 col-md-1 d-flex align-items-center gap-2 pb-1">
+        <div class="form-check form-switch mb-0">
+          <input class="form-check-input" type="checkbox" role="switch" id="PeriodicasSwitchCheck" checked>
+          <label class="form-check-label" for="PeriodicasSwitchCheck" style="font-size:12px;">Periódicas</label>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ─── DATOS PROVEEDOR / FACTURA ─── -->
+<div class="app-card mb-4">
+  <div class="app-card-body">
+    <p class="section-label">2 · Proveedor &amp; Factura</p>
+
+    <div class="row g-3 mb-3">
+      <div class="col-12 col-md-2">
+        <label class="form-label">Cédula / RUC</label>
+        <input type="text" class="form-control" id="rucProveedor" readonly>
+      </div>
+      <div class="col-12 col-md-4">
+        <label class="form-label">Proveedor</label>
+        <input type="text" class="form-control" id="nombreProveedor" readonly>
+      </div>
+      <div class="col-12 col-md-4">
+        <label class="form-label">Autorización SRI</label>
+        <input type="text" class="form-control" id="autorizacionSri" readonly>
+      </div>
+      <div class="col-12 col-md-2">
+        <label class="form-label">N° Orden OC</label>
+        <input type="text" class="form-control" id="ordenCompra" readonly>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-12 col-md-4">
+        <label class="form-label">Descripción</label>
+        <input type="text" class="form-control" id="descripcionFactura" required style="text-transform: uppercase;">
+        <div class="invalid-feedback">Campo obligatorio</div>
+      </div>
+      <div class="col-6 col-md-1">
+        <label class="form-label">Plazo Pago</label>
+        <input type="text" class="form-control" id="plazoPago" value="0" required>
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label">Serie</label>
+        <input type="text" class="form-control" id="serieFactura" readonly>
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label">N° Factura</label>
+        <input type="text" class="form-control" id="numeroFactura" required>
+      </div>
+      <div class="col-12 col-md-3">
+        <label class="form-label">Tipo Crédito</label>
+        <select id="tipoCreditoSelect" class="form-select">
+          <option selected>Escoja tipo de crédito</option>
+          {% if ntcredito %}
+            {% for credito in ntcredito %}
+            <option value="{{ credito.cre_codigo }}">{{ credito.cre_codigo }} {{ credito.cre_descrip }}</option>
+            {% endfor %}
+          {% endif %}
+        </select>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-6 col-md-2">
+        <label class="form-label">Fecha Ingreso</label>
+        <input type="text" class="form-control" id="fechaIngresoHora" readonly>
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label">Fecha Factura</label>
+        <input type="text" class="form-control" id="fechaEmision" readonly>
+      </div>
+      <div class="col-12 col-md-3">
+        <label class="form-label">Plantilla</label>
+        <select class="form-select" id="PlantillaSelect">
+          <option selected>Elija Plantilla</option>
+        </select>
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label">Código IVA</label>
+        <input type="text" class="form-control" id="codigoPorcentaje" readonly>
+      </div>
+
+      <!-- File upload pill -->
+      <div class="col-12 col-md-3 d-flex align-items-end">
+        <div class="w-100">
+          <label class="form-label">XML Factura</label>
+          <input type="file" class="form-control" id="inputGroupFileFactura"
+                 onchange="leerArchivoXML()" accept=".xml">
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ─── DETALLE ─── -->
+<div class="app-card mb-4">
+  <div class="app-card-header">
+    <h5>Detalle de Factura</h5>
+  </div>
+  <div class="app-card-body p-0">
+    <div class="table-responsive">
+      <table id="tablaDetalle" class="table table-hover mb-0">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <table id="tablaIva" class="table" hidden></table>
+  </div>
+</div>
+
+<!-- ─── TOTALES ─── -->
+<div class="row justify-content-end mb-4">
+  <div class="col-12 col-md-5">
+    <div class="app-card">
+      <div class="app-card-header">
+        <h5>Resumen</h5>
+      </div>
+      <div class="app-card-body">
+
+        <table id="tablaSumaBase" class="table table-sm mb-2">
+          <thead></thead><tbody></tbody>
+        </table>
+
+        <div class="d-flex justify-content-between align-items-center py-2"
+             style="border-top: 1px solid var(--border);">
+          <span style="font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:.08em; color:var(--muted);">
+            Subtotal sin impuestos
+          </span>
+          <input type="text" class="form-control text-end fw-500"
+                 id="subtotalSinImpuestos" readonly
+                 style="width:140px; border:0; background:transparent; font-size:14px;">
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center py-2"
+             style="border-top: 1px solid var(--border);">
+          <span style="font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:.08em; color:var(--muted);">
+            Descuento
+          </span>
+          <input type="text" class="form-control text-end"
+                 id="totalDescuento" readonly
+                 style="width:140px; border:0; background:transparent; font-size:14px;">
+        </div>
+
+        <table id="tablaSumaIva" class="table table-sm my-2">
+          <thead></thead><tbody></tbody>
+        </table>
+
+        <div class="d-flex justify-content-between align-items-center py-2"
+             style="border-top: 2px solid var(--accent);">
+          <span style="font-size:12px; font-weight:500; text-transform:uppercase; letter-spacing:.08em; color:var(--accent);">
+            Valor Total
+          </span>
+          <input type="text" class="form-control text-end fw-bold"
+                 id="importeTotal" readonly
+                 style="width:140px; border:0; background:transparent; font-size:16px; color:var(--accent);">
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── ACCIONES ─── -->
+<div class="d-flex gap-3 mb-5">
+  <button id="botonGuardar" onclick="enviarDatosFactura()" class="btn btn-primary">
+    <i class="fas fa-save me-2"></i> Guardar Factura
+  </button>
+</div>
+
+{% endblock %}
+
+{% block footer_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const username = "{{ username|default:'Invitado' }}";
+    document.getElementById('userName').value = username;
+    if (username !== 'Invitado') {
+      sessionStorage.setItem('username', username);
+    }
+  });
+</script>
+{% endblock %}
