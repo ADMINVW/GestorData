@@ -457,7 +457,7 @@
           </div>
           <div class="card-footer">
             <button class="btn btn-primary" type="submit" id="guardar-btn">Guardar</button>
-            <a class="btn btn-danger" role="button" data-url="../../../verTransaccion/{{norden}}"
+            <a class="btn btn-danger" role="button" data-url="../../../verTransaccion/{{norden}}" href="../../../verTransaccion/{{norden}}?company={{ company_key }}"
               id="cancelar-btn">Cancelar</a>
           </div>
         </div>
@@ -465,22 +465,5 @@
       <div id="respuesta"></div>
     </div>
 {% endblock %} {% block footer_scripts %}
-<script>
-  // Guardar company_key en sessionStorage para usarlo en fetch
-  var ck = "{{ company_key|default:'' }}";
-  if (ck) {
-    sessionStorage.setItem('company_key', ck);
-    // Actualizar links del navbar con company_key
-    var ckNav = sessionStorage.getItem('company_key');
-    if (ckNav) {
-      document.querySelectorAll('.navbar a[href]').forEach(function (link) {
-        var href = link.getAttribute('href');
-        if (href && href !== '#' && !href.includes('company=') && !href.includes('company_select')) {
-          link.setAttribute('href', href + (href.includes('?') ? '&' : '?') + 'company=' + ckNav);
-        }
-      });
-    }
-  }
-</script>
 <script src="/static/js/funcionesRetenciones.js" defer></script>
 {% endblock %}

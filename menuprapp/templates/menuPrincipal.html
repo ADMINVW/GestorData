@@ -1,50 +1,8 @@
+{% extends "base.html" %}
 {% load static %}
 
-<!DOCTYPE html>
-<html>
-<!-- TEST-HTML-22OCT -->
+{% block titulo %}Menu Principal{% endblock %}
 
-<head>
-    <title>{% block title %} {% endblock %}</title>
-    <link type='text/css' rel='stylesheet' />
-    <script src="/static/js/funciones.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!--<link type='text/css' href='{% static "css/menuMain.css" %}' rel='stylesheet'/>
-        -->
-    <!--Iconos-->
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menu Principal</title>
-    <style>
-        /* Estilos para el modal */
-        #loginModal {
-            display: none;
-            /* Por defecto, el modal está oculto */
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
-        }
-
-        /* Contenido del modal */
-        #loginModalContent {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 500px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-    </style>
-
-
-</head>
 
 <body>
     {% include "menuBarraNav.html" %}
@@ -69,34 +27,6 @@
     </script>
 
     {% block content %}
-    <div id="loginModal">
-        <div id="loginModalContent">
-            <!-- Aquí se cargará el contenido de login.html -->
-        </div>
-    </div>
-    <script>
-        //Se identifica url anterior: SIN VALOR [carga inicial del sitio o viene de sitio externo] CON VALOR [viene del mismo sitio (Ej. Botones Cancelar vuelven a este menu)]
-        var urlAnterior = document.referrer;
-        //SIN VALOR: se resetea valores de login y se despliega modal login
-        if (urlAnterior == ''){
-            if (sessionStorage.getItem("username") != null) {
-                sessionStorage.removeItem("username");
-                sessionStorage.removeItem("compania");
-                sessionStorage.removeItem("agencia");
-                sessionStorage.removeItem("bodega");
-            }
-            loadLoginModal()
-        }
-        //CON VALOR: opcion "Cerrar Sesión" vuelve a este menú pero solo en este caso debe cargar modal login
-        else {
-            //Opcion "Cerrar Sesión" resetea valores de login, por tanto se valida este valor para desplegar modal login
-             if (sessionStorage.getItem("username") == null) {
-                loadLoginModal()
-             }
-            //Demas opciones tendrán seteado login y no desplegarán modal login
-        }
-        
-    </script>
     <img src='{% static "imagenes/ECUAWAGEN.jpg" %}' href="/menuprapp/templates/menuPrincipal.html" />
     {% endblock %}
     <p>

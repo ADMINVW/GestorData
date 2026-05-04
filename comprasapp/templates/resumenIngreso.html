@@ -263,29 +263,5 @@
   </div>
 {% endblock %}
 {% block footer_scripts %}
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const username = "{{ username|default:'Invitado' }}";
-      document.getElementById('userName').value = username;
-      if (username !== 'Invitado') {
-        sessionStorage.setItem('username', username);
-      }
-
-      // ← Agregar: actualizar company_key y links del navbar
-      var ck = "{{ company_key|default:'' }}";
-      if (ck) sessionStorage.setItem('company_key', ck);
-
-      var ckNav = sessionStorage.getItem('company_key');
-      if (ckNav) {
-        document.querySelectorAll('.navbar a[href]').forEach(function (link) {
-          var href = link.getAttribute('href');
-          if (href && href !== '#' && !href.includes('company=') && !href.includes('company_select')) {
-            link.setAttribute('href', href + (href.includes('?') ? '&' : '?') + 'company=' + ckNav);
-          }
-        });
-      }
-  });
-</script>
 <script src="/static/js/funcionesFormato.js" defer></script>
 {% endblock %}
