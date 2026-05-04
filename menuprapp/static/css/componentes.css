@@ -112,3 +112,26 @@ p.warning {
     /*color: #999;*/
     cursor: not-allowed;
 }
+/* Tema por defecto */
+.theme-default .navbar-brand,
+.theme-default .nav-link {
+  color: #6c757d !important;
+}
+
+/* Ecuawagen */
+.theme-ecuawagen .navbar { 
+  border-bottom: 3px solid #0d6efd; 
+}
+.theme-ecuawagen .navbar-brand,
+.theme-ecuawagen .nav-link {
+  color: #0d6efd !important;
+}
+
+/* Germanmoto */
+.theme-germanmoto .navbar { 
+  border-bottom: 3px solid #e5001e; 
+}
+.theme-germanmoto .navbar-brand,
+.theme-germanmoto .nav-link {
+  color: #e5001e !important;
+}

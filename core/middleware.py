@@ -20,6 +20,8 @@ class DynamicConnectionMiddleware:
         print(f"MIDDLEWARE - company_key resuelto: {company_key}")
 
         if company_key:
+            # Actualizar la sesión con el company_key resuelto
+            request.session['active_company_key'] = company_key
             # Primero intentar desde la sesión (tiene user/pass)
             active = request.session.get('active_companies', {})
             company_info = active.get(company_key)

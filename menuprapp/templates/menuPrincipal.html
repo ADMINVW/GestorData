@@ -3,49 +3,22 @@
 
 {% block titulo %}Menu Principal{% endblock %}
 
+{% block contenido %}
+  <h2>{{ company.name }}</h2>
+{% endblock %}
 
-<body>
-    {% include "menuBarraNav.html" %}
+{% block footer_scripts %}
+<script>
+  var username = "{{ username|default:'' }}";
+  var compania = "{{ compania|default:'' }}";
+  var agencia  = "{{ agencia|default:'' }}";
+  var bodega   = "{{ bodega|default:'' }}";
 
-    <script>
-        // Guardar datos de sesión desde Django al sessionStorage
-        var companyKey = "{{ company_key|default:'' }}";
-        if (companyKey) {
-            sessionStorage.setItem("company_key", companyKey);
-        }
-        var username = "{{ username|default:'' }}";
-        var compania = "{{ compania|default:'' }}";
-        var agencia = "{{ agencia|default:'' }}";
-        var bodega = "{{ bodega|default:'' }}";
-        
-        if (username && sessionStorage.getItem("username") !== username) {
-            sessionStorage.setItem("username", username);
-            sessionStorage.setItem("compania", compania);
-            sessionStorage.setItem("agencia", agencia);
-            sessionStorage.setItem("bodega", bodega);
-        }
-    </script>
-
-    {% block content %}
-    <img src='{% static "imagenes/ECUAWAGEN.jpg" %}' href="/menuprapp/templates/menuPrincipal.html" />
-    {% endblock %}
-    <p>
-        <u1 style='color:blue;'>ECUAWAGEN TI</u1>
-
-    </p>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var ck = sessionStorage.getItem('company_key');
-            if (!ck) return;
-            document.querySelectorAll('.navbar a[href]').forEach(function (link) {
-                var href = link.getAttribute('href');
-                if (href && href !== '#' && !href.includes('company=') && !href.includes('company_select')) {
-                    link.setAttribute('href', href + (href.includes('?') ? '&' : '?') + 'company=' + ck);
-                }
-            });
-        });
-    </script>
-</body>
-
-</html>
+  if (username && sessionStorage.getItem("username") !== username) {
+    sessionStorage.setItem("username",  username);
+    sessionStorage.setItem("compania",  compania);
+    sessionStorage.setItem("agencia",   agencia);
+    sessionStorage.setItem("bodega",    bodega);
+  }
+</script>
+{% endblock %}
