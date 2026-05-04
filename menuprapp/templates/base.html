@@ -1,107 +1,424 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{% block titulo %} {% endblock %}</title>
+  <title>{% block titulo %}{% endblock %} — GestorData</title>
 
-  <!-- Google Font: Source Sans Pro -->
-  <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback" />
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
   <!-- Bootstrap -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
-  <!-- Estilos Propios -->
-  <link rel="stylesheet" type="text/css" href="/static/css/componentes.css" />
-  <!--Datatables-->
-  <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.bootstrap5.css" />
-  <!--Font Awesone-->
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
-  <!--Autocomplete-->
+  <!-- Datatables -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.bootstrap5.css" />
+  <!-- jQuery UI Autocomplete -->
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+
+  <style>
+    /* ─── DESIGN TOKENS ─── */
+    :root {
+      --bg:          #f4f6f9;
+      --surface:     #ffffff;
+      --border:      #e2e6ed;
+      --border2:     #cdd3de;
+      --muted:       #8a93a4;
+      --text:        #1a1d24;
+      --text-soft:   #4a5263;
+
+      /* Default / fallback */
+      --accent:      #0057b8;
+      --accent-lt:   #eaf2ff;
+      --accent-h:    #00439a;
+      --top-bar:     linear-gradient(90deg, #0057b8 0%, #00aaff 100%);
+      --nav-border:  #0057b8;
+    }
+
+    /* ─── TEMA ECUAWAGEN (azul) ─── */
+    .theme-ecuawagen {
+      --accent:    #0057b8;
+      --accent-lt: #eaf2ff;
+      --accent-h:  #00439a;
+      --top-bar:   linear-gradient(90deg, #0057b8 0%, #00aaff 100%);
+      --nav-border:#0057b8;
+    }
+
+    /* ─── TEMA GERMANMOTO (rojo) ─── */
+    .theme-germanmoto {
+      --accent:    #c0112c;
+      --accent-lt: #fff0f2;
+      --accent-h:  #96001e;
+      --top-bar:   linear-gradient(90deg, #c0112c 0%, #ff4d6a 100%);
+      --nav-border:#c0112c;
+    }
+
+    /* ─── RESET & BASE ─── */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+    }
+
+    /* Top accent bar */
+    body::after {
+      content: '';
+      position: fixed; top: 0; left: 0; right: 0; height: 4px;
+      background: var(--top-bar);
+      z-index: 1100;
+    }
+
+    /* Subtle grid background */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 36px 36px;
+      opacity: .35;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── NAVBAR ─── */
+    .app-navbar {
+      position: sticky; top: 4px; z-index: 1050;
+      background: var(--surface);
+      border-bottom: 2px solid var(--nav-border);
+      box-shadow: 0 2px 12px rgba(0,0,0,.07);
+    }
+
+    .app-navbar .navbar-brand {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px;
+      letter-spacing: .1em;
+      color: var(--accent) !important;
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    .app-navbar .navbar-brand .brand-vw {
+      width: 32px; height: 32px;
+      border: 1.5px solid var(--border2);
+      border-radius: 50%;
+      display: grid; place-items: center;
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+
+    .app-navbar .navbar-brand .brand-vw svg { width: 18px; }
+
+    .app-navbar .nav-link {
+      color: var(--text-soft) !important;
+      font-size: 13.5px; font-weight: 400;
+      padding: 8px 14px !important;
+      border-radius: 6px;
+      transition: background .15s, color .15s;
+    }
+
+    .app-navbar .nav-link:hover,
+    .app-navbar .nav-link.active {
+      color: var(--accent) !important;
+      background: var(--accent-lt);
+    }
+
+    .app-navbar .dropdown-menu {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.10);
+      padding: 6px;
+      min-width: 190px;
+    }
+
+    .app-navbar .dropdown-item {
+      font-size: 13px; font-weight: 400;
+      color: var(--text-soft);
+      border-radius: 6px;
+      padding: 8px 12px;
+      transition: background .15s, color .15s;
+    }
+
+    .app-navbar .dropdown-item:hover {
+      background: var(--accent-lt);
+      color: var(--accent);
+    }
+
+    .app-navbar .nav-link-logout {
+      font-size: 12.5px; font-weight: 500;
+      color: var(--muted) !important;
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 14px !important;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      transition: border-color .2s, color .2s, background .2s;
+    }
+
+    .app-navbar .nav-link-logout:hover {
+      border-color: var(--accent);
+      color: var(--accent) !important;
+      background: var(--accent-lt);
+    }
+
+    /* Company badge in navbar */
+    .nav-company-badge {
+      font-size: 11px; font-weight: 500;
+      color: var(--accent);
+      background: var(--accent-lt);
+      border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+      border-radius: 20px;
+      padding: 4px 12px;
+      letter-spacing: .04em;
+    }
+
+    /* ─── CONTENT AREA ─── */
+    .app-content-header {
+      padding: 28px 0 0;
+    }
+
+    .app-page-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 26px; letter-spacing: .08em;
+      color: var(--text);
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    .app-page-title::before {
+      content: '';
+      display: inline-block;
+      width: 4px; height: 22px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .app-breadcrumb {
+      font-size: 11.5px; color: var(--muted);
+      letter-spacing: .06em; text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .app-content { 
+      position: relative; z-index: 1;
+      padding: 24px 0 48px; 
+    }
+
+    /* ─── CARDS ─── */
+    .app-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 2px 4px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.07);
+      overflow: hidden;
+    }
+
+    .app-card-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    .app-card-header h5 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 16px; letter-spacing: .08em;
+      color: var(--text); margin: 0;
+    }
+
+    .app-card-body { padding: 24px; }
+
+    .app-card-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+      display: flex; gap: 10px; align-items: center;
+    }
+
+    /* Override Bootstrap card styles */
+    .card-info .card-header { background: transparent; border-bottom: 1px solid var(--border); }
+    .card { border-radius: 14px !important; border-color: var(--border) !important; }
+
+    /* ─── FORM CONTROLS ─── */
+    .form-control, .form-select {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13.5px; font-weight: 300;
+      border: 1.5px solid var(--border2);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      background: var(--surface);
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);
+      outline: none;
+    }
+
+    .form-control[readonly] {
+      background: var(--bg);
+      color: var(--text-soft);
+    }
+
+    .form-label, .col-form-label {
+      font-size: 11.5px; font-weight: 500;
+      color: var(--text-soft);
+      letter-spacing: .06em; text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    /* ─── BUTTONS ─── */
+    .btn-primary {
+      background: var(--accent) !important;
+      border-color: var(--accent) !important;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13.5px; font-weight: 500;
+      border-radius: 8px; padding: 10px 20px;
+      transition: background .2s, transform .15s, box-shadow .2s;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-h) !important;
+      border-color: var(--accent-h) !important;
+      box-shadow: 0 4px 16px color-mix(in srgb, var(--accent) 35%, transparent);
+      transform: translateY(-1px);
+    }
+
+    .btn-danger {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13.5px; font-weight: 500;
+      border-radius: 8px; padding: 10px 20px;
+    }
+
+    /* ─── SECTION LABELS ─── */
+    .section-label {
+      font-size: 10px; font-weight: 500;
+      letter-spacing: .2em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .section-label::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* ─── TABLES ─── */
+    .table { font-size: 13px; }
+    .table thead th {
+      font-size: 10.5px; font-weight: 500;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); border-bottom: 1.5px solid var(--border);
+      padding: 10px 12px;
+    }
+
+    .table tbody td { padding: 10px 12px; vertical-align: middle; }
+    .table-hover tbody tr:hover { background: var(--accent-lt); }
+
+    /* ─── ALERTS ─── */
+    .alert-warning {
+      background: #fffbeb; border-color: #fde68a;
+      color: #92400e; font-size: 13px;
+      border-radius: 8px;
+    }
+
+    /* ─── FOOTER ─── */
+    .app-footer {
+      position: relative; z-index: 1;
+      padding: 20px 0;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 11px; color: var(--muted);
+      letter-spacing: .08em; text-transform: uppercase;
+    }
+
+    /* ─── TAB OVERRIDES ─── */
+    .contenedorTabi .atabi.active,
+    .contenedorTabf .atabf.active {
+      background-color: var(--accent) !important;
+    }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .app-content > * { animation: fadeUp .4s ease both; }
+  </style>
 </head>
 
-<body class="hold-transition layout-top-nav {{ body_theme }}">
-  <div class="wrapper">
-    {% include "menuBarraNav.html" %}
+<body class="{{ body_theme }}">
 
-    <!-- Content Wrapper. Contains page content -->
-    <div class="content-wrapper">
-      <!-- Content Header (Page header) -->
-      <div class="content-header">
-        <div class="container">
-          <br />
-          <div class="container-fluid">
-              <div class="row">
-                {% block cabcontenido %}
-                    <!-- Content Header (Page header) -->
-                    <!-- /.content -->
-                    {% endblock %}
-              </div>
-          </div>
-        </div>
-        <!-- /.container-fluid -->
-      </div>
-      <!-- /.content-header -->
+  <!-- NAVBAR -->
+  {% include "menuBarraNav.html" %}
 
-      <!-- Main content -->
-      <div class="content">
-        <div class="container">
-          <div class="row">{% block contenido %} {% endblock %}</div>
-          <!-- /.row -->
-        </div>
-        <!-- /.container-fluid -->
-      </div>
-      <!-- /.content -->
+  <!-- PAGE HEADER -->
+  <div class="app-content-header">
+    <div class="container">
+      {% block cabcontenido %}{% endblock %}
     </div>
-    <!-- /.content-wrapper -->
-
-    <!-- Control Sidebar -->
-    <aside class="control-sidebar control-sidebar-dark">
-      <!-- Control sidebar content goes here -->
-    </aside>
-    <!-- /.control-sidebar -->
-    {% include 'footer.html' %}
   </div>
-  <!-- ./wrapper -->
 
-  <!--Estaban en head, habra q hacer pruebas q todo funciona -->
-  <!-- Bootstrap -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
-  <!-- jQuery> -->
+  <!-- MAIN CONTENT -->
+  <div class="app-content">
+    <div class="container">
+      {% block contenido %}{% endblock %}
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="app-footer">
+    <div class="container">
+      GestorData &mdash; Sistema de Gestión &nbsp;·&nbsp; 
+      {% if company %}{{ company.name }}{% endif %}
+      &nbsp;·&nbsp; v1.0.0
+    </div>
+  </footer>
+
+  <!-- JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <!-- Autocomplete-->
   <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-  <!-- Sweetalert ventanas de dialogo-->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <!---->
-
-  <!--JS Datatables-->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.datatables.net/2.3.2/js/dataTables.js"></script>
   <script src="https://cdn.datatables.net/2.3.2/js/dataTables.bootstrap5.js"></script>
-  <!--JS propios-->
   <script src="/static/js/funciones.js" defer></script>
+
   <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var ck = "{{ company_key|default:'' }}";
-            if (ck) {
-              sessionStorage.setItem('company_key', ck);
-              // Actualizar links del navbar con company_key
-              var ckNav = sessionStorage.getItem('company_key');
-              if (ckNav) {
-                document.querySelectorAll('.navbar a[href]').forEach(function (link) {
-                  var href = link.getAttribute('href');
-                  if (href && href !== '#' && !href.includes('company=') && !href.includes('company_select')) {
-                    link.setAttribute('href', href + (href.includes('?') ? '&' : '?') + 'company=' + ckNav);
-                  }
-                });
-              }
-            }
+    document.addEventListener('DOMContentLoaded', function () {
+      var ck = "{{ company_key|default:'' }}";
+      if (ck) {
+        sessionStorage.setItem('company_key', ck);
+        document.querySelectorAll('.app-navbar a[href]').forEach(function (link) {
+          var href = link.getAttribute('href');
+          if (href && href !== '#' && !href.includes('company=') && !href.includes('company_select')) {
+            link.setAttribute('href', href + (href.includes('?') ? '&' : '?') + 'company=' + ck);
+          }
         });
+      }
+    });
+
+    function cerrar_modal() {
+      $('#ventana_modal').modal('hide');
+      return false;
+    }
+    function abrir_modal(url) {
+      $('#ventana_modal').load(url, function () {
+        $(this).modal({ backdrop: 'static', keyboard: false });
+        $(this).modal('show');
+      });
+      return false;
+    }
   </script>
-  {% block footer_scripts %} {% endblock %}
+
+  {% block footer_scripts %}{% endblock %}
 </body>
+
+<div id="ventana_modal" class="modal fade" role="dialog"></div>
 </html>

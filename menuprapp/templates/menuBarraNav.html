@@ -1,82 +1,104 @@
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">{{ company.name }}</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Taller
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#">Orden de Trabajo</a></li>
-              <li><a class="dropdown-item" href="#">Tempario</a></li>
-              <li>
-                <hr class="dropdown-divider" />
-              </li>
-              <li><a class="dropdown-item" href="#">Torre de Control</a></li>
-            </ul>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Compras
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="/comprasapp/templates/ordenCompra?company={{ company_key }}">Orden de Compra</a></li>
-              <li><a class=" dropdown-item" href="/comprasapp/cargarTmplOrdenes?company={{ company_key }}">Consulta</a></li>
-              <li><a class=" dropdown-item" href="/comprasapp/cargarTmplPlantillas?company={{ company_key }}">Plantillas Periódicas</a></li>
-                <li class="dropend">
-                  <!--Propiedad data-bs-toggle ejecuta en evento de mostrar o ocultar menu con = dropdown -->
-                  <a class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="#">
-                  Centro de Gastos
-                  </a>
-                  <!--Submenu trabaja con css propios -->
-                  <ul class="dropdown-menu dropdown-submenu"> 
-                  <li>
-                    <a class="dropdown-item" href="/comprasapp/cargarTmplConsultaCentroGastos?company={{ company_key }}">Consulta</a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item" href="#">Asignacion Proveedor</a>
-                  </li>
-                  </ul>
-                </li>
-              <li>
-                <hr class=" dropdown-divider" />
-              </li>
-              <li><a class="dropdown-item" href="#">Proveedores</a></li>
-            </ul>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Repuestos
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <a class="dropdown-item" href="/repuestosapp/templates/compraRepuestos?company={{ company_key }}">Orden de Compra</a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="/repuestosapp/pruebas?company={{ company_key }}">Pruebas</a>
-              </li>
-              <li>
-                <hr class=" dropdown-divider" />
-              </li>
-              <li><a class="dropdown-item" href="#">Proveedores</a></li>
-            </ul>
-          </li>
-        </ul>
-        <!-- <form class="d-flex" role="search">
-          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
-          <button class="btn btn-outline-success" type="submit">
-            Search
-          </button>
-        </form> -->
-        <a class="d-flex" href="{% url 'company_select' %}" onclick="cerrarSesion()">
+<nav class="navbar navbar-expand-lg app-navbar">
+  <div class="container">
 
-          Cerrar Sesión
+    <!-- Brand -->
+    <a class="navbar-brand" href="/menuprapp/mimenu?company={{ company_key }}">
+      <div class="brand-vw">
+        <svg viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="19" cy="19" r="18" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M10 12l5 10 4-8 4 8 5-10" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+      GestorData
+    </a>
+
+    {% if company %}
+    <span class="nav-company-badge d-none d-md-inline ms-2">{{ company.name }}</span>
+    {% endif %}
+
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse"
+            data-bs-target="#mainNav" aria-controls="mainNav"
+            aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav ms-4 me-auto mb-2 mb-lg-0">
+
+        <!-- Taller -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+            <i class="fas fa-tools me-1" style="font-size:12px; opacity:.7;"></i> Taller
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Orden de Trabajo</a></li>
+            <li><a class="dropdown-item" href="#">Tempario</a></li>
+            <li><hr class="dropdown-divider my-1"></li>
+            <li><a class="dropdown-item" href="#">Torre de Control</a></li>
+          </ul>
+        </li>
+
+        <!-- Compras -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+            <i class="fas fa-shopping-cart me-1" style="font-size:12px; opacity:.7;"></i> Compras
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="/comprasapp/templates/ordenCompra?company={{ company_key }}">Orden de Compra</a></li>
+            <li><a class="dropdown-item" href="/comprasapp/cargarTmplOrdenes?company={{ company_key }}">Consulta</a></li>
+            <li><a class="dropdown-item" href="/comprasapp/cargarTmplPlantillas?company={{ company_key }}">Plantillas Periódicas</a></li>
+            <li class="dropend">
+              <a class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" href="#">Centro de Gastos</a>
+              <ul class="dropdown-menu dropdown-submenu">
+                <li><a class="dropdown-item" href="/comprasapp/cargarTmplConsultaCentroGastos?company={{ company_key }}">Consulta</a></li>
+                <li><a class="dropdown-item" href="#">Asignación Proveedor</a></li>
+              </ul>
+            </li>
+            <li><hr class="dropdown-divider my-1"></li>
+            <li><a class="dropdown-item" href="#">Proveedores</a></li>
+          </ul>
+        </li>
+
+        <!-- Repuestos -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+            <i class="fas fa-cog me-1" style="font-size:12px; opacity:.7;"></i> Repuestos
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="/repuestosapp/templates/compraRepuestos?company={{ company_key }}">Orden de Compra</a></li>
+            <li><a class="dropdown-item" href="/repuestosapp/pruebas?company={{ company_key }}">Pruebas</a></li>
+            <li><hr class="dropdown-divider my-1"></li>
+            <li><a class="dropdown-item" href="#">Proveedores</a></li>
+          </ul>
+        </li>
+
+      </ul>
+
+      <!-- Right side: user info + logout -->
+      <div class="d-flex align-items-center gap-3">
+        {% if username %}
+        <span style="font-size:12px; color: var(--muted);">
+          <i class="fas fa-user" style="font-size:10px;"></i>
+          {{ username }}
+        </span>
+        {% endif %}
+        <a class="nav-link-logout" href="{% url 'company_select' %}" onclick="cerrarSesion()">
+          <i class="fas fa-sign-out-alt" style="font-size:11px;"></i>
+          Cerrar sesión
         </a>
       </div>
     </div>
+
+  </div>
 </nav>
+
+<script>
+  function cerrarSesion() {
+    sessionStorage.removeItem("username");
+    sessionStorage.removeItem("compania");
+    sessionStorage.removeItem("agencia");
+    sessionStorage.removeItem("bodega");
+    sessionStorage.removeItem("company_key");
+  }
+</script>
