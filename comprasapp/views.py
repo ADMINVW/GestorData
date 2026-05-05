@@ -1190,9 +1190,14 @@ def obtenerDetalleOrdenCompra(request,numOrden,codAge, codDiv, periodica, verifi
         detalleOrden = [dict(zip(columnas, fila)) for fila in cur.fetchall()]
 
         #iva --> si se da iva por item se debera corregir
-        ssql="SELECT oc_iva_rp FROM ocxxt001 WHERE oc_agencia = '" + codAge + "' AND oc_division = '" + codDiv + "' AND oc_numero = " + str(numOrden) + " "\
-             " UNION "\
-             "SELECT oc_iva_rp FROM ocxxt801 WHERE oc_agencia = '" + codAge + "' AND oc_division = '" + codDiv + "' AND oc_numero = " + str(numOrden) + "'"
+        ssql = (
+            f"SELECT oc_iva_rp FROM ocxxt001 "
+            f"WHERE oc_agencia = '{codAge}' AND oc_division = '{codDiv}' AND oc_numero = {numOrden} "
+            f"UNION "
+            f"SELECT oc_iva_rp FROM ocxxt801 "
+            f"WHERE oc_agencia = '{codAge}' AND oc_division = '{codDiv}' AND oc_numero = {numOrden}"
+        )
+        print("SQL para obtener iva: ", ssql)
         iva=consultarDato(request, ssql, db_alias=db_alias)
         
     if request.method == 'GET':
