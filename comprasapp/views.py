@@ -24,6 +24,7 @@ from globales.utils import *
 from globales.validators import VALIDACIONES
 
 from django.contrib import messages
+from core.context_processors import company_context
 
 # Create your views here.
 
@@ -70,7 +71,7 @@ def ordenCompras(request):
         'nempresa':   empresa,
         'nsolicita':  solicita,
         'ntcredito':  tcredito,
-        'username':   request.session.get(f'user_{company_key}'),
+        'username':   company_context(request).get('db_user', ''),
         'company':    company,
         'company_key': company_key,
     })

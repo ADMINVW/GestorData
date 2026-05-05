@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from .models import Company
+from core.crypto import encrypt_credential
 
 def company_select(request):
     companies = Company.objects.filter(activa=True)
@@ -82,8 +83,8 @@ def company_login(request):
                 return redirect('company_select')
 
             # Guardar credenciales POR EMPRESA (no sobreescribe otras)
-            request.session[f'user_{company.key}'] = user
-            request.session[f'pass_{company.key}'] = pw
+            request.session[f'user_{company.key}'] = encrypt_credential(user)
+            request.session[f'pass_{company.key}'] = encrypt_credential(pw)
 
             # Guardar lista de empresas activas en sesión
             active = request.session.get('active_companies', {})

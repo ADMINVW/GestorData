@@ -1,5 +1,6 @@
 from django.db import connections
 from core.db_context import set_db_credentials
+from core.crypto import decrypt_credential
 
 class DynamicConnectionMiddleware:
     def __init__(self, get_response):
@@ -28,12 +29,12 @@ class DynamicConnectionMiddleware:
 
             if company_info:
                 db_alias = company_info['db_alias']
-                db_user  = request.session.get(f'user_{company_key}')
-                db_pass  = request.session.get(f'pass_{company_key}')
+                db_user  = decrypt_credential(request.session.get(f'user_{company_key}'))
+                db_pass  = decrypt_credential(request.session.get(f'pass_{company_key}'))
             elif company_key in connections.databases:
                 db_alias = company_key
-                db_user = request.session.get(f'user_{company_key}')
-                db_pass = request.session.get(f'pass_{company_key}')
+                db_user = decrypt_credential(request.session.get(f'user_{company_key}'))
+                db_pass = decrypt_credential(request.session.get(f'pass_{company_key}'))
                 print(f"MIDDLEWARE - fallback directo a db_alias: {company_key}")
             else:
                 db_alias, db_user, db_pass = 'default', None, None

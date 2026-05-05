@@ -1,4 +1,5 @@
 from .models import Company
+from core.crypto import decrypt_credential
 
 def company_context(request):
     company_key = request.session.get('active_company_key')
@@ -6,7 +7,7 @@ def company_context(request):
     if company_key:
         try:
             company = Company.objects.get(key=company_key)
-            db_user = request.session.get(f'user_{company_key}')
+            db_user = decrypt_credential(request.session.get(f'user_{company_key}'))
             print(f"CONTEXT PROCESSOR - company: {company}, db_user: {db_user}")
             return {'company': company, 'db_user': db_user, 'company_key': company_key}
         except Company.DoesNotExist:

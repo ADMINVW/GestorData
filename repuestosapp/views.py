@@ -15,6 +15,7 @@ from django.shortcuts import redirect
 from django.views.decorators.http import require_GET
 from django.db import connection, transaction
 from decimal import Decimal, ROUND_HALF_UP
+from core.context_processors import company_context
 
 import os
 import xml.etree.ElementTree as ET
@@ -59,7 +60,7 @@ def comprasRepuestos(request):
     return render(request,'compraRepuestos.html',{
         'nsolicita':solicita ,
         'ntcredito':tcredito,
-        'username':   request.session.get(f'user_{company_key}'),
+        'username':   company_context(request).get('db_user', ''),
         'company': company,
         'company_key': company_key,
     })

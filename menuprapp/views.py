@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from globales.views import gusername,gpassword
 from django.http import JsonResponse 
 from django.views.decorators.csrf import csrf_exempt
+from core.context_processors import company_context
 
 
 
@@ -24,7 +25,7 @@ def mimenu(request):
     context = {
         'company_key': company_key,
         'company':     company,        # ← para el navbar
-        'username':    request.session.get(f'user_{company_key}'),
+        'username':    company_context(request).get('db_user', ''),
         'compania':    user_data.get('compania', ''),
         'agencia':     user_data.get('agencia', ''),
         'bodega':      user_data.get('bodega', ''),

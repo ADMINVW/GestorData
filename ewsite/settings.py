@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from cryptography.fernet import Fernet
 
 load_dotenv()
 
@@ -25,6 +26,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
+
+SESSION_CREDENTIALS_KEY = os.getenv('SESSION_CREDENTIALS_KEY')
+FERNET = Fernet(SESSION_CREDENTIALS_KEY.encode())
 
 # SECURITY WARNING: don't run with debug turned on in production!
 #DEBUG = False
