@@ -1,5 +1,14 @@
 {% extends "base.html" %} {% block titulo %}Generar Retencion{% endblock %}
-{% block contenido %}  
+{% block contenido %} 
+  {% if messages %}
+    <div class="alertas-container">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
   <!--CLASS TOTAL CENTRO MARGEN -->
     <div class="col-12 col-md-10 offset-md-1">
       <form id="form-retencion" class="form-horizontal" method="post">

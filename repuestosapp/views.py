@@ -158,40 +158,46 @@ def guardaFacturaRepuestos(request):
             Plantillas = ',null,'
 
             # GUARDO LA CABECERA DE LA COMPRA
-            
+            try:
 
-            cur.execute("INSERT INTO ocxxt001 VALUES (" + str(Secuencia) + ",'" + Compania + "','" + Agencia + "','" + Division + "','" + Usuario + "','" + FechaIngresoHora + "','" + Solicitante + "','A','" + SubTipo + "','','','',''," + str(CodigoProveedor) + ",'" + FechaIngreso + "','" + NumeroFactura + "','" + FechaEmision + "'," + TotalFactura + "," + TotalFactura + "," + TotalDescuento + "," + PlazoPago + "," + porcenIva +"," + porcenIva + ",0,'','" + Bodega + "','" + DescripcionFactura + "',''" + str(Plantillas) + "0,0,'DO','SRS','',0,'','01','" + TipoCredito + "','9999','" + SerieFactura + "','" + AutorizacionSri + "','" + FechaEmision + "','','')" )
-            OcNumero = Secuencia
+                cur.execute("INSERT INTO ocxxt001 VALUES (" + str(Secuencia) + ",'" + Compania + "','" + Agencia + "','" + Division + "','" + Usuario + "','" + FechaIngresoHora + "','" + Solicitante + "','A','" + SubTipo + "','','','',''," + str(CodigoProveedor) + ",'" + FechaIngreso + "','" + NumeroFactura + "','" + FechaEmision + "'," + TotalFactura + "," + TotalFactura + "," + TotalDescuento + "," + PlazoPago + "," + porcenIva +"," + porcenIva + ",0,'','" + Bodega + "','" + DescripcionFactura + "',''" + str(Plantillas) + "0,0,'DO','SRS','',0,'','01','" + TipoCredito + "','9999','" + SerieFactura + "','" + AutorizacionSri + "','" + FechaEmision + "','','')" )
+                OcNumero = Secuencia
 
-            print("paso 3 cabecera:",Usuario)
-            # GUARDO EL DETALLE DE LA COMPRA
-            for fila in datos_tabla:
-                CenGastos = ''
-                # cantidad fila[0]
-                # codigo item fila[1]
-                # codigo local fila[2]
-                # descripcion fila[3]
-                # precio unitario fila[4]
-                # descuento fila[5]
-                # precio total sin impuestos fila[6]
-                # porcentaje iva fila[7]
-                # valor iva fila[8]
-                
-                # CALCULO PORCENTAJE DESCUENTO
-                totParcial = 0 
-                print("pre: ", fila[3], "cant: " , fila[0])
-                totParcial = float(fila[4]) * float(fila[0])          
-                fila[5] = round((float(fila[5]) / totParcial) * 100) 
+                print("paso 3 cabecera:",Usuario)
+                # GUARDO EL DETALLE DE LA COMPRA
+                for fila in datos_tabla:
+                    CenGastos = ''
+                    # cantidad fila[0]
+                    # codigo item fila[1]
+                    # codigo local fila[2]
+                    # descripcion fila[3]
+                    # precio unitario fila[4]
+                    # descuento fila[5]
+                    # precio total sin impuestos fila[6]
+                    # porcentaje iva fila[7]
+                    # valor iva fila[8]
+                    
+                    # CALCULO PORCENTAJE DESCUENTO
+                    totParcial = 0 
+                    print("pre: ", fila[3], "cant: " , fila[0])
+                    totParcial = float(fila[4]) * float(fila[0])          
+                    fila[5] = round((float(fila[5]) / totParcial) * 100) 
 
-                #if not Periodicas:
-                CenGastos = "0" 
-                ##mineoctubre
-                tipoItem = "BIENES"
-                ##
-                cur.execute("INSERT INTO ocxxt002 VALUES('" + Compania + "','" + Division + "','" + Agencia + "'," + str(Secuencia) + "," + str(ordinal) + ",'" + fila[1] + "'," + fila[0] + "," + fila[0] + ",'" + fila[3] + "',''," + str(fila[4]) + ",''," + str(fila[5]) + ",'" + tipoItem + "','" + str(CenGastos) + "'," + fila[7] + "," + fila[8] + ")")
+                    #if not Periodicas:
+                    CenGastos = "0" 
+                    ##mineoctubre
+                    tipoItem = "BIENES"
+                    ##
+                    cur.execute("INSERT INTO ocxxt002 VALUES('" + Compania + "','" + Division + "','" + Agencia + "'," + str(Secuencia) + "," + str(ordinal) + ",'" + fila[1] + "'," + fila[0] + "," + fila[0] + ",'" + fila[3] + "',''," + str(fila[4]) + ",''," + str(fila[5]) + ",'" + tipoItem + "','" + str(CenGastos) + "'," + fila[7] + "," + fila[8] + ")")
 
-                ordinal = ordinal + 1
-            print("paso 4 detalle:",ordinal)
+                    ordinal = ordinal + 1
+                print("paso 4 detalle:",ordinal)
+
+            except Exception as e:
+                print(f"Error al insertar detalle: {e}")
+                messages.error(request, f"Hubo un fallo: no se generó la compra local {e}")
+                company_key = request.headers.get('X-Company-Key', '')
+                return JsonResponse({'redirect_url': f'../../comprasapp/templates/retencionCompra/{OcNumero}/{Division}/?Agencia={Agencia}&company={company_key}'})
 
             #GUARDA COMPRA LOCAL REPUESTOS
             tipoDoc = "16"

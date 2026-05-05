@@ -289,55 +289,63 @@ def guardaFacturaCompra(request):
             print(f"PlazoPago: '{PlazoPago}'")
             print(f"porcenIva: '{porcenIva}'")
 
-            sql_insert = ("INSERT INTO ocxxt001 VALUES (" + 
-                str(secuenciaw) + ",'" + Compania + "','" + Agencia + "','" + Division + 
-                "','" + Usuario + "','" + FechaIngresoHora + "','" + Solicitante + 
-                "','A','" + SubTipo + "','','','',''," + str(CodigoProveedor) + 
-                ",'" + FechaIngreso + "','" + NumeroFactura + "','" + FechaEmision + 
-                "'," + TotalFactura + "," + TotalFactura + "," + TotalDescuento + 
-                "," + PlazoPago + "," + porcenIva + "," + porcenIva + 
-                ",0,'','" + Bodega + "','" + DescripcionFactura + "',''," +  
-                PlantillaSQL +                                                  
-                ",0,0,'DO','SRS','',0,'','01','" + TipoCredito + 
-                "','9999','" + SerieFactura + "','" + AutorizacionSri + 
-                "','" + FechaEmision + "','','')")
+            try:
+                
+                sql_insert = ("INSERT INTO ocxxt001 VALUES (" + 
+                    str(secuenciaw) + ",'" + Compania + "','" + Agencia + "','" + Division + 
+                    "','" + Usuario + "','" + FechaIngresoHora + "','" + Solicitante + 
+                    "','A','" + SubTipo + "','','','',''," + str(CodigoProveedor) + 
+                    ",'" + FechaIngreso + "','" + NumeroFactura + "','" + FechaEmision + 
+                    "'," + TotalFactura + "," + TotalFactura + "," + TotalDescuento + 
+                    "," + PlazoPago + "," + porcenIva + "," + porcenIva + 
+                    ",0,'','" + Bodega + "','" + DescripcionFactura + "',''," +  
+                    PlantillaSQL +                                                  
+                    ",0,0,'DO','SRS','',0,'','01','" + TipoCredito + 
+                    "','9999','" + SerieFactura + "','" + AutorizacionSri + 
+                    "','" + FechaEmision + "','','')")
 
-            print(f"SQL INSERT: {sql_insert}")
-            cur.execute(sql_insert)
-            Cantidad = 0
+                print(f"SQL INSERT: {sql_insert}")
+                cur.execute(sql_insert)
+                Cantidad = 0
 
-            print("paso 3 cabecera:",Usuario)
-            # GUARDO EL DETALLE DE LA COMPRA
-            for fila in datos_tabla:
-                CenGastos = ''
-                # precio total sin impuestos fila[5]
-                # precio unitario fila[3]
-                # descuento fila[4]
-                # cantidad fila[0]
-                # CALCULO PORCENTAJE DESCUENTO
-                totParcial = 0 
-                print("pre: ", fila[3], "cant: " , fila[0])
-                totParcial = float(fila[3]) * float(fila[0])          
-                fila[4] = (float(fila[4]) / totParcial) * 100
-                if not Periodicas:
-                   CenGastos = fila[7]
+                print("paso 3 cabecera:",Usuario)
+                # GUARDO EL DETALLE DE LA COMPRA
+                for fila in datos_tabla:
+                    CenGastos = ''
+                    # precio total sin impuestos fila[5]
+                    # precio unitario fila[3]
+                    # descuento fila[4]
+                    # cantidad fila[0]
+                    # CALCULO PORCENTAJE DESCUENTO
+                    totParcial = 0 
+                    print("pre: ", fila[3], "cant: " , fila[0])
+                    totParcial = float(fila[3]) * float(fila[0])          
+                    fila[4] = (float(fila[4]) / totParcial) * 100
+                    if not Periodicas:
+                        CenGastos = fila[7]
 
-                fila1 = limpiar_texto_informix(fila[1])
-                fila2 = limpiar_texto_informix(fila[2])
-                fila5 = limpiar_texto_informix(fila[5])
-                CenGastos_str = limpiar_texto_informix(CenGastos)
+                    fila1 = limpiar_texto_informix(fila[1])
+                    fila2 = limpiar_texto_informix(fila[2])
+                    fila5 = limpiar_texto_informix(fila[5])
+                    CenGastos_str = limpiar_texto_informix(CenGastos)
 
-                sql_detalle = ("INSERT INTO ocxxt002 VALUES('" + Compania + "','" + Division + 
-                    "','" + Agencia + "'," + str(secuenciaw) + "," + str(ordinal) + 
-                    ",'" + fila1 + "'," + str(fila[0]) + "," + str(fila[0]) + 
-                    ",'" + fila2 + "',''," + str(fila[3]) + ",''," + str(fila[4]) + 
-                    ",'" + fila5 + "','" + CenGastos_str + "'," + str(fila[8]) + "," + str(fila[9]) + ")")
+                    sql_detalle = ("INSERT INTO ocxxt002 VALUES('" + Compania + "','" + Division + 
+                        "','" + Agencia + "'," + str(secuenciaw) + "," + str(ordinal) + 
+                        ",'" + fila1 + "'," + str(fila[0]) + "," + str(fila[0]) + 
+                        ",'" + fila2 + "',''," + str(fila[3]) + ",''," + str(fila[4]) + 
+                        ",'" + fila5 + "','" + CenGastos_str + "'," + str(fila[8]) + "," + str(fila[9]) + ")")
 
-                print(f"SQL DETALLE: {sql_detalle}")
-                cur.execute(sql_detalle) 
+                    print(f"SQL DETALLE: {sql_detalle}")
+                    cur.execute(sql_detalle) 
 
-                ordinal = ordinal + 1
-            print("paso 4 detalle:",ordinal)
+                    ordinal = ordinal + 1
+                print("paso 4 detalle:",ordinal)
+
+            except Exception as e:
+                print(f"Error al insertar detalle: {e}")
+                messages.error(request, f"Hubo un fallo: no se generó la compra local {e}")
+                company_key = request.headers.get('X-Company-Key', '')
+                return JsonResponse({'redirect_url': f'../../comprasapp/templates/retencionCompra/{OcNumero}/{Division}/?Agencia={Agencia}&company={company_key}'})
 
         ordenCompra = obtenerOrdenCompra(db_alias, Agencia, Division, secuenciaw)   
         if ordenCompra is None:
@@ -1187,7 +1195,6 @@ def obtenerDetalleOrdenCompra(request,numOrden,codAge, codDiv, periodica, verifi
              "SELECT oc_iva_rp FROM ocxxt801 WHERE oc_agencia = '" + codAge + "' AND oc_division = '" + codDiv + "' AND oc_numero = " + str(numOrden) + "'"
         iva=consultarDato(request, ssql, db_alias=db_alias)
         
-        cur.close
     if request.method == 'GET':
         context ={
             'ndetalleOrden':detalleOrden,
