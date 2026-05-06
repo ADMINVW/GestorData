@@ -2,3 +2,6 @@ from .division_serializer import DivisionSerializer
 from .tipo_credito_serializer import TipoCreditoSerializer
 from .solicitante_serializer import SolicitanteSerializer
 from .tipo_compra_serializer import TipoCompraSerializer
+from .centro_gastos_serializer import CentroGastosSerializer
+from .proveedor_serializer import ProveedorSerializer
+from .cuenta_serializer import CuentaSerializer

@@ -4,6 +4,7 @@ from django.db import connections
 from core.db_context import get_db, get_db_from_request
 
 from django.http import JsonResponse 
+from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 import json
 from globales.views import *
@@ -30,19 +31,20 @@ from .services import (
     OrdenComprasService
 )
 from .serializers import (
-    DivisionSerializer, TipoCreditoSerializer, SolicitanteSerializer, TipoCompraSerializer
+    DivisionSerializer, TipoCreditoSerializer, SolicitanteSerializer, TipoCompraSerializer, CentroGastosSerializer
 )
 
+@require_http_methods(["GET"])
 def ordenCompras(request):
 
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
     db_alias = get_db_from_request(request)
     service = OrdenComprasService()
 
-    divs = service.get_division()
-    tipos = service.get_tipo_credito()
-    solis = service.get_solicitante()
-    
+    divs = service.get_division(db_alias)
+    tipos = service.get_tipo_credito(db_alias)
+    solis = service.get_solicitante(db_alias)
+
     div_data = DivisionSerializer(divs, many=True).data
     tipo_data = TipoCreditoSerializer(tipos, many=True).data
     soli_data = SolicitanteSerializer(solis, many=True).data
@@ -55,49 +57,38 @@ def ordenCompras(request):
         'company_key': company_key,
     })
 
+@require_http_methods(["GET"])
 def subTipo(request):
 
     db_alias = get_db_from_request(request)
     service = OrdenComprasService()
 
-    if request.method == 'GET':
-        division = request.GET.get('division')
-        if not division:
-            return JsonResponse({'error': 'División no proporcionada'}, status=400)
+    division = request.GET.get('division')
+    if not division:
+        return JsonResponse({'error': 'División no proporcionada'}, status=400)
 
-        tipos_compra = service.get_tipo_compra(division)
-        tipo_compra_data = TipoCompraSerializer(tipos_compra, many=True).data
-        return JsonResponse({'ntipoorden': tipo_compra_data})
+    tipos_compra = service.get_tipo_compra(db_alias, division)
+    tipo_compra_data = TipoCompraSerializer(tipos_compra, many=True).data
+    return JsonResponse({'ntipoorden': tipo_compra_data})
 
-    return JsonResponse({'error': 'Método no permitido Sub Tipo'}, status=405)
-
+@require_http_methods(["GET"])
 def cuentaProv(request):
+
     db_alias = get_db_from_request(request)
-    print(f"cuentaProv - Conectando a: {db_alias}")
-    print(f"cuentaProv - company_key desde request: {request.GET.get('company')}")
-    print(f"cuentaProv - Conexiones disponibles: {list(connections.databases.keys())}")
-
-    if request.method == 'GET':
-        ruc = request.GET.get('rucprov')
-        
-        if ruc is None:
-            return JsonResponse({'error': 'Código de Proveedor no proporcionado'}, status=400)
-        
-        try:
-            with connections[db_alias].cursor() as cur:
-                    cur.execute("SELECT a.*,ct_cuenta,c.ct_descripcion FROM ocxxt013 a,ciatt011 b, cgrta001 c WHERE mc_codpro = pv_codigo AND ct_cuenta = mc_cuenta AND ct_compania = 'e' AND pv_cedruc = '" + ruc + "'")
-                    rows = cur.fetchall()
-                    column_names = [desc[0] for desc in cur.description]
-                    cuentaprov = [dict(zip(column_names, row)) for row in rows]
-                    cur.close()
-            return JsonResponse({'ncuentaprov': cuentaprov})
-        
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
+    ruc = request.GET.get('rucprov')
+    service = OrdenComprasService()
     
-    return JsonResponse({'error': 'Método no permitido cuenta proveedor'}, status=405)
-
-
+    if ruc is None:
+        return JsonResponse({'error': 'Código de Proveedor no proporcionado'}, status=400)
+    
+    try:
+        cuentas_proveedor = service.get_cuentas_proveedor(db_alias, ruc)
+        cuentas_data = CentroGastosSerializer(cuentas_proveedor, many=True).data
+        return JsonResponse({'ncuentaprov': cuentas_data})
+    
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+    
 
 def plantillaProv(request):
     db_alias = get_db_from_request(request)
