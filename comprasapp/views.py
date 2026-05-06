@@ -26,6 +26,8 @@ from globales.validators import VALIDACIONES
 from django.contrib import messages
 from core.context_processors import company_context
 
+from .services import orden_compra_service as services
+
 # Create your views here.
 
 def ordenCompras(request):
@@ -51,26 +53,12 @@ def ordenCompras(request):
             'company': company, 'company_key': company_key,
         })
 
-    with connections[db_alias].cursor() as cur:
-        cur.execute("SELECT * FROM ocxxt006 WHERE so_estado = 'A'")
-        rows = cur.fetchall()
-        column_names = [desc[0] for desc in cur.description]
-        solicita = [dict(zip(column_names, row)) for row in rows]
-
-        cur.execute("SELECT * FROM ciatt003 WHERE co_tipfila = 'd'")
-        rows = cur.fetchall()
-        column_names = [desc[0] for desc in cur.description]
-        empresa = [dict(zip(column_names, row)) for row in rows]
-
-        cur.execute("SELECT * FROM coat007 WHERE cre_codigo <> '00'")
-        rows = cur.fetchall()
-        column_names = [desc[0] for desc in cur.description]
-        tcredito = [dict(zip(column_names, row)) for row in rows]
+    service = services.OrdenComprasService()
 
     return render(request, 'ordenCompra.html', {
-        'nempresa':   empresa,
-        'nsolicita':  solicita,
-        'ntcredito':  tcredito,
+        'nempresa':   service.get_division().using(db_alias),
+        'nsolicita':  service.get_solicitante().using(db_alias),
+        'ntcredito':  service.get_tipo_credito().using(db_alias),
         'username':   company_context(request).get('db_user', ''),
         'company':    company,
         'company_key': company_key,
@@ -1197,7 +1185,6 @@ def obtenerDetalleOrdenCompra(request,numOrden,codAge, codDiv, periodica, verifi
             f"SELECT oc_iva_rp FROM ocxxt801 "
             f"WHERE oc_agencia = '{codAge}' AND oc_division = '{codDiv}' AND oc_numero = {numOrden}"
         )
-        print("SQL para obtener iva: ", ssql)
         iva=consultarDato(request, ssql, db_alias=db_alias)
         
     if request.method == 'GET':
