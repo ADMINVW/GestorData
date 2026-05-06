@@ -30,7 +30,7 @@ from .services import (
     OrdenComprasService
 )
 from .serializers import (
-    DivisionSerializer, TipoCreditoSerializer, SolicitanteSerializer
+    DivisionSerializer, TipoCreditoSerializer, SolicitanteSerializer, TipoCompraSerializer
 )
 
 def ordenCompras(request):
@@ -58,31 +58,17 @@ def ordenCompras(request):
 def subTipo(request):
 
     db_alias = get_db_from_request(request)
-    print(f"subTipo - Conectando a: {db_alias}")
-    print(f"subTipo - company_key desde request: {request.GET.get('company')}")
-    print(f"subTipo - Conexiones disponibles: {list(connections.databases.keys())}")
+    service = OrdenComprasService()
 
     if request.method == 'GET':
         division = request.GET.get('division')
-        
-        if division is None:
-            return JsonResponse({'error': 'Division no proporcionada'}, status=400)
-        
-        try:
-            with connections[db_alias].cursor() as cur:
-                    #cur.execute("SELECT * FROM ocxxt004 WHERE to_cia = %s AND to_division = %s", ('e', division))
-                    cur.execute("SELECT * FROM ocxxt004 WHERE to_cia = 'e' AND to_division = '" + division + "'")
-                    rows = cur.fetchall()
-                    column_names = [desc[0] for desc in cur.description]
-                    tipoorden = [dict(zip(column_names, row)) for row in rows]
-                    cur.close
-            #return render(request,'ordenCompra.html',{'ntipoorden':tipoorden} )
-            return JsonResponse({'ntipoorden': tipoorden})
+        if not division:
+            return JsonResponse({'error': 'División no proporcionada'}, status=400)
 
-        except Exception as e:
-            #return render(request,'ordenCompra.html',{'error': 'Error en la base de datos'} )
-            return JsonResponse({'error': str(e)}, status=500)
-    #return render(request,'ordenCompra.html',{'error': 'Error inesperado'} )
+        tipos_compra = service.get_tipo_compra(division)
+        tipo_compra_data = TipoCompraSerializer(tipos_compra, many=True).data
+        return JsonResponse({'ntipoorden': tipo_compra_data})
+
     return JsonResponse({'error': 'Método no permitido Sub Tipo'}, status=405)
 
 def cuentaProv(request):

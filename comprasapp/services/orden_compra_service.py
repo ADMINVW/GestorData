@@ -1,6 +1,7 @@
 from ..models.division import Division
 from ..models.tipo_credito import TipoCredito
 from ..models.solicitante import Solicitante
+from ..models.tipo_compra import TipoCompra
 
 class OrdenComprasService:
     def get_division(self):
@@ -11,3 +12,6 @@ class OrdenComprasService:
 
     def get_solicitante(self):
         return Solicitante.objects.filter(so_estado = 'A')
+
+    def get_tipo_compra(self, division):
+        return TipoCompra.objects.filter(to_division = division, to_cia = 'e')

@@ -219,7 +219,7 @@ function fetchSubTipo() {
     if (division) {
         var ck = sessionStorage.getItem('company_key') || '';
         $.ajax({
-            url: '/comprasapp/subTipo/',  // Asegúrate de que esta URL coincida con la URL de tu vista en Django
+            url: '/comprasapp/subTipo/?division=' + division + '&company=' + ck,
             method: 'GET',
             data: {
                 'division': division,
