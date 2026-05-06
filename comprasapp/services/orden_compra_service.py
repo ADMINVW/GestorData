@@ -4,10 +4,10 @@ from ..models.solicitante import Solicitante
 
 class OrdenComprasService:
     def get_division(self):
-        return Division.objects.filter(co_tipfila = 'd').values('co_div', 'co_nomext')
+        return Division.objects.filter(co_tipfila = 'd')
 
     def get_tipo_credito(self):
-        return TipoCredito.objects.exclude(cre_codigo = '00').values('cre_codigo', 'cre_descrip')
+        return TipoCredito.objects.exclude(cre_codigo = '00')
 
     def get_solicitante(self):
-        return Solicitante.objects.filter(so_estado = 'A').values('so_codigo', 'so_nombres')
+        return Solicitante.objects.filter(so_estado = 'A')

@@ -2,7 +2,7 @@ from django.db import models
 
 class Solicitante(models.Model):
     so_cia = models.CharField(blank=True, null=True)
-    so_codigo = models.CharField(blank=True, null=True)
+    so_codigo = models.CharField(primary_key=True, blank=True, null=False)
     so_nombres = models.CharField(blank=True, null=True)
     so_fecalta = models.DateTimeField()
     so_estado = models.CharField(blank=True, null=True)

@@ -1,5 +1,5 @@
-form rest_framework import serializers
-from ../models import Division
+from rest_framework import serializers
+from ..models import Division
 
 class DivisionSerializer(serializers.ModelSerializer):
     class Meta:

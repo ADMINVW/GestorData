@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ../models import TipoCredito
+from ..models import TipoCredito
 
 class TipoCreditoSerializer(serializers.ModelSerializer):
     class Meta:

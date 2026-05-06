@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ../models import Solicitante
+from ..models import Solicitante
 
 class SolicitanteSerializer(serializers.ModelSerializer):
     class Meta:

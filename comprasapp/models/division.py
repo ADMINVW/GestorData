@@ -3,7 +3,7 @@ from django.db import models
 class Division(models.Model):
     co_tipfila = models.CharField(blank=True, null=True)
     co_cia = models.CharField(blank=True, null=True)
-    co_div = models.CharField(blank=True, null=True)
+    co_div = models.CharField(primary_key=True, blank=True, null=False)
     co_agencia = models.CharField(blank=True, null=True)
     co_ciudad = models.CharField(blank=True, null=True)
     co_nomext = models.CharField()

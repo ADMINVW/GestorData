@@ -26,41 +26,32 @@ from globales.validators import VALIDACIONES
 from django.contrib import messages
 from core.context_processors import company_context
 
-from .services import orden_compra_service as services
-
-# Create your views here.
+from .services import (
+    OrdenComprasService
+)
+from .serializers import (
+    DivisionSerializer, TipoCreditoSerializer, SolicitanteSerializer
+)
 
 def ordenCompras(request):
-    from core.models import Company
 
-    # Usar active_company_key para mantener consistencia con el login
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
-    
-    try:
-        company = Company.objects.get(key=company_key)
-    except Company.DoesNotExist:
-        company = None
-
     db_alias = get_db_from_request(request)
-    print(f"Conectando a: {db_alias}")
-    print(f"company_key: {company_key}")
-    print(f"Conexiones disponibles: {list(connections.databases.keys())}")
+    service = OrdenComprasService()
 
-    if db_alias not in connections.databases:
-        print(f"ERROR: La conexión '{db_alias}' no está configurada")
-        return render(request, 'ordenCompra.html', {
-            'nempresa': [], 'nsolicita': [], 'ntcredito': [],
-            'company': company, 'company_key': company_key,
-        })
-
-    service = services.OrdenComprasService()
+    divs = service.get_division()
+    tipos = service.get_tipo_credito()
+    solis = service.get_solicitante()
+    
+    div_data = DivisionSerializer(divs, many=True).data
+    tipo_data = TipoCreditoSerializer(tipos, many=True).data
+    soli_data = SolicitanteSerializer(solis, many=True).data
 
     return render(request, 'ordenCompra.html', {
-        'nempresa':   service.get_division().using(db_alias),
-        'nsolicita':  service.get_solicitante().using(db_alias),
-        'ntcredito':  service.get_tipo_credito().using(db_alias),
+        'nempresa':   div_data,
+        'nsolicita':  soli_data,
+        'ntcredito':  tipo_data,
         'username':   company_context(request).get('db_user', ''),
-        'company':    company,
         'company_key': company_key,
     })
 
