@@ -40,6 +40,9 @@ venv\Scripts\activate
 
 ```powershell
 pip install django python-dotenv djangorestframework
+pip install django-informixdb
+pip install cryptography
+pip install pyodbc
 ```
 
 > Si necesitas drivers de base de datos adicionales, instálalos también según el motor de destino.
@@ -51,11 +54,13 @@ Crea un archivo `.env` en la raíz del proyecto con al menos:
 ```env
 SECRET_KEY=tu_clave_secreta
 DEBUG=True
+SESSION_CREDENTIALS_KEY=tu_clave_cryptography
 ```
 
 4. Ejecutar migraciones básicas:
 
 ```powershell
+python manage.py makemigrations
 python manage.py migrate
 ```
 
