@@ -3,6 +3,8 @@ from ..models.tipo_credito import TipoCredito
 from ..models.solicitante import Solicitante
 from ..models.tipo_compra import TipoCompra
 from ..models.centro_gastos import CentroGastos
+from ..models.proveedor import Proveedor
+from ..models.plantilla_cabecera import PlantillaCabecera
 
 class OrdenComprasService:
     def get_division(self, db_alias):
@@ -22,3 +24,19 @@ class OrdenComprasService:
             proveedor__pv_cedruc=ruc,
             cuenta__ct_compania='e'
         )
+    
+    def get_codigo_proveedor(self, db_alias, ruc):
+        return Proveedor.objects.using(db_alias).filter(
+            pv_cia = 'e', 
+            pv_cedruc = ruc
+        ).values_list(
+            'pv_codigo', flat=True
+        ).first()
+
+    def get_plantillas(self, db_alias, codigo_proveedor):
+        return PlantillaCabecera.objects.using(db_alias).filter(
+            pt_codproveedor=codigo_proveedor
+        ).values(
+            'codigo_plantilla_id',           
+            'codigo_plantilla__pc_concepto'  
+        ).distinct()

@@ -5,3 +5,5 @@ from .tipo_compra_serializer import TipoCompraSerializer
 from .centro_gastos_serializer import CentroGastosSerializer
 from .proveedor_serializer import ProveedorSerializer
 from .cuenta_serializer import CuentaSerializer
+from .plantilla_detalle_serializer import PlantillaDetalleSerializer
+from .plantilla_cabecera_serializer import PlantillaCabeceraSerializer

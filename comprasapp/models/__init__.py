@@ -5,3 +5,5 @@ from .tipo_compra import TipoCompra
 from .centro_gastos import CentroGastos
 from .proveedor import Proveedor
 from .cuenta import Cuenta
+from .plantilla_detalle import PlantillaDetalle
+from .plantilla_cabecera import PlantillaCabecera

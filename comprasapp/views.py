@@ -31,7 +31,7 @@ from .services import (
     OrdenComprasService
 )
 from .serializers import (
-    DivisionSerializer, TipoCreditoSerializer, SolicitanteSerializer, TipoCompraSerializer, CentroGastosSerializer
+    DivisionSerializer, TipoCreditoSerializer, SolicitanteSerializer, TipoCompraSerializer, CentroGastosSerializer, ProveedorSerializer, PlantillaCabeceraSerializer
 )
 
 @require_http_methods(["GET"])
@@ -89,53 +89,27 @@ def cuentaProv(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
     
-
+@require_http_methods(["GET"])
 def plantillaProv(request):
+
     db_alias = get_db_from_request(request)
+    service = OrdenComprasService()
+    rucprovp = request.GET.get('rucprovp')
 
-    if request.method == 'GET':
-        rucprovp = request.GET.get('rucprovp')
+    if not rucprovp:
+        return JsonResponse({'error': 'Ruc no proporcionado'}, status=400)
 
-        if not rucprovp:
-            return JsonResponse({'error': 'Ruc no proporcionado'}, status=400)
+    try:
+        codigo_proveedor = service.get_codigo_proveedor(db_alias, rucprovp)        
+        plantilla = service.get_plantillas(db_alias, codigo_proveedor)
+        plantilla_data = PlantillaCabeceraSerializer(plantilla, many=True).data
 
-        try:
-            with connections[db_alias].cursor() as cur:
-
-                # 1. Obtener código del proveedor para Informix
-                cur.execute(
-                    "SELECT pv_codigo FROM ciatt011 WHERE pv_cia = 'e' AND pv_cedruc = ?",
-                    [rucprovp]
-                )
-                row = cur.fetchone()
-
-                if not row:
-                    return JsonResponse({'nplantilla': []})
-
-                codigo_proveedor = row[0]
-
-                # 2. Obtener plantillas — mismo placeholder
-                cur.execute(
-                    """
-                    SELECT UNIQUE(pt_codplantilla), pc_concepto
-                    FROM cgrta035, ocxxt010
-                    WHERE pt_codplantilla = pc_codigo
-                    AND pt_codproveedor = ?
-                    """,
-                    [codigo_proveedor]
-                )
-                rows = cur.fetchall()
-                column_names = [desc[0].lower() for desc in cur.description]
-                plantilla = [dict(zip(column_names, row)) for row in rows]
-
-                return JsonResponse({'nplantilla': plantilla})
-
-        except Exception as e:
-            import traceback
-            print(traceback.format_exc())
-            return JsonResponse({'error': str(e)}, status=500)
-
-    return JsonResponse({'error': 'Método no permitido'}, status=405)
+        return JsonResponse({'nplantilla': plantilla_data})
+        
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return JsonResponse({'error': str(e)}, status=500)
 
 def limpiar_texto_informix(texto):
     if not texto:
