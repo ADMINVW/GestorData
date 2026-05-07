@@ -66,49 +66,25 @@ El proyecto requiere que agregues las empresas y sus parámetros de conexión en
 ### Usar SQLite shell
 
 ```powershell
-python -m sqlite3 db.sqlite3
+python manage.py shell
+from core.models import Company
 ```
 
 ### Ejemplo de inserción para Informix
 
-```sql
-INSERT INTO core_company (
-    key, name, db_alias, db_engine, db_dsn,
-    db_name, db_server, db_host, db_port, logo, activa
-) VALUES (
-    'germanmoto',
-    'German Moto',
-    'germanmoto',
-    'django_informixdb',
-    'nombre_dsn',
-    'nombre_base',
-    'nombre_servidor',
-    'host_informix',
-    1533,
-    '',
-    1
-);
-```
-
-### Ejemplo de inserción para PostgreSQL
-
-```sql
-INSERT INTO core_company (
-    key, name, db_alias, db_engine, db_dsn,
-    db_name, db_server, db_host, db_port, logo, activa
-) VALUES (
-    'miempresa',
-    'Mi Empresa',
-    'miempresa',
-    'django.db.backends.postgresql',
-    '',
-    'mi_basedatos',
-    '',
-    'localhost',
-    5432,
-    '',
-    1
-);
+```shell
+Company.objects.create(
+    key='ecuawagen',
+    name='Ecuawagen',
+    db_alias='ecuawagen',
+    db_dsn='DNSdesarrollo',
+    db_name='ecuawagen',
+    db_server='ol_desarrollo',
+    db_host='192.168.1.9',
+    logo='/static/ecuawagen.png',
+    activa=True,
+    db_engine='django_informixdb', 
+)
 ```
 
 ### Campos importantes
