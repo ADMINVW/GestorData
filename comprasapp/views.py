@@ -100,12 +100,12 @@ def plantillaProv(request):
         return JsonResponse({'error': 'Ruc no proporcionado'}, status=400)
 
     try:
-        codigo_proveedor = service.get_codigo_proveedor(db_alias, rucprovp)        
+        codigo_proveedor = service.get_codigo_proveedor(db_alias, 'e', rucprovp)        
         plantilla = service.get_plantillas(db_alias, codigo_proveedor)
         plantilla_data = PlantillaCabeceraSerializer(plantilla, many=True).data
 
         return JsonResponse({'nplantilla': plantilla_data})
-        
+
     except Exception as e:
         import traceback
         print(traceback.format_exc())
@@ -298,44 +298,23 @@ def existe_factura(request):
     agencia = request.GET.get("Agencia")
     cia = request.GET.get("Cia")
     ruc = request.GET.get("Ruc")
-
-    # Convertir "null" string o None a valores por defecto
-    if agencia == "null" or agencia is None:
-        agencia = "01"  # Valor por defecto
-    if cia == "null" or cia is None:
-        cia = "e"  # Valor por defecto
-    if division == "null" or division is None:
-        division = "d"  # Valor por defecto
-
-    # Validar parámetros requeridos (solo factura y ruc son obligatorios)
-    if not factura or not ruc:
-        return JsonResponse({"error": "Faltan parámetros"}, status=400)
+    service = OrdenComprasService()
 
     with connections[db_alias].cursor() as cur:
-        cur.execute("SELECT pv_codigo FROM ciatt011 WHERE pv_cia = '" + cia + "' AND pv_cedruc = '" + ruc + "'")
-
-        codigoprovedor = cur.fetchall()
-        print("codigoprovedor", codigoprovedor)
-        codprov = None
-        if codigoprovedor:
-            for codigoproveedorw in codigoprovedor:
-                codprov = codigoproveedorw[0] 
-
-        if not codprov:
+        codigoprovedor = service.get_codigo_proveedor(db_alias, cia, ruc)
+        if not codigoprovedor:
             return JsonResponse({"error": "Proveedor no encontrado"}, status=400)
 
-        sql = ("EXECUTE PROCEDURE sp_existe_factura('" + factura + "','" + division + "','" + agencia + "','" + cia + "'," + str(codprov) + ")")
-        print(f"SQL ejecutado: {sql}")
+        sql = ("EXECUTE PROCEDURE sp_existe_factura('" + factura + "','" + division + "','" + agencia + "','" + cia + "'," + str(codigoprovedor) + ")")
 
         cur.execute(
             "EXECUTE PROCEDURE sp_existe_factura('" + factura + "','" + division + "','" + agencia + "','" + cia + "'," + str(
-                codprov) + ")")
+                codigoprovedor) + ")")
         result = cur.fetchone()
 
     existe = result[0] if result else 0  # Si no hay datos, devuelve 0
 
     return JsonResponse({"existe": existe})
-
 
 ##MINE      
 def guardarCtaPagar(request, db_alias=None, orden=None):

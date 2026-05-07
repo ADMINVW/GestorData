@@ -25,9 +25,9 @@ class OrdenComprasService:
             cuenta__ct_compania='e'
         )
     
-    def get_codigo_proveedor(self, db_alias, ruc):
+    def get_codigo_proveedor(self, db_alias, cia, ruc):
         return Proveedor.objects.using(db_alias).filter(
-            pv_cia = 'e', 
+            pv_cia = cia, 
             pv_cedruc = ruc
         ).values_list(
             'pv_codigo', flat=True
