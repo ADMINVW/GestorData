@@ -11,13 +11,13 @@
 {% block contenido %}
 <script src="/static/js/funcionesRepuestos.js"></script>
 
-<!-- ─── CONFIGURACIÓN ─── -->
+<!-- ─── PARAMETROS ─── -->
 <div class="app-card mb-4">
   <div class="app-card-body">
     <p class="section-label">1 · Parámetros</p>
     <div class="row g-3 align-items-end">
 
-      <div class="col-12 col-md-4">
+      <div class="col-12 col-md-5">
         <label class="form-label">Solicitante</label>
         <select onchange="obtenerSeleccion()" id="selSolicita" class="form-select">
           <option selected>Escoja solicitante</option>
@@ -30,12 +30,6 @@
       </div>
 
       <div class="col-12 col-md-3">
-        <label class="form-label">XML Factura</label>
-        <input type="file" class="form-control" id="inputGroupFileFactura"
-               onchange="leerArchivoXML()" accept=".xml">
-      </div>
-
-      <div class="col-12 col-md-2">
         <label class="form-label">Usuario</label>
         <input type="text" class="form-control" id="userName" readonly>
       </div>
@@ -49,6 +43,28 @@
   <div class="app-card-body">
     <p class="section-label">2 · Proveedor &amp; Factura</p>
 
+    <!-- Fila 1: Identificación de la factura -->
+    <div class="row g-3 mb-3">
+      <div class="col-12 col-md-4">
+        <label class="form-label">XML Factura</label>
+        <input type="file" class="form-control" id="inputGroupFileFactura"
+               onchange="leerArchivoXML()" accept=".xml">
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label">Serie</label>
+        <input type="text" class="form-control" id="serieFactura" readonly>
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label">N° Factura</label>
+        <input type="text" class="form-control" id="numeroFactura" required>
+      </div>
+      <div class="col-12 col-md-4">
+        <label class="form-label">Autorización SRI</label>
+        <input type="text" class="form-control" id="autorizacionSri" readonly>
+      </div>
+    </div>
+
+    <!-- Fila 2: Datos del proveedor (readonly, poblados desde el XML) -->
     <div class="row g-3 mb-3">
       <div class="col-12 col-md-2">
         <label class="form-label">Cédula / RUC</label>
@@ -58,35 +74,27 @@
         <label class="form-label">Proveedor</label>
         <input type="text" class="form-control" id="nombreProveedor" readonly>
       </div>
-      <div class="col-12 col-md-4">
-        <label class="form-label">Autorización SRI</label>
-        <input type="text" class="form-control" id="autorizacionSri" readonly>
+      <div class="col-6 col-md-2">
+        <label class="form-label">Fecha Factura</label>
+        <input type="text" class="form-control" id="fechaEmision" readonly>
       </div>
-      <div class="col-12 col-md-2">
-        <label class="form-label">N° Orden OC</label>
-        <input type="text" class="form-control" id="ordenCompra" readonly>
+      <div class="col-6 col-md-2">
+        <label class="form-label">Fecha Ingreso</label>
+        <input type="text" class="form-control" id="fechaIngresoHora" readonly>
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label">Código IVA</label>
+        <input type="text" class="form-control" id="codigoPorcentaje" readonly>
       </div>
     </div>
 
-    <div class="row g-3 mb-3">
+    <!-- Fila 3: Datos editables de la compra -->
+    <div class="row g-3">
       <div class="col-12 col-md-4">
         <label class="form-label">Descripción</label>
         <input type="text" class="form-control" id="descripcionFactura" required
                style="text-transform: uppercase;">
         <div class="invalid-feedback">Campo obligatorio</div>
-      </div>
-      <div class="col-6 col-md-1">
-        <label class="form-label">Plazo Pago</label>
-        <input type="text" class="form-control" id="plazoPago" value="0" required>
-        <div class="invalid-feedback">Obligatorio</div>
-      </div>
-      <div class="col-6 col-md-2">
-        <label class="form-label">Serie</label>
-        <input type="text" class="form-control" id="serieFactura" readonly>
-      </div>
-      <div class="col-6 col-md-2">
-        <label class="form-label">N° Factura</label>
-        <input type="text" class="form-control" id="numeroFactura" required>
       </div>
       <div class="col-12 col-md-3">
         <label class="form-label">Tipo Crédito</label>
@@ -102,24 +110,18 @@
           {% endif %}
         </select>
       </div>
-    </div>
-
-    <div class="row g-3">
-      <div class="col-6 col-md-2">
-        <label class="form-label">Fecha Ingreso</label>
-        <input type="text" class="form-control" id="fechaIngresoHora" readonly>
-      </div>
-      <div class="col-6 col-md-2">
-        <label class="form-label">Fecha Factura</label>
-        <input type="text" class="form-control" id="fechaEmision" readonly>
-      </div>
       <div class="col-6 col-md-2">
         <label class="form-label">Factor de Venta</label>
         <input type="text" class="form-control" id="factorVenta" value="0" required>
       </div>
+      <div class="col-6 col-md-1">
+        <label class="form-label">Plazo Pago</label>
+        <input type="text" class="form-control" id="plazoPago" value="0" required>
+        <div class="invalid-feedback">Obligatorio</div>
+      </div>
       <div class="col-6 col-md-2">
-        <label class="form-label">Código IVA</label>
-        <input type="text" class="form-control" id="codigoPorcentaje" readonly>
+        <label class="form-label">N° Orden OC</label>
+        <input type="text" class="form-control" id="ordenCompra" readonly>
       </div>
     </div>
 
