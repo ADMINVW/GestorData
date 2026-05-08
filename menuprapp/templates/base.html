@@ -338,10 +338,38 @@
       letter-spacing: .08em; text-transform: uppercase;
     }
 
-    /* ─── TAB OVERRIDES ─── */
+    /* ─── TABS RETENCIONES ─── */
+
+    /* botones tabs */
+    .contenedorTabi .atabi,
+    .contenedorTabf .atabf{
+      cursor: pointer;
+      color: var(--text-soft);
+      border: 1px solid var(--border);
+      transition: all .2s ease;
+    }
+
+    /* tab activa */
     .contenedorTabi .atabi.active,
     .contenedorTabf .atabf.active {
       background-color: var(--accent) !important;
+      color: #fff !important;
+      border-color: var(--accent) !important;
+    }
+
+    /* CONTENIDO TABS */
+
+    /* ocultar todos */
+    .bloquetabi,
+    .bloquetabf{
+      display: none;
+      padding-top: 15px;
+    }
+
+    /* mostrar solo activo */
+    .bloquetabi.active,
+    .bloquetabf.active{
+      display: block;
     }
 
     /* ─── ANIMATIONS ─── */
