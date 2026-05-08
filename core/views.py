@@ -117,7 +117,6 @@ def company_login(request):
             request.session.pop('pending_company_db', None)
             request.session.pop('pending_company_name', None)
 
-            messages.success(request, f"Conectado a {company.name}.")
             # Redirigir pasando la empresa activa como query param
             return redirect(f'/mimenu/?company={company.key}')
 
