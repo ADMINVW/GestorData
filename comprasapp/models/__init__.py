@@ -7,3 +7,4 @@ from .proveedor import Proveedor
 from .cuenta import Cuenta
 from .plantilla_detalle import PlantillaDetalle
 from .plantilla_cabecera import PlantillaCabecera
+from .secuencia import Secuencia

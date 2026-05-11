@@ -1,3 +1,5 @@
+from django.db import transaction
+from django.db.models import F
 from ..models.division import Division
 from ..models.tipo_credito import TipoCredito
 from ..models.solicitante import Solicitante
@@ -5,6 +7,7 @@ from ..models.tipo_compra import TipoCompra
 from ..models.centro_gastos import CentroGastos
 from ..models.proveedor import Proveedor
 from ..models.plantilla_cabecera import PlantillaCabecera
+from ..models.secuencia import Secuencia
 
 class OrdenComprasService:
     def get_division(self, db_alias):
@@ -40,3 +43,23 @@ class OrdenComprasService:
             'codigo_plantilla_id',           
             'codigo_plantilla__pc_concepto'  
         ).distinct()
+
+    def update_numero_secuencia(self, db_alias, compania, division, agencia, tipoDoc):
+        filtros = {
+            'sq_cia': compania,
+            'sq_div': division,
+            'sq_agencia': agencia,
+            'sq_tipo': tipoDoc
+            }
+        
+        with transaction.atomic(using=db_alias):
+            # Actualiza directamente en la BD y devuelve cuántas filas afectó
+            actualizados = Secuencia.objects.using(db_alias).filter(**filtros).update(
+                sq_numero=F('sq_numero') + 1
+            )
+            
+            if actualizados:
+                # Recuperamos el valor actualizado
+                return Secuencia.objects.using(db_alias).get(**filtros).sq_numero
+            else:
+                raise Exception("No se encontró el registro de secuencia para actualizar.")

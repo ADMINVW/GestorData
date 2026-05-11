@@ -7,3 +7,4 @@ from .proveedor_serializer import ProveedorSerializer
 from .cuenta_serializer import CuentaSerializer
 from .plantilla_detalle_serializer import PlantillaDetalleSerializer
 from .plantilla_cabecera_serializer import PlantillaCabeceraSerializer
+from .secuencia_serializer import SecuenciaSerializer
