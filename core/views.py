@@ -38,6 +38,8 @@ def company_login(request):
         user = request.POST.get('username')
         pw   = request.POST.get('password')
 
+        nombre_user = get_nombre_user(request, db_alias, user)
+
         try:
             company = Company.objects.get(db_alias=db_alias)
 
@@ -84,6 +86,7 @@ def company_login(request):
 
             # Guardar credenciales POR EMPRESA (no sobreescribe otras)
             request.session[f'user_{company.key}'] = encrypt_credential(user)
+            request.session[f'user_name_{company.key}'] = encrypt_credential(nombre_user) if nombre_user else None
             request.session[f'pass_{company.key}'] = encrypt_credential(pw)
 
             # Guardar lista de empresas activas en sesión
@@ -134,3 +137,12 @@ def company_login(request):
             return redirect('company_select')
 
     return render(request, 'core/login.html')
+
+def get_nombre_user(request, db_alias, user):
+    with connections[db_alias].cursor() as cur:
+        cur.execute(
+            "SELECT us_nombre FROM ciatt004 WHERE us_login = ?",
+            [user]
+        )
+        row = cur.fetchone()
+        return row[0] if row else None

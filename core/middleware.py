@@ -20,6 +20,8 @@ class DynamicConnectionMiddleware:
         print(f"MIDDLEWARE - Headers X-Company-Key: {request.headers.get('X-Company-Key')}")
         print(f"MIDDLEWARE - company_key resuelto: {company_key}")
 
+        db_user_name = None  # Inicializar por defecto
+        
         if company_key:
             # Actualizar la sesión con el company_key resuelto
             request.session['active_company_key'] = company_key
@@ -31,10 +33,12 @@ class DynamicConnectionMiddleware:
                 db_alias = company_info['db_alias']
                 db_user  = decrypt_credential(request.session.get(f'user_{company_key}'))
                 db_pass  = decrypt_credential(request.session.get(f'pass_{company_key}'))
+                db_user_name = decrypt_credential(request.session.get(f'user_name_{company_key}'))
             elif company_key in connections.databases:
                 db_alias = company_key
                 db_user = decrypt_credential(request.session.get(f'user_{company_key}'))
                 db_pass = decrypt_credential(request.session.get(f'pass_{company_key}'))
+                db_user_name = decrypt_credential(request.session.get(f'user_name_{company_key}'))
                 print(f"MIDDLEWARE - fallback directo a db_alias: {company_key}")
             else:
                 db_alias, db_user, db_pass = 'default', None, None
@@ -44,6 +48,7 @@ class DynamicConnectionMiddleware:
         # Guardar en el request directamente ← clave del fix
         request.db_alias = db_alias
         request.db_user  = db_user
+        request.db_user_name = db_user_name
 
         # También en thread locals para compatibilidad con get_db()
         set_db_credentials(db_alias, db_user, db_pass)

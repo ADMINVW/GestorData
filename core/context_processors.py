@@ -8,8 +8,10 @@ def company_context(request):
         try:
             company = Company.objects.get(key=company_key)
             db_user = decrypt_credential(request.session.get(f'user_{company_key}'))
-            print(f"CONTEXT PROCESSOR - company: {company}, db_user: {db_user}")
-            return {'company': company, 'db_user': db_user, 'company_key': company_key}
+            db_user_name = decrypt_credential(request.session.get(f'user_name_{company_key}'))
+            nombre_user = db_user_name  # Variable para el template
+            print(f"CONTEXT PROCESSOR - company: {company}, db_user: {db_user}, db_user_name: {db_user_name}")
+            return {'company': company, 'db_user': db_user, 'db_user_name': db_user_name, 'nombre_user': nombre_user, 'company_key': company_key}
         except Company.DoesNotExist:
             print(f"CONTEXT PROCESSOR - Company no existe para key: {company_key}")
             pass
