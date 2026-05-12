@@ -8,3 +8,5 @@ from .cuenta_serializer import CuentaSerializer
 from .plantilla_detalle_serializer import PlantillaDetalleSerializer
 from .plantilla_cabecera_serializer import PlantillaCabeceraSerializer
 from .secuencia_serializer import SecuenciaSerializer
+from .orden_compra_cabecera_serializer import OrdenCompraCabeceraSerializer
+from .orden_compra_detalle_serializer import OrdenCompraDetalleSerializer

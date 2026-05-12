@@ -8,6 +8,8 @@ from ..models.centro_gastos import CentroGastos
 from ..models.proveedor import Proveedor
 from ..models.plantilla_cabecera import PlantillaCabecera
 from ..models.secuencia import Secuencia
+from ..models.orden_compra_cabecera import OrdenCompraCabecera
+from ..models.orden_compra_detalle import OrdenCompraDetalle
 
 class OrdenComprasService:
     def get_division(self, db_alias):
@@ -63,3 +65,35 @@ class OrdenComprasService:
                 return Secuencia.objects.using(db_alias).get(**filtros).sq_numero
             else:
                 raise Exception("No se encontró el registro de secuencia para actualizar.")
+
+    def actualizar_secuencia(self, db_alias, numero_secuencia, compania, division, agencia, tipoDoc, bodega):
+        filtros = {
+            'sq_cia': compania,
+            'sq_div': division,
+            'sq_agencia': agencia,
+            'sq_tipo': tipoDoc
+        }
+        with transaction.atomic(using = db_alias):
+            actualizados = Secuencia.objects.using(db_alias).filter(**filtros).update(
+                sq_numero = numero_secuencia,
+                sq_cia = compania,
+                sq_div = division,
+                sq_agencia = agencia,
+                sq_tipo = tipoDoc,
+                sq_bodega = bodega
+            )
+            
+        if not actualizados:
+            raise Exception("No se encontró el registro de secuencia para actualizar.")
+
+    
+    def guardar_orden_compra_cabecera(self, db_alias, datos):
+        with transaction.atomic(using = db_alias):
+            oc_cabecera = OrdenCompraCabecera.objects.using(db_alias).create(**datos)
+        return oc_cabecera
+
+    
+    def guardar_orden_compra_detalle(self, db_alias, datos):
+        with transaction.atomic(using = db_alias):
+            oc_detalle = OrdenCompraDetalle.objects.using(db_alias).create(**datos)
+        return oc_detalle
