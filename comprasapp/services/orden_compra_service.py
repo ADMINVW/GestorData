@@ -1,5 +1,6 @@
 from django.db import transaction
 from django.db.models import F
+from django.db import connections
 from ..models.division import Division
 from ..models.tipo_credito import TipoCredito
 from ..models.solicitante import Solicitante
@@ -10,6 +11,7 @@ from ..models.plantilla_cabecera import PlantillaCabecera
 from ..models.secuencia import Secuencia
 from ..models.orden_compra_cabecera import OrdenCompraCabecera
 from ..models.orden_compra_detalle import OrdenCompraDetalle
+from ..models.cuenta import Cuenta
 
 class OrdenComprasService:
     def get_division(self, db_alias):
@@ -24,12 +26,21 @@ class OrdenComprasService:
     def get_tipo_compra(self, db_alias, division):
         return TipoCompra.objects.using(db_alias).filter(to_division = division, to_cia = 'e')
 
-    def get_cuentas_proveedor(self, db_alias, ruc):
+    def get_cuentas_proveedor_A(self, db_alias, cia, ruc):
         return CentroGastos.objects.using(db_alias).select_related('proveedor', 'cuenta').filter(
             proveedor__pv_cedruc=ruc,
-            cuenta__ct_compania='e'
+            cuenta__ct_compania = cia
         )
-    
+
+    def get_cuentas_proveedor(self, db_alias, cia, ruc):
+        with connections[db_alias].cursor() as cursor:
+            sql_query = "SELECT a.*,d.ct_cuenta,c.ct_descripcion FROM ocxxt013 a, ciatt011 b, cgrta001 c, ocxxt012 d WHERE mc_codpro = pv_codigo AND c.ct_cuenta = d.ct_cuenta AND ct_compania = '" + cia + "' AND pv_cedruc = '" + ruc + "' AND ct_codgrp = mc_codgrp AND ct_secgrp = mc_secgrp"
+            cursor.execute(sql_query)
+            rows = cursor.fetchall()
+            column_names = [desc[0] for desc in cursor.description]
+            cuentaProv = [dict(zip(column_names, row)) for row in rows]
+        return cuentaProv
+
     def get_codigo_proveedor(self, db_alias, cia, ruc):
         return Proveedor.objects.using(db_alias).filter(
             pv_cia = cia, 

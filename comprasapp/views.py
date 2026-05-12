@@ -31,7 +31,8 @@ from .services import (
     OrdenComprasService
 )
 from .serializers import (
-    DivisionSerializer, TipoCreditoSerializer, SolicitanteSerializer, TipoCompraSerializer, CentroGastosSerializer, ProveedorSerializer, PlantillaCabeceraSerializer
+    DivisionSerializer, TipoCreditoSerializer, SolicitanteSerializer, TipoCompraSerializer, CentroGastosSerializer, ProveedorSerializer, PlantillaCabeceraSerializer,
+    OrdenCompraCabeceraSerializer
 )
 
 @require_http_methods(["GET"])
@@ -81,13 +82,11 @@ def cuentaProv(request):
     if ruc is None:
         return JsonResponse({'error': 'Código de Proveedor no proporcionado'}, status=400)
     
-    try:
-        cuentas_proveedor = service.get_cuentas_proveedor(db_alias, ruc)
-        cuentas_data = CentroGastosSerializer(cuentas_proveedor, many=True).data
-        return JsonResponse({'ncuentaprov': cuentas_data})
-    
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+    cuentas_proveedor = service.get_cuentas_proveedor(db_alias=db_alias, cia='e', ruc=ruc)
+    if not cuentas_proveedor:
+        return JsonResponse({'error': 'No se encontraron cuentas para el proveedor con RUC proporcionado'}, status=404)
+    #cuentas_data = CentroGastosSerializer(cuentas_proveedor, many=True).data
+    return JsonResponse({'ncuentaprov': cuentas_proveedor})
     
 @require_http_methods(["GET"])
 def plantillaProv(request):
@@ -1285,6 +1284,8 @@ def crearXmlRetencion(request, datos):
         match iva:
             case  0:
                 codiva = 0
+            case 8:
+                codiva = 8
             case 12:
                 codiva = 2
             case 14:
@@ -1445,7 +1446,12 @@ def crearXmlRetencion(request, datos):
     nombre_archivo= f'{datos["ncodDiv"]}ew0w{datos["nnumRetencion"]}.xml'
     print("nombre xml: "+ nombre_archivo)
     #Produccion
-    #ruta_remota = r"\\192.168.1.11\enviodoc\all-ftpconex\out\compret"
+    #if db_alias == 'ecuawagen':
+    #    ruta_remota = r"\\192.168.1.11\enviodoc\all-ftpconex\out\compret"
+    #elif db_alias == 'germanmoto':
+    #    ruta_remota = r"\\192.168.1.11\enviodocg\all-ftpconex\out\compret"
+    #else:
+    #    return JsonResponse({"error": "Base de datos no reconocida para determinar ruta de almacenamiento"}, status=400)
     #ruta_completa = os.path.join(ruta_remota, nombre_archivo)
     #tree.write(ruta_completa,encoding='utf-8',xml_declaration=True)
     
