@@ -138,6 +138,27 @@ def company_login(request):
 
     return render(request, 'core/login.html')
 
+def company_logout(request):
+    company_key = request.GET.get('company') or request.session.get('active_company_key')
+    if company_key:
+        request.session.pop(f'user_{company_key}', None)
+        request.session.pop(f'user_name_{company_key}', None)
+        request.session.pop(f'pass_{company_key}', None)
+        request.session.pop(f'user_data_{company_key}', None)
+
+        active = request.session.get('active_companies', {})
+        if company_key in active:
+            active.pop(company_key, None)
+            request.session['active_companies'] = active
+
+        if request.session.get('active_company_key') == company_key:
+            if active:
+                request.session['active_company_key'] = next(iter(active))
+            else:
+                request.session.pop('active_company_key', None)
+
+    return redirect('company_select')
+
 def get_nombre_user(request, db_alias, user):
     with connections[db_alias].cursor() as cur:
         cur.execute(

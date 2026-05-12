@@ -1,4 +1,5 @@
 from django.db import connections
+from django.shortcuts import redirect
 from core.db_context import set_db_credentials
 from core.crypto import decrypt_credential
 
@@ -14,6 +15,27 @@ class DynamicConnectionMiddleware:
             or request.POST.get('company')
             or request.session.get('active_company_key')  # Fallback: buscar en sesión
         )
+
+        # Rutas públicas que no requieren estar logueado
+        public_exact_paths = ('/', '/login_db/', '/logout/')
+        public_prefix_paths = ('/admin/', '/static/')
+
+        is_public = (
+            request.path in public_exact_paths
+            or any(request.path.startswith(prefix) for prefix in public_prefix_paths)
+        )
+
+        active = request.session.get('active_companies', {})
+        company_info = company_key and active.get(company_key)
+
+        db_user = decrypt_credential(request.session.get(f'user_{company_key}')) if company_key else None
+        db_pass = decrypt_credential(request.session.get(f'pass_{company_key}')) if company_key else None
+        db_user_name = decrypt_credential(request.session.get(f'user_name_{company_key}')) if company_key else None
+
+        valid_login = bool(company_info and db_user and db_pass)
+
+        if not is_public and not valid_login:
+            return redirect('company_select')
 
         print(f"MIDDLEWARE - path: {request.path}")
         print(f"MIDDLEWARE - GET params: {dict(request.GET)}")

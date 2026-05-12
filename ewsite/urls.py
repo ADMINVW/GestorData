@@ -18,7 +18,7 @@ from menuprapp.views import mimenu
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path,include
-from core.views import company_select, company_login
+from core.views import company_select, company_login, company_logout
 from django.conf import settings
 import os
 
@@ -27,6 +27,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', company_select, name='company_select'),
     path('login_db/', company_login, name='company_login'),
+    path('logout/', company_logout, name='company_logout'),
     path('',mimenu),
     path('',include('menuprapp.urls')),
     path('',include('tallerapp.urls')),
