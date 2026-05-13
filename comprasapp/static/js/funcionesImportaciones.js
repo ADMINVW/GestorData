@@ -7,6 +7,30 @@ $.ajaxSetup({
     }
 });
 
+function actualizarEtiquetaCG(fila) {
+    // Busca todos los checkboxes de esa fila
+    var checks = document.querySelectorAll('#cg-' + fila + '-checklist .cg-check:checked');
+    
+    // Reconstruye buscando dentro del dropdown de esa fila
+    // Mejor: buscamos el botón por data o por posición en la tabla
+    var dropdowns = document.querySelectorAll('.cg-dropdown-btn');
+    var btn = dropdowns[fila];
+    
+    var seleccionados = [];
+    var todosLosChecks = document.querySelectorAll('[id^="cg-' + fila + '-"]');
+    todosLosChecks.forEach(function(chk) {
+        if (chk.checked) {
+            seleccionados.push(chk.nextElementSibling.textContent.trim());
+        }
+    });
+
+    if (btn) {
+        btn.textContent = seleccionados.length > 0
+            ? seleccionados.join(', ')
+            : 'Seleccionar C.G.';
+    }
+}
+
 function leerArchivoXML() {
     //mine
     sessionStorage.removeItem("form_enviado");
@@ -23,7 +47,6 @@ function leerArchivoXML() {
             var elementoTemporal = document.createElement("textarea");
             elementoTemporal.innerHTML = contenidoXML;
             var textoDecodificado = elementoTemporal.value;
-            var Periodicas = document.getElementById("PeriodicasSwitchCheck");
             var NombreProveedor = document.getElementById("nombreProveedor");
             var RucProveedor = document.getElementById("rucProveedor");
             var FechaEmision = document.getElementById("fechaEmision");
@@ -45,8 +68,6 @@ function leerArchivoXML() {
 
             var parser = new DOMParser();
             var xmlDoc = parser.parseFromString(textoSinDeclaracion, 'text/xml');
-
-            var PeriodicasisChecked = Periodicas.checked;
 
             var nombreElemento = xmlDoc.querySelector('factura > infoTributaria > razonSocial');
             NombreProveedor.value = nombreElemento.textContent;
@@ -139,21 +160,33 @@ function leerArchivoXML() {
                     tablaTarifa += "<th>" + tarifa + "</th>";
                     tablaTarifa += "<th>" + valor.toFixed(2) + "</th>";
 
+                    tabla += "<th scope='col'>";
+                    tabla += "<div class='dropdown'>";
+                    tabla += "  <button class='btn btn-outline-secondary btn-sm dropdown-toggle cg-dropdown-btn' type='button' data-bs-toggle='dropdown' data-bs-auto-close='outside' data-fila='" + i + "'>";
+                    tabla += "    Seleccionar C.G.";
+                    tabla += "  </button>";
+                    tabla += "  <ul class='dropdown-menu p-2' style='min-width:220px; max-height:200px; overflow-y:auto;'>";
 
-                    if (PeriodicasisChecked == false) {
-                        tabla += "<th scope='col'>";
-                        tabla += "<select class='form-select' aria-label='Default select example'>"
-                        tabla += "<option selected>Selecion C. G.</option>"
-                        tabla += opcionesHTML;
-                        tabla += "</select>"
-                        tabla += "</th>";
-                    } else {
-                        tabla += "<th scope='col'>";
-                        tabla += "<select class='form-select' aria-label='Default select example'>"
-                        tabla += "</select>"
-                        tabla += "</th>";
-                    }
-                    
+                    // Parsear opcionesHTML para extraer value y texto
+                    var tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = opcionesHTML;
+                    var options = tempDiv.querySelectorAll('option');
+
+                    options.forEach(function(opt) {
+                        var val = opt.value;
+                        var texto = opt.textContent.trim();
+                        tabla += "<li class='dropdown-item p-1'>";
+                        tabla += "  <div class='form-check'>";
+                        tabla += "    <input class='form-check-input cg-check' type='checkbox' value='" + val + "' id='cg-" + i + "-" + val + "' onchange='actualizarEtiquetaCG(" + i + ")'>";
+                        tabla += "    <label class='form-check-label w-100' for='cg-" + i + "-" + val + "'>" + texto + "</label>";
+                        tabla += "  </div>";
+                        tabla += "</li>";
+                    });
+
+                    tabla += "  </ul>";
+                    tabla += "</div>";
+                    tabla += "</th>";
+                
                 }
 
                 document.getElementById("tablaDetalle").innerHTML = tabla;
@@ -419,12 +452,10 @@ async function enviarDatosFactura() {
         return;  // Esto devuelve `true` correctamente
     }
 
-    const periodicas = document.getElementById('PeriodicasSwitchCheck');
     var DescripTemp = document.getElementById("descripcionFactura");
     DescripTemp.value = DescripTemp.value.toUpperCase();
 
     var datos = {
-        Periodicas: periodicas.checked,
         Compania: sessionStorage.getItem('compania'),
         Agencia: sessionStorage.getItem('agencia'),
         Bodega: sessionStorage.getItem('bodega'),
@@ -488,21 +519,17 @@ async function enviarDatosFactura() {
         }
 
         filaDatos.push(celdas[6].innerText);    // Total (6)
-        if (periodicas.checked == false) {
-            var selectElement = celdas[7].getElementsByTagName("select")[0];
-            if (selectElement.selectedIndex == 0) {
-                alert('Debe seleccionar todos los Centros de Gastos.');
-                selectElement.focus();
-                return false;
-            }
-            var selectElement = celdas[7].getElementsByTagName("select")[0];
-            var selectValue = selectElement ? selectElement.value : "";
-            filaDatos.push(selectValue); // Centro de Gastos (7)
+        
+        var selectElement = celdas[7].getElementsByTagName("select")[0];
+        if (selectElement.selectedIndex == 0) {
+            alert('Debe seleccionar todos los Centros de Gastos.');
+            selectElement.focus();
+            return false;
         }
-        else {
-            var selectValue = "";
-            filaDatos.push(selectValue); // Centro de Gastos (7)
-        }
+        var selectElement = celdas[7].getElementsByTagName("select")[0];
+        var selectValue = selectElement ? selectElement.value : "";
+        filaDatos.push(selectValue); // Centro de Gastos (7)
+        
         filaDatos.push(celdasIva[1].innerText);    // Porcentaje IVA (8)
         filaDatos.push(celdasIva[2].innerText);    // Valor IVA (9)
         // Agrega la submatriz a la matriz principal
@@ -587,7 +614,6 @@ async function validaExisteFactura() {
 async function validaDatosFactura() {
 
     // Obtén los elementos del formulario
-    const periodicas = document.getElementById('PeriodicasSwitchCheck');
     const divisionselect = document.getElementById('divisionSelect');
     const subtiposelect = document.getElementById('subTipoSelect');
     const selsolicita = document.getElementById('selSolicita');
@@ -624,7 +650,7 @@ async function validaDatosFactura() {
         return false;
     }
 
-    if (plantillas.selectedIndex == 0 & periodicas.checked) {
+    if (plantillas.selectedIndex == 0) {
         alert('El campo Plantillas es obligatorio.');
         plantillas.focus();
         return false;
