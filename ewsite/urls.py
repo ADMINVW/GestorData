@@ -33,7 +33,7 @@ urlpatterns = [
     path('',include('tallerapp.urls')),
     path('',include('comprasapp.urls')),
     path('',include('repuestosapp.urls')),
-    
+    path('',include('importacionesapp.urls')),
 ]
 
 if settings.DEBUG:
