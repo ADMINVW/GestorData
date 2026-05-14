@@ -40,6 +40,11 @@ class OrdenComprasService:
             column_names = [desc[0] for desc in cursor.description]
             cuentaProv = [dict(zip(column_names, row)) for row in rows]
         return cuentaProv
+    
+    def get_cuentas_importaciones(self, db_alias):
+        return Cuenta.objects.using(db_alias).filter(
+            ct_descripcion__icontains = 'PEDIDOS'
+        )
 
     def get_codigo_proveedor(self, db_alias, cia, ruc):
         return Proveedor.objects.using(db_alias).filter(
@@ -97,14 +102,13 @@ class OrdenComprasService:
         if not actualizados:
             raise Exception("No se encontró el registro de secuencia para actualizar.")
 
-    
     def guardar_orden_compra_cabecera(self, db_alias, datos):
         with transaction.atomic(using = db_alias):
             oc_cabecera = OrdenCompraCabecera.objects.using(db_alias).create(**datos)
         return oc_cabecera
 
-    
     def guardar_orden_compra_detalle(self, db_alias, datos):
         with transaction.atomic(using = db_alias):
             oc_detalle = OrdenCompraDetalle.objects.using(db_alias).create(**datos)
         return oc_detalle
+

@@ -335,7 +335,7 @@ function fetchCuentaProv() {
 
         if (rucprov) {
             $.ajax({
-                url: '/comprasapp/cuentaProv/',
+                url: '/importacionesapp/cuentaProv/',
                 method: 'GET',
                 data: {
                     'rucprov': rucprov,
