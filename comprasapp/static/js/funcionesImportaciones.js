@@ -545,7 +545,7 @@ async function enviarDatosFactura() {
     var ck = sessionStorage.getItem('company_key') || '';
 
     $.ajax({
-        url: '/comprasapp/guardaFacturaCompra/',
+        url: '/importacionesapp/guardaFacturaImportaciones/',
         method: 'POST',
         headers: {
             'X-Company-Key': ck
