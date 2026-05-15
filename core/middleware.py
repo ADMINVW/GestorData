@@ -13,8 +13,19 @@ class DynamicConnectionMiddleware:
             request.GET.get('company')
             or request.headers.get('X-Company-Key')
             or request.POST.get('company')
-            or request.session.get('active_company_key')  # Fallback: buscar en sesión
+            or request.session.get('active_company_key')
         )
+
+        active = request.session.get('active_companies', {})
+        company_info = active.get(company_key)
+
+        if company_info:
+            db_alias = company_info['db_alias']
+
+        # company_key ahora puede ser "ecuawagen__intaco"
+        # extraer el db_alias real desde active_companies
+        active = request.session.get('active_companies', {})
+        company_info = active.get(company_key)
 
         # Rutas públicas que no requieren estar logueado
         public_exact_paths = ('/', '/login_db/', '/logout/')
