@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'tallerapp',
     'comprasapp',
     'repuestosapp',
+    'importacionesapp',
     'core',
 ]
 
