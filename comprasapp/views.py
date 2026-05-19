@@ -272,11 +272,13 @@ def guardaFacturaCompra(request):
 
             except Exception as e:
                 print(f"Error al insertar detalle: {e}")
-                messages.error(request, f"Hubo un fallo: no se generó la compra local {e}")
+                messages.error(request, f"Hubo un fallo: no se guardó la factura")
                 company_key = request.headers.get('X-Company-Key', '')
-                return JsonResponse({'redirect_url': f'../../comprasapp/templates/retencionCompra/{OcNumero}/{Division}/?Agencia={Agencia}&company={company_key}'})
+                return JsonResponse(
+                    {'redirect_url': f'/comprasapp/templates/ordenCompra&company={company_key}'}
+                )
 
-        ordenCompra = obtenerOrdenCompra(db_alias, Agencia, Division, secuenciaw)   
+        ordenCompra = obtenerOrdenCompra(request, db_alias, Agencia, Division, secuenciaw)   
         if ordenCompra is None:
             return JsonResponse({'error': f'No se pudo recuperar la orden de compra {secuenciaw}'}, status=400)
         guardarCtaPagar(request, db_alias, ordenCompra)
@@ -365,6 +367,9 @@ def guardarCtaPagar(request, db_alias=None, orden=None):
 
     except Exception as e:
         print("Error al guardar cta pagar: ", e)
+        messages.error(request, f"No se generó la cuenta por pagar, vuelva a ingresar los datos")
+        company_key = request.headers.get('X-Company-Key', '')
+        return JsonResponse({'redirect_url': f'/comprasapp/templates/ordenCompra&company={company_key}'})
     finally:
         cur.close() 
    
@@ -426,7 +431,7 @@ def actualizarSaldos(request, db_alias=None, fechaFactura=None, fechaVencimiento
                 print("Registro general Pagar")
                 actualizo = True
             else:
-                crearRegistroSaldos(db_alias, "G",division,agencia,cartera,proveedor,fechaFactura,tipoProv)
+                crearRegistroSaldos(request, db_alias, "G",division,agencia,cartera,proveedor,fechaFactura,tipoProv)
         #Registro proveedor
         actualizo=False
         while (actualizo==False):
@@ -437,10 +442,10 @@ def actualizarSaldos(request, db_alias=None, fechaFactura=None, fechaVencimiento
                 print("Registro proveedor")
                 actualizo = True
             else:
-                crearRegistroSaldos(db_alias, "P",division,agencia,cartera,proveedor,fechaFactura,None)
+                crearRegistroSaldos(request, db_alias, "P",division,agencia,cartera,proveedor,fechaFactura,None)
     cur.close
 
-def crearRegistroSaldos(db_alias=None, tipoReg=None, division=None, agencia=None, cartera=None, proveedor=None, fechaFactura=None, tipoProv=None):
+def crearRegistroSaldos(request, db_alias=None, tipoReg=None, division=None, agencia=None, cartera=None, proveedor=None, fechaFactura=None, tipoProv=None):
     if db_alias is None:
         db_alias = get_db_from_request(request)
     
@@ -475,7 +480,7 @@ def ingresarRetencion(request,id,codDiv):
         #codDiv = "d"
         ocompra = id
 
-        ordenCompra = obtenerOrdenCompra(db_alias, codAge, codDiv, ocompra)   
+        ordenCompra = obtenerOrdenCompra(request, db_alias, codAge, codDiv, ocompra)   
         
         numFac = ordenCompra["oc_facpro"]
         codProv = ordenCompra["oc_codpro"]
@@ -778,7 +783,7 @@ def verTransaccionResumen(request, numOrden):
     nombreAgencia = consultarDato(request, ssql, db_alias=db_alias)
     
     #Datos Orden
-    datosOrden = obtenerOrdenCompra(db_alias, codAge, codDiv, numOrden)
+    datosOrden = obtenerOrdenCompra(request, db_alias, codAge, codDiv, numOrden)
     
     factura =  datosOrden["oc_facpro"]
     codProveedor = datosOrden["oc_codpro"]
@@ -903,7 +908,7 @@ def obtenerNombreDiv(request, div):
     nombre = consultarDato(request, ssql,[div], db_alias=db_alias)
     return nombre
 
-def obtenerOrdenCompra(db_alias=None, codAge=None, codDiv=None, numOrden=None):
+def obtenerOrdenCompra(request, db_alias=None, codAge=None, codDiv=None, numOrden=None):
     if db_alias is None:
         db_alias = get_db_from_request(request)
     
@@ -1715,7 +1720,7 @@ def crearPlantilla(request):
     except Company.DoesNotExist:
         company = None
     
-    listsSelects = obtenerSelectPlantilla()
+    listsSelects = obtenerSelectPlantilla(request)
     context = {
         'nproceso' : "C",
         'nsolicitantes':listsSelects["solicitantes"],
@@ -1743,7 +1748,7 @@ def editarPlantilla(request, codigo):
         plantilla = consultarRegistros(request, ssql,parametros)
         datosProveedor = obtenerDatosProveedor(request, plantilla[0]["pc_codpro"])
 
-        listsSelects = obtenerSelectPlantilla()
+        listsSelects = obtenerSelectPlantilla(request)
 
         context ={
             'nproceso' : "U",
@@ -1761,7 +1766,7 @@ def editarPlantilla(request, codigo):
     
     return render(request,'plantillaPeriodica.html', context)
 
-def obtenerSelectPlantilla():
+def obtenerSelectPlantilla(request):
     db_alias = get_db_from_request(request)
     #Obtiene registros para llenar los select del template plantillaPeriodica
     listsSelects={}

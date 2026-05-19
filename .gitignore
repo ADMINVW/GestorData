@@ -6,3 +6,5 @@ new_data.xml
 .vscode/
 *.pyc
 __pycache__/
+generated_models.py
+django_debug.log
