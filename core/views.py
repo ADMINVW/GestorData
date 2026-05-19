@@ -38,8 +38,6 @@ def company_login(request):
         user = request.POST.get('username')
         pw   = request.POST.get('password')
 
-        nombre_user = get_nombre_user(request, db_alias, user)
-
         try:
             company = Company.objects.get(db_alias=db_alias)
 
@@ -64,8 +62,13 @@ def company_login(request):
                 if company.db_port:
                     connections.databases[db_alias]['PORT'] = str(company.db_port)
 
+            # Cerrar y limpiar antes de intentar conectar
+            try:
+                connections[db_alias].close()
+            except Exception:
+                pass
+
             conn = connections[db_alias]
-            conn.close()
             conn.settings_dict['USER']     = user
             conn.settings_dict['PASSWORD'] = pw
             conn.ensure_connection()
@@ -81,26 +84,32 @@ def company_login(request):
 
             if not row or row[0].lower() != company.db_name.lower():
                 conn.close()
-                error = "Error de integridad: la base de datos conectada no coincide."
+                messages.error(request, "Error de integridad: la base de datos conectada no coincide.")
                 return redirect('company_select')
 
-            # Guardar credenciales POR EMPRESA (no sobreescribe otras)
-            request.session[f'user_{company.key}'] = encrypt_credential(user)
-            request.session[f'user_name_{company.key}'] = encrypt_credential(nombre_user) if nombre_user else None
-            request.session[f'pass_{company.key}'] = encrypt_credential(pw)
+            # get_nombre_user DESPUÉS de conexión exitosa
+            nombre_user = get_nombre_user(db_alias, user)
 
-            # Guardar lista de empresas activas en sesión
+            # Guardar credenciales por empresa y usuario
+            session_key = f"{company.key}__{user}" 
+
+            request.session[f'user_{session_key}']      = encrypt_credential(user)
+            request.session[f'user_name_{session_key}'] = encrypt_credential(nombre_user) if nombre_user else None
+            request.session[f'pass_{session_key}']      = encrypt_credential(pw)
+            request.session[f'user_data_{session_key}'] = { ... }
+
             active = request.session.get('active_companies', {})
-            active[company.key] = {
-                'key':    company.key,
-                'name':   company.name,
+            active[session_key] = {
+                'key':      company.key,       
+                'name':     company.name,
                 'db_alias': company.db_alias,
+                'username': user,               
             }
             request.session['active_companies'] = active
-            request.session['active_company_key'] = company.key
+            request.session['active_company_key'] = session_key  
+
             request.session.modified = True
 
-            # Obtener datos del usuario
             with conn.cursor() as cursor:
                 cursor.execute(
                     "SELECT ur_cia, ur_age, ur_bodprn FROM tattt034 WHERE ur_user = ?",
@@ -108,58 +117,67 @@ def company_login(request):
                 )
                 user_data = cursor.fetchone()
                 if user_data:
-                    # Guardar por empresa, no globalmente
-                    request.session[f'user_data_{company.key}'] = {
-                        'compania': user_data[0],
-                        'agencia':  user_data[1],
-                        'bodega':   user_data[2],
+                    request.session[f'user_data_{session_key}'] = {
+                        'compania': str(user_data[0]) if user_data[0] is not None else None,
+                        'agencia':  str(user_data[1]) if user_data[1] is not None else None,
+                        'bodega':   str(user_data[2]) if user_data[2] is not None else None,
                     }
 
-            # Limpiar pending
             request.session.pop('pending_company_key', None)
             request.session.pop('pending_company_db', None)
             request.session.pop('pending_company_name', None)
 
-            # Redirigir pasando la empresa activa como query param
-            return redirect(f'/mimenu/?company={company.key}')
+            return redirect(f'/mimenu/?company={session_key}')
 
         except Company.DoesNotExist:
-            error = "Empresa no encontrada."
-            messages.error(request, error)
+            messages.error(request, "Empresa no encontrada.")
             return redirect('company_select')
         except Exception as e:
+            print(f"[DEBUG LOGIN ERROR] type={type(e).__name__} | error={e}")
             try:
                 connections[db_alias].close()
+                connections.databases[db_alias]['USER'] = ''
+                connections.databases[db_alias]['PASSWORD'] = ''
             except Exception:
                 pass
-            error = "Error de conexión: usuario o contraseña incorrectos"
-            messages.error(request, error)
-            return redirect('company_select')
-
-    return render(request, 'core/login.html')
+            messages.error(request, "Error de conexión: usuario o contraseña incorrectos")
+    return redirect('company_select')
 
 def company_logout(request):
-    company_key = request.GET.get('company') or request.session.get('active_company_key')
-    if company_key:
-        request.session.pop(f'user_{company_key}', None)
-        request.session.pop(f'user_name_{company_key}', None)
-        request.session.pop(f'pass_{company_key}', None)
-        request.session.pop(f'user_data_{company_key}', None)
+    session_key = request.GET.get('company') or request.session.get('active_company_key')
+    if session_key:
+        request.session.pop(f'user_{session_key}', None)
+        request.session.pop(f'user_name_{session_key}', None)
+        request.session.pop(f'pass_{session_key}', None)
+        request.session.pop(f'user_data_{session_key}', None)
 
         active = request.session.get('active_companies', {})
-        if company_key in active:
-            active.pop(company_key, None)
-            request.session['active_companies'] = active
+        active.pop(session_key, None)
+        request.session['active_companies'] = active
 
-        if request.session.get('active_company_key') == company_key:
+        if request.session.get('active_company_key') == session_key:
             if active:
                 request.session['active_company_key'] = next(iter(active))
             else:
                 request.session.pop('active_company_key', None)
 
+        # Cerrar conexión solo si no hay otras sesiones activas usando el mismo db_alias
+        company_info = active
+        still_using = any(
+            v['db_alias'] == session_key.split('__')[0]
+            for v in company_info.values()
+        )
+        if not still_using:
+            db_alias = session_key.split('__')[0]
+            try:
+                connections[db_alias].close()
+            except Exception:
+                pass
+
     return redirect('company_select')
 
-def get_nombre_user(request, db_alias, user):
+
+def get_nombre_user(db_alias, user):
     with connections[db_alias].cursor() as cur:
         cur.execute(
             "SELECT us_nombre FROM ciatt004 WHERE us_login = ?",
