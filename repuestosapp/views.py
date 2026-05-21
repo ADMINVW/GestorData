@@ -220,7 +220,7 @@ def guardaFacturaRepuestos(request):
 
                 #OBTENGO INFORMACION ADICIONAL DE LOS REPUESTOS
                 for fila in datos_tabla:
-                    cur.execute("SELECT it_linea,it_clase, it_costpro,st_ubica,st_stockact,it_descrip,it_precio FROM inrrt003,inrrt004 WHERE it_codigo = '" + fila[2].strip() + "' AND it_codigo = st_codigo AND st_bodega = '" + Bodega + "'")
+                    cur.execute("SELECT it_linea,it_clase, it_costpro,st_ubica,st_stockact,it_descrip,it_precio FROM inrrt003,inrrt004 WHERE it_codigo = '" + fila[2].strip() + "' AND it_codigo = st_codigo")
                     nuevaInfo = cur.fetchone()
                             
                     if nuevaInfo:
