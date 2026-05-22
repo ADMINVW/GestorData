@@ -560,6 +560,7 @@ async function enviarDatosFactura() {
         },
         error: function (xhr, status, error) {
             console.error('Ha ocurrido un error:', error);
+            document.getElementById('botonGuardar').disabled = true;
         }
     });
 }

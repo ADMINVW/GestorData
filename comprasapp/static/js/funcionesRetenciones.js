@@ -7,8 +7,6 @@ $.ajaxSetup({
 //Eventos al cargar plantilla
 document.addEventListener("DOMContentLoaded", function (event) {
   //Formateo valores decimales
-  sessionStorage.removeItem("form_enviado");
-  console.log(form_enviado)
   baseIvaB.value = formateoDecimal(baseIvaB.value);
   baseIvaS.value = formateoDecimal(baseIvaS.value);
   baseIva.value = formateoDecimal(baseIva.value);
@@ -500,7 +498,6 @@ document.getElementById("form-retencion").addEventListener("submit", function (e
     .then(data => {
       if (data.redirect_url) {
         // Redirige al usuario a la URL devuelta por el servidor
-        console.log(form_enviado)
         sessionStorage.setItem("form_enviado", "true");
         //swal.fire("Oops!", "Retención generada", "success"); -->muestra pero no espera confirmacion, desaparce y va al resumen
         window.location.href = data.redirect_url;
