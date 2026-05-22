@@ -70,7 +70,7 @@ def mapeaItem(request):
     db_alias = get_db_from_request(request)
     codigo = request.GET.get("codigo", "").strip()
     resultado = None
-
+    print("codigo recibido:", codigo)
     if codigo:
         with connections[db_alias].cursor() as cur:
             cur.execute("SELECT it_codigo,it_descrip FROM inrrt003 WHERE it_codigo = '" + codigo.strip() + "'" )
@@ -215,24 +215,37 @@ def guardaFacturaRepuestos(request):
 
             #OBTENGO INFORMACION ADICIONAL DE LOS REPUESTOS
             for fila in datos_tabla:
-                cur.execute("SELECT it_linea,it_clase, it_costpro,st_ubica,st_stockact,it_descrip,it_precio FROM inrrt003,inrrt004 WHERE it_codigo = '" + fila[2].strip() + "' AND it_codigo = st_codigo AND st_bodega = '" + Bodega + "'")
+                cur.execute("SELECT it_linea,it_clase, it_costpro,st_ubica,st_stockact,it_descrip,it_precio FROM inrrt003,inrrt004 WHERE it_codigo = '" + fila[2].strip() + "' AND it_codigo = st_codigo ")
                 nuevaInfo = cur.fetchone()
                         
                 if nuevaInfo:
-                    fila.append(nuevaInfo[0]) 
+                    fila.append(nuevaInfo[0])
                     fila.append(nuevaInfo[1])
                     fila.append(nuevaInfo[2]) 
                     fila.append(nuevaInfo[3])
                     fila.append(nuevaInfo[4])
                     fila.append(nuevaInfo[5])
                     fila.append(nuevaInfo[6])
+                else:
+                    cur.execute("SELECT it_linea,it_clase, it_costpro,'NOLOC',0,it_descrip,it_precio FROM inrrt003 WHERE it_codigo = '" + fila[2].strip() + "'")
+                    nuevaInfo = cur.fetchone() 
+                    if nuevaInfo:
+                        fila.append(nuevaInfo[0])
+                        fila.append(nuevaInfo[1])
+                        fila.append(nuevaInfo[2]) 
+                        fila.append(nuevaInfo[3])
+                        fila.append(nuevaInfo[4])
+                        fila.append(nuevaInfo[5])
+                        fila.append(nuevaInfo[6])
 
                 #OBTENGO EL STOCK TOTAL DEL ITEM EN TODAS LAS BODEGAS     
                 cur.execute("SELECT SUM(st_stockact) FROM inrrt004 WHERE st_codigo = '" + fila[2].strip() + "'")
                 nuevaInfo = cur.fetchone() 
                 if nuevaInfo:  
                     totalItem = nuevaInfo[0]
-                 
+                else:    
+                    totalItem = 0
+
                 valDescuento = float(fila[4]) *float(fila[5])/100 
                 #CALCULO NUEVO COSTO PROMEDIO
                 fila.append((float(fila[0])*(float(fila[4])-valDescuento) + float(totalItem)*float(fila[11]))/(float(fila[0])+float(totalItem)))
@@ -282,8 +295,15 @@ def guardaFacturaRepuestos(request):
                 cur.execute("UPDATE inrrt003 SET it_costpro = " + str(fila[16]) + ", it_costult = " + str(fila[11]) + ", it_precio = " + str((float(fila[4])-valDescuento)*float(FactorVenta)) + ",it_preant = " + str(fila[15]) + " WHERE it_codigo = '" + fila[2] + "'" )
 
                 #ACTUALIZO ITEM DE STOCK DETALLE
-                cur.execute("UPDATE inrrt004 SET st_stockant = st_stockact , st_stockact = st_stockact + " + str(fila[0]) + ",st_fulmov = '" + FechaIngreso + "', st_documov = '" + str(Secuencia) + "',st_tipumov = '" + tipoDoc.strip() + "' WHERE st_codigo = '" + fila[2] + "' AND st_bodega = '" + Bodega + "'")
 
+                cur.execute("SELECT * FROM inrrt004 WHERE st_codigo = '" + fila[2].strip() + "' AND st_bodega = '" + Bodega + "'")
+                nuevaInfo = cur.fetchone()
+                        
+                if nuevaInfo:
+                    cur.execute("UPDATE inrrt004 SET st_stockant = st_stockact , st_stockact = st_stockact + " + str(fila[0]) + ",st_fulmov = '" + FechaIngreso + "', st_documov = '" + str(Secuencia) + "',st_tipumov = '" + tipoDoc.strip() + "' WHERE st_codigo = '" + fila[2] + "' AND st_bodega = '" + Bodega + "'")
+                else:
+                    cur.execute("INSERT INTO inrrt004 VALUES('" + Bodega + "','" + fila[2].strip()  + "','" + str(fila[12]) + "','',0," + str(fila[0]) + ",'',0,0,0.0,0,0,'','" + FechaIngreso + "'," + str(Secuencia) + ",'16')")
+                    
                 #GUARDO CODIGO DE ITEM DISTINTO EN LA TABLA MAPEO
                 if fila[1].strip() != fila[2].strip():
                     cur.execute("SELECT mp_codigoex FROM inrrt012 WHERE mp_codigoex = '" + fila[1] + "'")
@@ -298,7 +318,7 @@ def guardaFacturaRepuestos(request):
         cur.close()
         ##MineOctubre
         print(OcNumero)
-        ordenCompra =  obtenerOrdenCompra(db_alias, Agencia, Division, OcNumero)   
+        ordenCompra =  obtenerOrdenCompra(request,db_alias, Agencia, Division, OcNumero)   
         if ordenCompra is None:
             return JsonResponse({'error': f'No se pudo recuperar la orden de compra {OcNumero}'}, status=400)
         guardarCtaPagar(request, db_alias, ordenCompra)
