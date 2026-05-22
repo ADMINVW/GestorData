@@ -12,3 +12,4 @@ from .orden_compra_cabecera import OrdenCompraCabecera
 from .orden_compra_detalle import OrdenCompraDetalle
 from .centro_gastos_cabecera import CentroGastosCabecera
 from .pedido import Pedido
+from .retencion import Retencion

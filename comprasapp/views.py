@@ -572,6 +572,8 @@ def guardarRetencion(request):
         or request.headers.get('X-Company-Key')
         or request.GET.get('company')
     )
+
+    service = OrdenComprasService()
     
     if request.method == 'POST':
         try:
@@ -592,6 +594,16 @@ def guardarRetencion(request):
                 valfac= otrosDatos.get("nvalorOriginal")
                 ocompra = otrosDatos.get("ocompra")
                 valRet = otrosDatos.get("totRetencion")
+
+                retencion = service.comprobar_existencia_retencion(db_alias, division, codpro, factura, agencia)
+                if not retencion:
+                    print("Retencion ya existe")
+                    messages.error(request, f"Ya existe la retencion")
+                    company_key = request.headers.get('X-Company-Key', '')
+                    return JsonResponse(
+                        {'redirect_url': f'/comprasapp/templates/ordenCompra&company={company_key}'}
+                    )
+                
                 with connections[db_alias].cursor() as cur:
                     #retencion unica secuencia con division "d"    
                     numero=obtenerSecuencia(request, compania,"d",agencia,"RT","CP")
