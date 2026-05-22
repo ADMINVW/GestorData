@@ -218,22 +218,11 @@ def guardaFacturaRepuestos(request):
 
                 TipoTran = Bodega.strip() + tipoDoc.strip() 
 
-            #OBTENGO INFORMACION ADICIONAL DE LOS REPUESTOS
-            for fila in datos_tabla:
-                cur.execute("SELECT it_linea,it_clase, it_costpro,st_ubica,st_stockact,it_descrip,it_precio FROM inrrt003,inrrt004 WHERE it_codigo = '" + fila[2].strip() + "' AND it_codigo = st_codigo ")
-                nuevaInfo = cur.fetchone()
-                        
-                if nuevaInfo:
-                    fila.append(nuevaInfo[0])
-                    fila.append(nuevaInfo[1])
-                    fila.append(nuevaInfo[2]) 
-                    fila.append(nuevaInfo[3])
-                    fila.append(nuevaInfo[4])
-                    fila.append(nuevaInfo[5])
-                    fila.append(nuevaInfo[6])
-                else:
-                    cur.execute("SELECT it_linea,it_clase, it_costpro,'NOLOC',0,it_descrip,it_precio FROM inrrt003 WHERE it_codigo = '" + fila[2].strip() + "'")
-                    nuevaInfo = cur.fetchone() 
+                #OBTENGO INFORMACION ADICIONAL DE LOS REPUESTOS
+                for fila in datos_tabla:
+                    cur.execute("SELECT it_linea,it_clase, it_costpro,st_ubica,st_stockact,it_descrip,it_precio FROM inrrt003,inrrt004 WHERE it_codigo = '" + fila[2].strip() + "' AND it_codigo = st_codigo ")
+                    nuevaInfo = cur.fetchone()
+                            
                     if nuevaInfo:
                         fila.append(nuevaInfo[0])
                         fila.append(nuevaInfo[1])
@@ -242,25 +231,36 @@ def guardaFacturaRepuestos(request):
                         fila.append(nuevaInfo[4])
                         fila.append(nuevaInfo[5])
                         fila.append(nuevaInfo[6])
+                    else:
+                        cur.execute("SELECT it_linea,it_clase, it_costpro,'NOLOC',0,it_descrip,it_precio FROM inrrt003 WHERE it_codigo = '" + fila[2].strip() + "'")
+                        nuevaInfo = cur.fetchone() 
+                        if nuevaInfo:
+                            fila.append(nuevaInfo[0])
+                            fila.append(nuevaInfo[1])
+                            fila.append(nuevaInfo[2]) 
+                            fila.append(nuevaInfo[3])
+                            fila.append(nuevaInfo[4])
+                            fila.append(nuevaInfo[5])
+                            fila.append(nuevaInfo[6])
 
-                #OBTENGO EL STOCK TOTAL DEL ITEM EN TODAS LAS BODEGAS     
-                cur.execute("SELECT SUM(st_stockact) FROM inrrt004 WHERE st_codigo = '" + fila[2].strip() + "'")
-                nuevaInfo = cur.fetchone() 
-                if nuevaInfo:  
-                    totalItem = nuevaInfo[0]
-                else:    
-                    totalItem = 0
+                    #OBTENGO EL STOCK TOTAL DEL ITEM EN TODAS LAS BODEGAS     
+                    cur.execute("SELECT SUM(st_stockact) FROM inrrt004 WHERE st_codigo = '" + fila[2].strip() + "'")
+                    nuevaInfo = cur.fetchone() 
+                    if nuevaInfo:  
+                        totalItem = nuevaInfo[0]
+                    else:    
+                        totalItem = 0
 
-                valDescuento = float(fila[4]) *float(fila[5])/100 
-                #CALCULO NUEVO COSTO PROMEDIO
-                fila.append((float(fila[0])*(float(fila[4])-valDescuento) + float(totalItem)*float(fila[11]))/(float(fila[0])+float(totalItem)))
-                
+                    valDescuento = float(fila[4]) *float(fila[5])/100 
+                    #CALCULO NUEVO COSTO PROMEDIO
+                    fila.append((float(fila[0])*(float(fila[4])-valDescuento) + float(totalItem)*float(fila[11]))/(float(fila[0])+float(totalItem)))
                     
-            for fila in datos_tabla:
-                print ("fila nueva :", fila[9] + "/" + str(fila[5]) + "/" + str(fila[15]) + "/" + str(valDescuento))
-            
-            #CABECERA
-            cur.execute("INSERT INTO inrrt015 VALUES ('" + str(TipoTran) + "'," + str(Secuencia) + ",'" + NombreProveedor + "'," + str(CodigoProveedor) + ",0,0," + str(OcNumero) + ",'" + FechaIngreso + "',2,null,'" + DescripcionFactura + "','" + NumeroFactura + "',null,'" + Usuario + "'," + FactorVenta + ",0,null,'" + Bodega + "'," + str(TotalFactura) + ",'X'," + porcenIva + ",'DO',1,null)" ) 
+                        
+                for fila in datos_tabla:
+                    print ("fila nueva :", fila[9] + "/" + str(fila[5]) + "/" + str(fila[15]) + "/" + str(valDescuento))
+                
+                #CABECERA
+                cur.execute("INSERT INTO inrrt015 VALUES ('" + str(TipoTran) + "'," + str(Secuencia) + ",'" + NombreProveedor + "'," + str(CodigoProveedor) + ",0,0," + str(OcNumero) + ",'" + FechaIngreso + "',2,null,'" + DescripcionFactura + "','" + NumeroFactura + "',null,'" + Usuario + "'," + FactorVenta + ",0,null,'" + Bodega + "'," + str(TotalFactura) + ",'X'," + porcenIva + ",'DO',1,null)" ) 
 
                 #DETALLE
                 for fila in datos_tabla:
