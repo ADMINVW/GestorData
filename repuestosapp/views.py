@@ -231,6 +231,7 @@ def guardaFacturaRepuestos(request):
                         fila.append(nuevaInfo[4])
                         fila.append(nuevaInfo[5])
                         fila.append(nuevaInfo[6])
+                        print ("opcion 1")
                     else:
                         cur.execute("SELECT it_linea,it_clase, it_costpro,'NOLOC',0,it_descrip,it_precio FROM inrrt003 WHERE it_codigo = '" + fila[2].strip() + "'")
                         nuevaInfo = cur.fetchone() 
@@ -242,6 +243,7 @@ def guardaFacturaRepuestos(request):
                             fila.append(nuevaInfo[4])
                             fila.append(nuevaInfo[5])
                             fila.append(nuevaInfo[6])
+                            print ("opcion 2")
 
                     #OBTENGO EL STOCK TOTAL DEL ITEM EN TODAS LAS BODEGAS     
                     cur.execute("SELECT SUM(st_stockact) FROM inrrt004 WHERE st_codigo = '" + fila[2].strip() + "'")
@@ -251,6 +253,15 @@ def guardaFacturaRepuestos(request):
                     else:    
                         totalItem = 0
 
+
+                    cur.execute("SELECT st_ubica FROM inrrt004 WHERE st_codigo = '" + fila[2].strip() + "' AND st_bodega = '" + Bodega + "'")
+
+                    ubicaItem = cur.fetchone() 
+                    if ubicaItem:  
+                        fila[12] = ubicaItem[0]
+                    else:    
+                        fila[12] = "NOLOC"
+                    
                     valDescuento = float(fila[4]) *float(fila[5])/100 
                     #CALCULO NUEVO COSTO PROMEDIO
                     fila.append((float(fila[0])*(float(fila[4])-valDescuento) + float(totalItem)*float(fila[11]))/(float(fila[0])+float(totalItem)))
@@ -299,25 +310,27 @@ def guardaFacturaRepuestos(request):
                     #ACTUALIZO ITEM DE STOCK CABECERA
                     cur.execute("UPDATE inrrt003 SET it_costpro = " + str(fila[16]) + ", it_costult = " + str(fila[11]) + ", it_precio = " + str((float(fila[4])-valDescuento)*float(FactorVenta)) + ",it_preant = " + str(fila[15]) + " WHERE it_codigo = '" + fila[2] + "'" )
 
-                #ACTUALIZO ITEM DE STOCK DETALLE
+                    #ACTUALIZO ITEM DE STOCK DETALLE
 
-                cur.execute("SELECT * FROM inrrt004 WHERE st_codigo = '" + fila[2].strip() + "' AND st_bodega = '" + Bodega + "'")
-                nuevaInfo = cur.fetchone()
+                    cur.execute("SELECT * FROM inrrt004 WHERE st_codigo = '" + fila[2].strip() + "' AND st_bodega = '" + Bodega + "'")
+                    nuevaInfo = cur.fetchone()
                         
-                if nuevaInfo:
-                    cur.execute("UPDATE inrrt004 SET st_stockant = st_stockact , st_stockact = st_stockact + " + str(fila[0]) + ",st_fulmov = '" + FechaIngreso + "', st_documov = '" + str(Secuencia) + "',st_tipumov = '" + tipoDoc.strip() + "' WHERE st_codigo = '" + fila[2] + "' AND st_bodega = '" + Bodega + "'")
-                else:
-                    cur.execute("INSERT INTO inrrt004 VALUES('" + Bodega + "','" + fila[2].strip()  + "','" + str(fila[12]) + "','',0," + str(fila[0]) + ",'',0,0,0.0,0,0,'','" + FechaIngreso + "'," + str(Secuencia) + ",'16')")
-                    
-                #GUARDO CODIGO DE ITEM DISTINTO EN LA TABLA MAPEO
-                if fila[1].strip() != fila[2].strip():
-                    cur.execute("SELECT mp_codigoex FROM inrrt012 WHERE mp_codigoex = '" + fila[1] + "'")
-                    codigoex = cur.fetchall()
-                    print ("codigo fila1/fila2: ",fila[1],"/", fila[2])
-                    if not codigoex:
-                        cur.execute("INSERT INTO inrrt012 VALUES('" + fila[2] + "','" + fila[14] + "','" + fila[1] + "','" + fila[3] + "')")
+                    if nuevaInfo:
+                        cur.execute("UPDATE inrrt004 SET st_stockant = st_stockact , st_stockact = st_stockact + " + str(fila[0]) + ",st_fulmov = '" + FechaIngreso + "', st_documov = '" + str(Secuencia) + "',st_tipumov = '" + tipoDoc.strip() + "' WHERE st_codigo = '" + fila[2] + "' AND st_bodega = '" + Bodega + "'")
+                        print("opcion 3 ", Bodega,fila[2].strip())
+                    else:
+                        cur.execute("INSERT INTO inrrt004 VALUES('" + Bodega + "','" + fila[2].strip()  + "','" + str(fila[12]) + "','',0," + str(fila[0]) + ",'',0,0,0.0,0,0,'','" + FechaIngreso + "'," + str(Secuencia) + ",'16')")
+                        print("opcion 4 ", Bodega,fila[2].strip())
 
-                    ordinal = ordinal + 1
+                    #GUARDO CODIGO DE ITEM DISTINTO EN LA TABLA MAPEO
+                    if fila[1].strip() != fila[2].strip():
+                        cur.execute("SELECT mp_codigoex FROM inrrt012 WHERE mp_codigoex = '" + fila[1] + "'")
+                        codigoex = cur.fetchall()
+                        print ("codigo fila1/fila2: ",fila[1],"/", fila[2])
+                        if not codigoex:
+                            cur.execute("INSERT INTO inrrt012 VALUES('" + fila[2] + "','" + fila[14] + "','" + fila[1] + "','" + fila[3] + "')")
+
+                        ordinal = ordinal + 1
                     
             except Exception as e:
                 print(f"Error al insertar detalle: {e}")
