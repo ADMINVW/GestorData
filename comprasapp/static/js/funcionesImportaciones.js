@@ -8,25 +8,14 @@ $.ajaxSetup({
 });
 
 function actualizarEtiquetaCG(fila) {
-    // Busca todos los checkboxes de esa fila
-    var checks = document.querySelectorAll('#cg-' + fila + '-checklist .cg-check:checked');
-    
-    // Reconstruye buscando dentro del dropdown de esa fila
-    // Mejor: buscamos el botón por data o por posición en la tabla
     var dropdowns = document.querySelectorAll('.cg-dropdown-btn');
     var btn = dropdowns[fila];
-    
-    var seleccionados = [];
-    var todosLosChecks = document.querySelectorAll('[id^="cg-' + fila + '-"]');
-    todosLosChecks.forEach(function(chk) {
-        if (chk.checked) {
-            seleccionados.push(chk.nextElementSibling.textContent.trim());
-        }
-    });
+
+    var checks = document.querySelectorAll('[id^="cg-' + fila + '-"]:checked');
 
     if (btn) {
-        btn.textContent = seleccionados.length > 0
-            ? seleccionados.join(', ')
+        btn.textContent = checks.length > 0
+            ? checks.length + ' seleccionado(s)'
             : 'Seleccionar C.G.';
     }
 }
@@ -165,7 +154,7 @@ function leerArchivoXML() {
                     tabla += "  <button class='btn btn-outline-secondary btn-sm dropdown-toggle cg-dropdown-btn' type='button' data-bs-toggle='dropdown' data-bs-auto-close='outside' data-fila='" + i + "'>";
                     tabla += "    Seleccionar C.G.";
                     tabla += "  </button>";
-                    tabla += "  <ul class='dropdown-menu p-2' style='min-width:220px; max-height:200px; overflow-y:auto;'>";
+                    tabla += "  <ul class='dropdown-menu p-2' style='min-width:420px; max-height:350px; overflow-y:auto;'>";
 
                     // Parsear opcionesHTML para extraer value y texto
                     var tempDiv = document.createElement('div');
