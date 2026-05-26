@@ -19,7 +19,7 @@ function actualizarEtiquetaCG(fila) {
             : 'Seleccionar C.G.';
     }
 }
-
+65
 function leerArchivoXML() {
     //mine
     sessionStorage.removeItem("form_enviado");
