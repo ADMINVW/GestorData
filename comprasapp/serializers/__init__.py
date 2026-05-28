@@ -12,3 +12,4 @@ from .orden_compra_cabecera_serializer import OrdenCompraCabeceraSerializer
 from .orden_compra_detalle_serializer import OrdenCompraDetalleSerializer
 from .centro_gastos_cabecera_serializer import CentroGastosCabeceraSerializer
 from .pedido_serializer import PedidoSerializer
+from .retencion_serializer import RetencionSerializer

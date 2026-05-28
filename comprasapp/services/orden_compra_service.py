@@ -12,6 +12,7 @@ from ..models.secuencia import Secuencia
 from ..models.orden_compra_cabecera import OrdenCompraCabecera
 from ..models.orden_compra_detalle import OrdenCompraDetalle
 from ..models.cuenta import Cuenta
+from ..models.retencion import Retencion
 
 class OrdenComprasService:
     def get_division(self, db_alias):
@@ -111,4 +112,11 @@ class OrdenComprasService:
         with transaction.atomic(using = db_alias):
             oc_detalle = OrdenCompraDetalle.objects.using(db_alias).create(**datos)
         return oc_detalle
-
+    
+    def comprobar_existencia_retencion(self, db_alias, division, codigo_proveedor, numero_factura, agencia):
+        return Retencion.objects.using(db_alias).filter(
+            rt_division = division,
+            rt_codpro = codigo_proveedor,
+            rt_factura = numero_factura,
+            rt_agencia = agencia
+        ).exists()
