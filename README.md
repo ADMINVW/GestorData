@@ -57,6 +57,18 @@ DEBUG=True
 SESSION_CREDENTIALS_KEY=tu_clave_cryptography
 ```
 
+Para generar SECRET_KEY de Django:
+
+```powershell
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+Para generar key de cryptograpy:
+
+```powershell
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
+
 4. Ejecutar migraciones básicas:
 
 ```powershell
@@ -84,6 +96,21 @@ Company.objects.create(
     db_alias='ecuawagen',
     db_dsn='DNSdesarrollo',
     db_name='ecuawagen',
+    db_server='ol_desarrollo',
+    db_host='192.168.1.9',
+    logo='/static/ecuawagen.png',
+    activa=True,
+    db_engine='django_informixdb', 
+)
+```
+
+```shell
+Company.objects.create(
+    key='germanmoto',
+    name='German Motors',
+    db_alias='germanmoto',
+    db_dsn='DNSdesarrollo',
+    db_name='germanmoto',
     db_server='ol_desarrollo',
     db_host='192.168.1.9',
     logo='/static/ecuawagen.png',
