@@ -6,6 +6,18 @@ $.ajaxSetup({
 });
 //Eventos al cargar plantilla
 document.addEventListener("DOMContentLoaded", function (event) {
+  // ── SCROLL TOP DESPUÉS DE RELOAD ──
+  if (new URLSearchParams(window.location.search).get('scrollTop')) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.history.replaceState({}, '', window.location.pathname + 
+      window.location.search.replace(/[?&]scrollTop=1/, '').replace(/^\?$/, ''));
+    // Mostrar mensaje de error si existe
+    const errorMsg = sessionStorage.getItem('errorMsg');
+    if (errorMsg) {
+      swal.fire("Error", errorMsg, "error");
+      sessionStorage.removeItem('errorMsg');
+    }
+  }
   //Formateo valores decimales
   baseIvaB.value = formateoDecimal(baseIvaB.value);
   baseIvaS.value = formateoDecimal(baseIvaS.value);
@@ -490,7 +502,11 @@ document.getElementById("form-retencion").addEventListener("submit", function (e
 
     .then(response => {
       if (!response.ok) {
-        swal.fire("Oops!", "Ocurrio un error al guardar, comunique a sistemas", "error"); //mirar bitacora
+        // Antes: window.location.reload();
+        const url = new URL(window.location.href);
+        url.searchParams.set('scrollTop', '1');
+        sessionStorage.setItem('errorMsg', 'Oops!", "Ocurrio un error al guardar, comunique a sistemas');
+        window.location.href = url.toString();
         throw new Error('Error en la respuesta del servidor');
       }
       return response.json();
