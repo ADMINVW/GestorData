@@ -596,13 +596,11 @@ def guardarRetencion(request):
                 valRet = otrosDatos.get("totRetencion")
 
                 retencion = service.comprobar_existencia_retencion(db_alias, division, codpro, factura, agencia)
-                if not retencion:
+
+                if retencion:
                     print("Retencion ya existe")
                     messages.error(request, f"Ya existe la retencion")
-                    company_key = request.headers.get('X-Company-Key', '')
-                    return JsonResponse(
-                        {'redirect_url': f'/comprasapp/templates/ordenCompra&company={company_key}'}
-                    )
+                    return JsonResponse({'status': 'error', 'message': 'Ya existe la retención'}, status = 400)
                 
                 with connections[db_alias].cursor() as cur:
                     #retencion unica secuencia con division "d"    
