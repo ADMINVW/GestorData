@@ -19,7 +19,7 @@ function actualizarEtiquetaCG(fila) {
             : 'Seleccionar C.G.';
     }
 }
-65
+
 function leerArchivoXML() {
     //mine
     sessionStorage.removeItem("form_enviado");
@@ -157,17 +157,17 @@ function leerArchivoXML() {
                     tabla += "  <ul class='dropdown-menu p-2' style='min-width:420px; max-height:350px; overflow-y:auto;'>";
 
                     // Parsear opcionesHTML para extraer value y texto
-                    var tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = opcionesHTML;
-                    var options = tempDiv.querySelectorAll('option');
+                    var tempSelect = document.createElement('select');
+                    tempSelect.innerHTML = opcionesHTML;
+                    var options = tempSelect.querySelectorAll('option');
 
-                    options.forEach(function(opt) {
+                    options.forEach(function(opt, j) {          // <-- agrega el índice j
                         var val = opt.value;
                         var texto = opt.textContent.trim();
                         tabla += "<li class='dropdown-item p-1'>";
                         tabla += "  <div class='form-check'>";
-                        tabla += "    <input class='form-check-input cg-check' type='checkbox' value='" + val + "' id='cg-" + i + "-" + val + "' onchange='actualizarEtiquetaCG(" + i + ")'>";
-                        tabla += "    <label class='form-check-label w-100' for='cg-" + i + "-" + val + "'>" + texto + "</label>";
+                        tabla += "    <input class='form-check-input cg-check' type='checkbox' value='" + val + "' id='cg-" + i + "-" + j + "' onchange='actualizarEtiquetaCG(" + i + ")'>";
+                        tabla += "    <label class='form-check-label w-100' for='cg-" + i + "-" + j + "'>" + texto + "</label>";
                         tabla += "  </div>";
                         tabla += "</li>";
                     });
@@ -337,9 +337,7 @@ function fetchCuentaProv() {
                     if (data.ncuentaprov && data.ncuentaprov.length > 0) {
                         data.ncuentaprov.forEach(function (item) {
                             var option = document.createElement("option");
-                            option.value = item.mc_secgrp; // Usa el campo adecuado para el valor
-                            option.text = item.ct_cuenta + "  " + item.ct_descripcion; // Usa el campo adecuado para el texto
-                            opcionesHTML += "<option value='" + option.value + "'>" + option.text + "</option>";
+                            opcionesHTML += "<option value='" + item.ct_cuenta.trim() + "'>" + item.ct_cuenta.trim() + "  " + item.ct_descripcion.trim() + "</option>";
                         });
                         resolve(opcionesHTML);
                     } else {
@@ -497,28 +495,27 @@ async function enviarDatosFactura() {
         filaDatos.push(celdas[3].innerText);    // Descripcion (2)
         filaDatos.push(celdas[4].innerText);    // Precio Unitario (3)
         filaDatos.push(celdas[5].innerText);    // Descuento (4)
-        var radios = celdas[8].getElementsByTagName("input");
-        for (var j = 0; j < radios.length; j++) {
-            if (radios[j].checked) {
-                var selectValue = radios ? radios[j].value : "";
-                filaDatos.push(selectValue); // Bienes/Servicios (5)
-                //console.log("Valor seleccionado en esta fila:", radios[i].value);
-                break;
-            }
-        }
+        
 
         filaDatos.push(celdas[6].innerText);    // Total (6)
-        
-        var selectElement = celdas[7].getElementsByTagName("select")[0];
-        if (selectElement.selectedIndex == 0) {
-            alert('Debe seleccionar todos los Centros de Gastos.');
-            selectElement.focus();
+
+        var checkboxesSeleccionados = celdas[7].querySelectorAll(".cg-check:checked");
+
+        if (checkboxesSeleccionados.length === 0) {
+            alert('Debe seleccionar al menos un Centro de Gastos para cada ítem.');
+            
+            var botonDropdown = celdas[7].querySelector(".cg-dropdown-btn");
+            if (botonDropdown) botonDropdown.click(); 
+            
             return false;
         }
-        var selectElement = celdas[7].getElementsByTagName("select")[0];
-        var selectValue = selectElement ? selectElement.value : "";
-        filaDatos.push(selectValue); // Centro de Gastos (7)
-        
+
+        var valoresCG = [];
+        checkboxesSeleccionados.forEach(function(cb) {
+            valoresCG.push(cb.value); // Guarda el ID/Código del Centro de Gasto
+        });
+        filaDatos.push(valoresCG);
+    
         filaDatos.push(celdasIva[1].innerText);    // Porcentaje IVA (8)
         filaDatos.push(celdasIva[2].innerText);    // Valor IVA (9)
         // Agrega la submatriz a la matriz principal
@@ -639,13 +636,6 @@ async function validaDatosFactura() {
         return false;
     }
 
-    if (plantillas.selectedIndex == 0) {
-        alert('El campo Plantillas es obligatorio.');
-        plantillas.focus();
-        return false;
-    }
-
-
     if (descripcionfactura.value.trim() === '') {
         alert('El campo Descripción Factura es obligatorio.');
         descripcionfactura.focus();
@@ -673,36 +663,6 @@ async function validaDatosFactura() {
     //Si todos los campos requeridos están llenos, puedes proceder con el envío o la acción de guardar
 
 
-}
-
-function clickBien() {
-    var tabla = document.getElementById("tablaDetalle");
-
-    // Obtén todas las filas de la tabla
-    var filas = tabla.getElementsByTagName("tr");
-
-    // Recorre cada fila (comenzando desde 1 si la primera fila es el encabezado)
-    for (var i = 0; i < filas.length - 1; i++) {
-        // CREAR AQUI OPCION DE BIENES/SERVICIOS
-        const btnBien = document.getElementById(`btnradioBien${i}`);
-        btnBien.checked = true;
-    }
-
-}
-
-
-function clickServicio() {
-    var tabla = document.getElementById("tablaDetalle");
-
-    // Obtén todas las filas de la tabla
-    var filas = tabla.getElementsByTagName("tr");
-
-    // Recorre cada fila (comenzando desde 1 si la primera fila es el encabezado)
-    for (var i = 0; i < filas.length - 1; i++) {
-        // CREAR AQUI OPCION DE BIENES/SERVICIOS
-        const btnServicio = document.getElementById(`btnradioServicio${i}`);
-        btnServicio.checked = true;
-    }
 }
 
 function actualizarPrecio(index) {
