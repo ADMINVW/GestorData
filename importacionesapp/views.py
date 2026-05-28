@@ -1,7 +1,9 @@
 import json
+import pprint
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 from core.db_context import get_db_from_request
 from core.context_processors import company_context
@@ -45,17 +47,38 @@ def cuentaProv(request):
     
     return JsonResponse({'ncuentaprov': cuentas_proveedor_data})
 
+@csrf_exempt
 @require_http_methods(["POST"])
 def guardaFacturaImportaciones(request):
-
     db_alias = get_db_from_request(request)
     service = OrdenComprasService()
-    serializer = OrdenCompraCabeceraSerializer(data = request.body)
 
     try:
         data = json.loads(request.body)
         datos = data.get('datos', {})
         datos_tabla = data.get('datosTabla', [])
+        
+        # Expandir filas por centro de gastos
+        datos_tabla_expandido = []
+        for fila in datos_tabla:
+            centros_gastos = fila[6]  # lista de cuentas
+            cantidad_cg = len(centros_gastos)
+            total_original = float(fila[5])
+            total_dividido = round(total_original / cantidad_cg, 2)
+            for idx, cuenta in enumerate(centros_gastos):
+                # La última fila absorbe el residuo del redondeo
+                if idx == cantidad_cg - 1:
+                    total_fila = round(total_original - (total_dividido * (cantidad_cg - 1)), 2)
+                else:
+                    total_fila = total_dividido
+
+                nueva_fila = fila[:5] + [str(total_fila)] + [[cuenta]] + fila[7:]
+                datos_tabla_expandido.append(nueva_fila)
+
+        for fila in datos_tabla_expandido:
+            print(f"fila", fila)
+            
+        pass
 
         secuencia = service.update_numero_secuencia(
             db_alias, datos.get("Compania"), datos.get("Division"), datos.get("Agencia"), "OC"
@@ -66,14 +89,16 @@ def guardaFacturaImportaciones(request):
         )
 
         if not secuencia or not codigo_proveedor:
-            return JsonResponse({'error': 'Faltan datos de secuencia o de proveedor'}, status = 400)
+            return JsonResponse({'error': 'Faltan datos de secuencia o de proveedor'}, status=400)
         
         with transaction.atomic(using=db_alias):
             cabecera = 'crear metodo create en OrdenCompraService'
+            
+        return JsonResponse({'status': 'success', 'message': 'Factura guardada correctamente'})
 
     except Exception as e:
         print(f"Error crítico: {str(e)}")
-        return JsonResponse({'error': str(e)}, status = 500)
+        return JsonResponse({'error': str(e)}, status=500)
 
     
 
