@@ -6,7 +6,7 @@ class OrdenCompraCabecera(models.Model):
     oc_agencia = models.CharField(blank=True, null=True)
     oc_division = models.CharField(blank=True, null=True)
     oc_usring = models.CharField(blank=True, null=True)
-    oc_fecing = models.DateTimeField()
+    oc_fecing = models.CharField()
     oc_solicit = models.CharField(blank=True, null=True)
     oc_estado = models.CharField(blank=True, null=True)
     oc_tipo = models.CharField(blank=True, null=True)

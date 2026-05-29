@@ -104,7 +104,26 @@ class OrdenComprasService:
             raise Exception("No se encontró el registro de secuencia para actualizar.")
 
     def guardar_orden_compra_cabecera(self, db_alias, datos):
-        with transaction.atomic(using = db_alias):
+        from datetime import datetime
+
+        def parse_datetime_ytm(valor):
+            if not valor:
+                return None
+            try:
+                if isinstance(valor, str):
+                    from datetime import datetime
+                    dt = datetime.strptime(valor[:16], '%Y-%m-%d %H:%M')
+                else:
+                    dt = valor
+                return dt.strftime('%Y-%m-%d %H:%M')
+            except (ValueError, TypeError) as e:
+                print(f"Error parseando: {e}")
+                return None
+
+        datos['oc_fecing'] = parse_datetime_ytm(datos.get('oc_fecing'))
+        print(datos['oc_fecing'])
+
+        with transaction.atomic(using=db_alias):
             oc_cabecera = OrdenCompraCabecera.objects.using(db_alias).create(**datos)
         return oc_cabecera
 

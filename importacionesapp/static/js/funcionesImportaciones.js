@@ -323,7 +323,7 @@ function formatoFecha() {
     const year = ifecha.getFullYear();
     const month = String(ifecha.getMonth() + 1).padStart(2, '0'); // Los meses son de 0-11
     const day = String(ifecha.getDate()).padStart(2, '0');
-    const formattedDate = `${day}/${month}/${year}`;
+    const formattedDate = `${year}-${month}-${day}`;
 
     // Asigna la fecha formateada al input
     const dateInput = formattedDate // document.getElementById('fecha');
@@ -379,6 +379,13 @@ function validaFecha(fecha) {
         }
 };
 
+function formatoFechaInput(fechaStr) {
+    // Convierte DD/MM/YYYY → YYYY-MM-DD
+    const partes = fechaStr.split('/');
+    if (partes.length !== 3) return fechaStr;
+    return `${partes[2]}-${partes[1]}-${partes[0]}`;
+}
+
 async function enviarDatosFactura() {
     //if (validaDatosFactura() === false) {
     //    return;
@@ -402,19 +409,15 @@ async function enviarDatosFactura() {
         oc_compania: sessionStorage.getItem('compania'),
         oc_agencia: sessionStorage.getItem('agencia'),
         oc_division: document.getElementById("divisionSelect").value,
-        oc_usering: document.getElementById("userName").value,
-        oc_fechaing: formatoFechaHora(),
+        oc_usring: document.getElementById("userName").value,
+        oc_fecing: formatoFechaHora(),
         oc_solicit: document.getElementById("selSolicita").value,
         oc_estado: 'A',
         oc_tipo: document.getElementById("subTipoSelect").value,
-        oc_usraprd: '',
-        oc_fehaprd:'',
-        oc_usraprf: '',
-        oc_fehaprf:'' ,
-        oc_codprov: '', // Este campo se llenará con el código del proveedor obtenido en el backend
+        oc_codpro: '', // Este campo se llenará con el código del proveedor obtenido en el backend
         oc_fecent: formatoFecha(),
         oc_facpro: document.getElementById("numeroFactura").value,
-        oc_fecfac: document.getElementById("fechaEmision").value,
+        oc_fecfac: formatoFechaInput(document.getElementById("fechaEmision").value),
         oc_valfac: document.getElementById("importeTotal").value,
         oc_valcst: document.getElementById("subtotalSinImpuestos").value,
         oc_descto: document.getElementById("totalDescuento").value,
@@ -422,7 +425,6 @@ async function enviarDatosFactura() {
         oc_iva_mo: 0,
         oc_iva_rp: 0,
         oc_recargo: 0,
-        oc_ordtra: '',
         oc_bodprn: sessionStorage.getItem('bodega'),
         oc_obser1: document.getElementById("descripcionFactura").value.toUpperCase(), 
         oc_obser2: '',  
@@ -432,14 +434,14 @@ async function enviarDatosFactura() {
         oc_moneda: 'DO',
         oc_atencion : 'SRS',
         oc_cta_aux : '', 
-        oc_retiva:'',
+        oc_retiva: 0.0,
         oc_numdia: 0,
         oc_cod_tip: '01',
         oc_ide_cre: document.getElementById("tipoCreditoSelect").value,
         oc_autimp: '9999',
         oc_serie: document.getElementById("serieFactura").value,
         oc_aut_sri: document.getElementById("autorizacionSri").value,
-        oc_fec_val: document.getElementById("fechaEmision").value,
+        oc_fec_val: formatoFechaInput(document.getElementById("fechaEmision").value),
         oc_cuenta:'',
         oc_subtipo:'',
         
@@ -538,6 +540,8 @@ async function enviarDatosFactura() {
         },
         error: function (xhr, status, error) {
             console.error('Ha ocurrido un error:', error);
+            console.error('Status HTTP:', xhr.status);
+            console.error('Respuesta del servidor:', xhr.responseText);
         }
     });
 }

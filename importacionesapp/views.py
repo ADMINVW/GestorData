@@ -79,13 +79,13 @@ def guardaFacturaImportaciones(request):
             db_alias, datos.get("oc_compania"), datos_ex.get("RucProveedor")
         )
 
-        datos['oc_codprov'] = codigo_proveedor
+        datos['oc_codpro'] = codigo_proveedor
         if not secuencia or not codigo_proveedor:
             return JsonResponse({'error': 'Faltan datos de secuencia o de proveedor'}, status=400)
         
         print("Datos recibidos en la vista:", datos)
 
-        cabecera_oc_data = OrdenCompraCabeceraSerializer(datos, many=True).data
+        cabecera_oc_data = OrdenCompraCabeceraSerializer(data=datos)
         
         if cabecera_oc_data.is_valid():
             with transaction.atomic(using=db_alias):
