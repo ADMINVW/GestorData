@@ -53,11 +53,51 @@ def guardaFacturaImportaciones(request):
     db_alias = get_db_from_request(request)
     service = OrdenComprasService()
 
+
+            
+
+
+    
     try:
         data = json.loads(request.body)
         datos = data.get('datos', {})
         datos_tabla = data.get('datosTabla', [])
+        datos_ex = data.get('datosEX', {})
+      
+
         
+
+        secuencia = service.update_numero_secuencia(
+            db_alias, datos.get("oc_compania"), datos.get("oc_division"), datos.get("oc_agencia"), "OC"
+        )
+        
+        datos['oc_numero'] = secuencia  # Agregar el número de orden de compra generado a los datos
+
+        
+
+        codigo_proveedor = service.get_codigo_proveedor(
+            db_alias, datos.get("oc_compania"), datos_ex.get("RucProveedor")
+        )
+
+        datos['oc_codprov'] = codigo_proveedor
+        if not secuencia or not codigo_proveedor:
+            return JsonResponse({'error': 'Faltan datos de secuencia o de proveedor'}, status=400)
+        
+        print("Datos recibidos en la vista:", datos)
+
+        cabecera_oc_data = OrdenCompraCabeceraSerializer(datos, many=True).data
+        
+        if cabecera_oc_data.is_valid():
+            with transaction.atomic(using=db_alias):
+               service.guardar_orden_compra_cabecera(db_alias, cabecera_oc_data.validated_data)
+        else:
+            return JsonResponse({'error': 'Datos de cabecera no válidos', 'details': cabecera_oc_data.errors}, status=400)       
+
+
+        print("Datos de cabecera guardados correctamente",secuencia, codigo_proveedor)
+        return JsonResponse({'status': 'success', 'message': 'Factura guardada correctamente', 'oc_numero': secuencia})
+        pass
+
         # Expandir filas por centro de gastos
         datos_tabla_expandido = []
         for fila in datos_tabla:
@@ -77,22 +117,8 @@ def guardaFacturaImportaciones(request):
 
         for fila in datos_tabla_expandido:
             print(f"fila", fila)
-            
-        pass
-
-        secuencia = service.update_numero_secuencia(
-            db_alias, datos.get("Compania"), datos.get("Division"), datos.get("Agencia"), "OC"
-        )
-
-        codigo_proveedor = service.get_codigo_proveedor(
-            db_alias, datos.get("Compania"), datos.get("RucProveedor")
-        )
-
-        if not secuencia or not codigo_proveedor:
-            return JsonResponse({'error': 'Faltan datos de secuencia o de proveedor'}, status=400)
-        
-        with transaction.atomic(using=db_alias):
-            cabecera = 'crear metodo create en OrdenCompraService'
+            #INSERTAR DETALLE DE LA FACTURA
+                
             
         return JsonResponse({'status': 'success', 'message': 'Factura guardada correctamente'})
 

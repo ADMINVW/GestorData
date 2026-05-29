@@ -109,7 +109,7 @@ function leerArchivoXML() {
             var tabla = "<tr><th scope='col'>#</th><th scope='col'>Cantidad</th><th scope='col'>Item</th><th scope='col'>Descripción</th><th scope='col'>Precio U.</th><th scope='col'>Descuento</h><th scope='col'>Total</th><th scope='col'>Centro Gastos</th><th scope='col'>";
             factura = xmlDoc.getElementsByTagName("detalle");
             fetchCuentaProv().then(opcionesHTML => {
-                fetchPlantillaProv();
+                //fetchPlantillaProv();
                 for (var i = 0; i < factura.length; i++) {
                     var cantidad = factura[i].getElementsByTagName("cantidad")[0].textContent;
                     var precioUnitario = factura[i].getElementsByTagName("precioUnitario")[0].textContent;
@@ -267,54 +267,6 @@ function fetchSubTipo() {
 }
 
 
-function fetchPlantillaProv() {
-
-    var selectElement = document.getElementById("rucProveedor");
-    var rucprovp = selectElement.value;
-    var ck = sessionStorage.getItem('company_key') || '';
-
-    if (rucprovp) {
-        $.ajax({
-            url: '/comprasapp/plantillaProv/',  // Asegúrate de que esta URL coincida con la URL de tu vista en Django
-            method: 'GET',
-            data: {
-                'rucprovp': rucprovp,
-                'company': ck
-            },
-            success: function (data) {
-
-                var select = document.getElementById("PlantillaSelect");
-                select.innerHTML = '';
-
-                if (data.nplantilla && data.nplantilla.length > 0) {
-                    var option = document.createElement("option");
-                    option.value = "Plantilla"; // Usa el campo adecuado para el valor
-                    option.text = "Escoja la plantilla"; // Usa el campo adecuado para el texto
-                    select.appendChild(option);
-                    data.nplantilla.forEach(function (item) {
-                        var option = document.createElement("option");
-                        option.value = item.pt_codplantilla; // Usa el campo adecuado para el valor
-                        option.text = item.pt_codplantilla + ' ' + item.pc_concepto; // Usa el campo adecuado para el texto
-                        select.appendChild(option);
-                    });
-                } else {
-                    var option = document.createElement("option");
-                    option.value = "Plantilla";
-                    option.text = 'Datos no disponibles';
-                    select.appendChild(option);
-                }
-
-            },
-            error: function (xhr, status, error) {
-                console.error('Ha ocurrido un error:', error);
-            }
-        });
-    } else {
-        console.warn('Por favor, seleccione una plantilla.');
-    }
-}
-
-
 function fetchCuentaProv() {
     return new Promise((resolve, reject) => {
         var tabla = document.getElementById("tablaDetalle");
@@ -439,35 +391,61 @@ async function enviarDatosFactura() {
         return;  // Esto devuelve `true` correctamente
     }
 
-    var DescripTemp = document.getElementById("descripcionFactura");
-    DescripTemp.value = DescripTemp.value.toUpperCase();
-
-    var datos = {
-        Compania: sessionStorage.getItem('compania'),
-        Agencia: sessionStorage.getItem('agencia'),
+    //var DescripTemp = 
+    
+    var datosEX = {
         Bodega: sessionStorage.getItem('bodega'),
-        Division: document.getElementById("divisionSelect").value,
-        SubTipo: document.getElementById("subTipoSelect").value,
-        Solicitante: document.getElementById("selSolicita").value,
-        Usuario: document.getElementById("userName").value,
         RucProveedor: document.getElementById("rucProveedor").value,
-        Plantillas: document.getElementById("PlantillaSelect").value,
-        FechaEmision: document.getElementById("fechaEmision").value,
-        SubTotalSinImpuestos: document.getElementById("subtotalSinImpuestos").value,
-        TotalDescuento: document.getElementById("totalDescuento").value,
-        TotalFactura: document.getElementById("importeTotal").value,
-        FechaIngresoHora: document.getElementById("fechaIngresoHora").value,
-        PlazoPago: document.getElementById("plazoPago").value,
-        SerieFactura: document.getElementById("serieFactura").value,
-        NumeroFactura: document.getElementById("numeroFactura").value,
-        TipoCredito: document.getElementById("tipoCreditoSelect").value,
-        AutorizacionSri: document.getElementById("autorizacionSri").value,
-        DescripcionFactura: DescripTemp.value,
-        OrdenCompra: document.getElementById("ordenCompra").value,
-
-        FechaIngreso: formatoFecha()
+    }
+    var datos = {
+        oc_numero: 0, // Este campo se llenará con la secuencia generada en el backend
+        oc_compania: sessionStorage.getItem('compania'),
+        oc_agencia: sessionStorage.getItem('agencia'),
+        oc_division: document.getElementById("divisionSelect").value,
+        oc_usering: document.getElementById("userName").value,
+        oc_fechaing: formatoFechaHora(),
+        oc_solicit: document.getElementById("selSolicita").value,
+        oc_estado: 'A',
+        oc_tipo: document.getElementById("subTipoSelect").value,
+        oc_usraprd: '',
+        oc_fehaprd:'',
+        oc_usraprf: '',
+        oc_fehaprf:'' ,
+        oc_codprov: '', // Este campo se llenará con el código del proveedor obtenido en el backend
+        oc_fecent: formatoFecha(),
+        oc_facpro: document.getElementById("numeroFactura").value,
+        oc_fecfac: document.getElementById("fechaEmision").value,
+        oc_valfac: document.getElementById("importeTotal").value,
+        oc_valcst: document.getElementById("subtotalSinImpuestos").value,
+        oc_descto: document.getElementById("totalDescuento").value,
+        oc_plazo: document.getElementById("plazoPago").value,
+        oc_iva_mo: 0,
+        oc_iva_rp: 0,
+        oc_recargo: 0,
+        oc_ordtra: '',
+        oc_bodprn: sessionStorage.getItem('bodega'),
+        oc_obser1: document.getElementById("descripcionFactura").value.toUpperCase(), 
+        oc_obser2: '',  
+        oc_clasif1:'',
+        oc_porcret1: 0,
+        oc_porcret2: 0,
+        oc_moneda: 'DO',
+        oc_atencion : 'SRS',
+        oc_cta_aux : '', 
+        oc_retiva:'',
+        oc_numdia: 0,
+        oc_cod_tip: '01',
+        oc_ide_cre: document.getElementById("tipoCreditoSelect").value,
+        oc_autimp: '9999',
+        oc_serie: document.getElementById("serieFactura").value,
+        oc_aut_sri: document.getElementById("autorizacionSri").value,
+        oc_fec_val: document.getElementById("fechaEmision").value,
+        oc_cuenta:'',
+        oc_subtipo:'',
+        
     };
-
+    
+    FechaIngreso: formatoFecha()
     var tabla = document.getElementById("tablaDetalle");
     var tablaTarifa = document.getElementById("tablaIva"); //tabla de porcentaje y valor iva
 
@@ -524,6 +502,7 @@ async function enviarDatosFactura() {
         var datosFactura = {
             datos: datos,
             datosTabla: datosTabla,
+            datosEX: datosEX,
 
         };
     }
@@ -604,7 +583,6 @@ async function validaDatosFactura() {
     const subtiposelect = document.getElementById('subTipoSelect');
     const selsolicita = document.getElementById('selSolicita');
     const tipocredito = document.getElementById('tipoCreditoSelect')
-    const plantillas = document.getElementById('PlantillaSelect');
     const descripcionfactura = document.getElementById('descripcionFactura');
     const plazopago = document.getElementById('plazoPago');
     const factura = document.getElementById('numeroFactura');
