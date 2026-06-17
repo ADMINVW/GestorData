@@ -1,3 +1,4 @@
+//js para consultar y listar las ordenes de compra en base a filtro en pantalla (consultaOrdenes.html)
 let dataTable;
 let dataTableIniciada = false;
 
@@ -75,7 +76,7 @@ const listOrdenes = async () => {
             });
 
         }
-
+        var ck = sessionStorage.getItem('company_key') || '';
         const data = await response.json();
         let content = ``;
         data.ordenes.forEach((orden) => {
@@ -89,7 +90,7 @@ const listOrdenes = async () => {
                     <td>${orden.oc_ordtra == null ? "-" : orden.oc_ordtra} </td>
                     <td>${orden.oc_fecing}</td>
                     <td>
-                         <a href="/comprasapp/templates/verTransaccion/${orden.oc_numero}?agencia=${orden.oc_agencia}&division=${orden.oc_division}" 
+                         <a href="/comprasapp/templates/verTransaccion/${orden.oc_numero}?agencia=${orden.oc_agencia}&division=${orden.oc_division}&company=${ck}" 
                class='btn btn-sm btn-primary' style='text-decoration: none;' target="_blank">
                <i class='fa-solid fa-search'></i>
             </a>

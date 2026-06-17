@@ -1,3 +1,4 @@
+//js para template de CRUD de plantilla periodica (plantillaPeriodica.html)
 //GLOBALES
 let grancontrib = "N"
 let rimpe = "N"
@@ -7,6 +8,7 @@ let retFte = "N"
 let nombreProveedor = ""
 let proceso = ""
 let user = sessionStorage.getItem('username');
+let nombreCentroG = ""
 
 document.addEventListener("DOMContentLoaded", function (event) {
     proceso = document.getElementById("proceso").value;
@@ -16,7 +18,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         let proveedor = document.getElementById("codProveedor").value;
         consultarProveedor(proveedor)
     }
-    sessionStorage.removeItem("form_enviado");
+    localStorage.removeItem("form_enviado");
 });
 
 //funciones ejecutadas al cargar el DOM
@@ -29,13 +31,27 @@ $(function () {
             //Ejecuta change siempre que su definicion este con jquery ($("#ct_grupo y no dom (document.getElementById("codProveedor").addEventListener)
         }
     });
+
+    $("#nomCentroG").autocomplete({
+        source: "/comprasapp/cargarCentroGastos/",
+        minLength: 3,
+        select: function (event, ui) {
+            $("#codCentroG").val(ui.item.codigo).trigger("change");
+            nombreCentroG = ui.item.value;
+            console.log("nombreCentroG", nombreCentroG)
+            //Ejecuta change siempre que su definicion este con jquery ($("#codProveedor").on("change") y no dom (document.getElementById("codProveedor").addEventListener)
+        }
+    });
+
+    sumarPorcentajes();
+
 });
 
 //Si usuario deja en blanco nombre proveedor se inicializa codigo y todo lo relacionado (checks iva fte, items retenciones)
 $("input[id='nomProveedor']").blur(function (e) {
     if (this.value.trim() == '') {
         $("#codProveedor").val('').trigger("change");
-        alert("No ha seleccionado proveedor!")
+        //alert("No ha seleccionado proveedor!")
     }
     else {
         // si modifica y se identifica diferencia con nombre original con existencia de codigo se setea nombre original 
@@ -46,34 +62,27 @@ $("input[id='nomProveedor']").blur(function (e) {
 });
 
 async function validarExistencia(codigo) {
-
-    if (!codigo) return;
+    if (!codigo) return false;
 
     codigo = codigo.toUpperCase()
-
     try {
         let response = await fetch(`../consultarExistencia/?validador=codplantilla&codigo=${codigo}`);
         let data = await response.json();
-        const inputCodigo = document.getElementById("codPlantilla");
+
         //valido el ok del retorno
         if (!response.ok) {
-            inputCodigo.value = "";
-            inputCodigo.focus();
-            alert("Error en respuesta - " + data.error + "; Comunique a sistemas")
+            throw new Error(data.error)
+        }
+
+        if (data.existe > 0) {
+            alert("Codigo de plantilla ya existe!")
             return false;
         }
-        else {
-            if (data.existe == 1) {
-                inputCodigo.value = "";
-                inputCodigo.focus();
-                alert("Codigo de plantilla ya existe!")
-                return false;
-            }
-        }
+        return true;
+
     } catch (error) {
-        inputCodigo.value = "";
-        inputCodigo.focus();
-        alert("ValidarExistencia - " + error + "; Comunique a sistemas")
+        alert(error + " en ValidarExistencia; Comunique a sistemas")
+        return false;
     }
 };
 
@@ -99,7 +108,7 @@ $("input[id='checkFte']").change(function (e) {
         //validacion tipo items
         if (!$("input[id='checkTipoS']").is(":checked") && !$("input[id='checkTipoB']").is(":checked")) {
             $(this).prop("checked", false);
-            alert("No ha seleccionado tipo ");
+            alert("No ha seleccionado tipo de items ");
             return;
         }
 
@@ -294,6 +303,28 @@ async function consultarProveedor(codigo) {
     }
 };
 
+
+//Al perder foco nombre plantilla, si deja vacio y existe codigo (proceso update no modificable) retorna nombre vigente
+$("input[id='nomPlantilla']").blur(async function (e) {
+    codigo = document.getElementById("codPlantilla").value;
+    if (codigo && (this.value.trim() == '') && proceso == 'U') {
+        const nombre = await consultarNombre(codigo, 'plantillaPeriodica');
+        $(this).val(nombre);
+    }
+});
+
+
+//Al perder foco codigo plantilla en proceso de creación valida existencia
+$("input[id='codPlantilla']").blur(async function (e) {
+    if (this.value.trim() != '' && proceso == 'C') {
+        if (await validarExistencia(this.value.trim()) == false) {
+            this.value = null;
+            this.focus();
+        }
+    }
+});
+
+
 //CANCELO PROCESO
 document.getElementById('cancelar-btn').addEventListener('click', function () {
     let url = this.getAttribute("data-url"); //Obtengo nombre vista a direccionar añadida como atributo en el boton
@@ -316,7 +347,7 @@ document.getElementById('cancelar-btn').addEventListener('click', function () {
 });
 
 //GUARDO REGISTRO
-document.getElementById("form-plantilla").addEventListener("submit", function (event) {
+document.getElementById("form-plantilla").addEventListener("submit", async function (event) {
 
     //METODO PARA CANCELAR ENVIO EN CASO DE CAER EN UNA VALIDACION
     event.preventDefault();
@@ -336,9 +367,9 @@ document.getElementById("form-plantilla").addEventListener("submit", function (e
         alert("Activó check de retención FUENTE y no ha seleccionado item de retención")
         return;
     }
-    //checks tipo 
+    //checks tipo de items
     if (!$("input[id='checkTipoB']").is(":checked") && !$("input[id='checkTipoS']").is(":checked")) {
-        alert("No ha seleccionado tipo")
+        alert("No ha seleccionado tipo de item")
         return;
     }
     //escenario cambio de tipo B o S y posterior a la seleccion de item de retencion
@@ -370,11 +401,22 @@ document.getElementById("form-plantilla").addEventListener("submit", function (e
     }
     //En creacion valido nuevamente existencia de codigo 
     if (proceso == 'C') {
-        if (validarExistencia($("input[id='codPlantilla']").val()) == false) { return }
+        if (await validarExistencia($("input[id='codPlantilla']").val()) == false) {
+            return
+        }
     }
 
+    //valor total de porcentajes asignados en detalle contable
+    const total = document.getElementById("sumporcentaje").value
+    console.log(total)
+    if (total != 100) {
+        alert("Valor total de asignación debe sumar el 100% ")
+        return;
+    }
+
+
     //CONTROL TRANSACCION ENVIADA
-    if (sessionStorage.getItem("form_enviado")) {
+    if (localStorage.getItem("form_enviado")) {
         swal.fire("Oops!", "Plantilla ya registrada!", "warning");
         document.getElementById("guardar-btn").disabled = true;
         return
@@ -391,7 +433,7 @@ document.getElementById("form-plantilla").addEventListener("submit", function (e
     const porcenFte = $("input[id='porcenFte']").val();
     if (porcenFte == '') { fuente = false }
 
-    //en creación pasa automaticamente al capturar campos de form, pero en update esta disabled y no pasa automaticamente, se opta por enviar manualmente
+    //en creación pasa automaticamente al capturar campos de form, pero en update esta disabled y no pasa automaticamente, se debe enviar manualmente
     const codigo = $("input[id='codPlantilla']").val();
 
     const otrosDatos = {
@@ -401,7 +443,8 @@ document.getElementById("form-plantilla").addEventListener("submit", function (e
         "user": user,
         "codigo": codigo.toUpperCase(),
         "iva": iva,
-        "fuente": fuente
+        "fuente": fuente,
+        "codGrupo": document.getElementById("codCentroG").value
     }
 
 
@@ -413,6 +456,24 @@ document.getElementById("form-plantilla").addEventListener("submit", function (e
         jsonData[key] = value;
     });
 
+    //capturo datos de seccion contable
+
+    const tfilas = [];
+    tabla = document.getElementById("listCentroG");
+    var rows = tabla.getElementsByTagName("tr");
+    for (var i = 1; i < rows.length - 1; i++) {
+        const Datos = {};
+        if (rows[i].querySelector(".porcentaje").disabled == false && rows[i].querySelector(".porcentaje").value > 0) {
+            valorPorcen = rows[i].querySelector(".porcentaje").value;
+            if (valorPorcen != null) {
+                celda = rows[i].cells[1];
+                Datos["subgrupo"] = celda.innerText;
+                Datos["porcentaje"] = valorPorcen;
+                tfilas.push(Datos);
+            }
+        }
+    }
+
     //ENVIO DATOS
     fetch("/comprasapp/guardarPlantilla/", {
         method: "POST",
@@ -420,7 +481,7 @@ document.getElementById("form-plantilla").addEventListener("submit", function (e
             "Content-Type": "application/json",
             "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
         },
-        body: JSON.stringify({ otrosDatos: otrosDatos, forma: jsonData }),
+        body: JSON.stringify({ otrosDatos: otrosDatos, forma: jsonData, filassubgrp: tfilas }),
     })
 
         .then(async response => {
@@ -434,7 +495,7 @@ document.getElementById("form-plantilla").addEventListener("submit", function (e
         .then(data => {
 
             if (data.status == 'success') {
-                sessionStorage.setItem("form_enviado", "true"); //se debe setear al cargar forma nuevamente
+                localStorage.setItem("form_enviado", "true"); //se debe setear al cargar forma nuevamente
                 swal.fire({
                     title: "Proceso satisfactorio",
                     text: "Plantilla guardada correctamente",
@@ -459,66 +520,335 @@ document.getElementById("form-plantilla").addEventListener("submit", function (e
         });
 });
 
-//ELIMINO REGISTRO
-document.getElementById('eliminar-btn').addEventListener('click', async function (event) {
-    //METODO PARA CANCELAR ENVIO EN CASO DE CAER EN UNA VALIDACION
+//ELIMINO REGISTRO: SE VALIDA EXISTENCIA DE BOTON PORQUE EN ESCENARIO CREACIÓN NO EXISTE
+const eliminar = document.getElementById('eliminar-btn')
+if (eliminar) {
+    document.getElementById('eliminar-btn').addEventListener('click', async function (event) {
+        //METODO PARA CANCELAR ENVIO EN CASO DE CAER EN UNA VALIDACION
 
-    event.preventDefault();
-    const codigo = document.getElementById('codPlantilla').value;
+        event.preventDefault();
+        const codigo = document.getElementById('codPlantilla').value;
 
-    const result = await swal.fire({
-        title: "¿Desea eliminar plantilla de orden periodica?",
-        text: "Se eliminará también su plantilla de asignaciones contables",
-        icon: "warning",
-        showCancelButton: true,
-        showConfirmButton: true,
-        confirmButtonText: "Si",
-        cancelButtonText: "No",
-        confirmButtonColor: "#DD6B55"
-    });
-
-    if (!result.isConfirmed) {
-        return;
-    }
-
-    try {
-        //envío datos
-        const response = await fetch(`/comprasapp/eliminarPlantilla/?codigo=${codigo}&proceso=P`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
-            },
-            body: JSON.stringify(),
+        const result = await swal.fire({
+            title: "¿Desea eliminar plantilla de orden periodica?",
+            text: "Se eliminará también su plantilla de asignaciones contables",
+            icon: "warning",
+            showCancelButton: true,
+            showConfirmButton: true,
+            confirmButtonText: "Si",
+            cancelButtonText: "No",
+            confirmButtonColor: "#DD6B55"
         });
 
-        if (!response.ok) {
-            const data = await response.json();
-            throw new Error(data.detallerr)
+        if (!result.isConfirmed) {
+            return;
         }
-        const data = await response.json();
 
-        if (data.status == "success") {
-            sessionStorage.setItem("form_enviado", "true");
-            await swal.fire({
-                title: "Proceso satisfactorio",
-                text: "Plantilla eliminada correctamente",
-                icon: "success",
-                confirmButtonText: "Aceptar",
+        try {
+            //envío datos
+            const response = await fetch(`/comprasapp/eliminarPlantilla/?codigo=${codigo}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+                body: JSON.stringify(),
             });
 
-            if (data.redirect_url) {
-                window.location.href = data.redirect_url; // Redirige al usuario a la URL devuelta por la vista
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.detallerr)
+            }
+            const data = await response.json();
+
+            if (data.status == "success") {
+                localStorage.setItem("form_enviado", "true");
+                await swal.fire({
+                    title: "Proceso satisfactorio",
+                    text: "Plantilla eliminada correctamente",
+                    icon: "success",
+                    confirmButtonText: "Aceptar",
+                });
+
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url; // Redirige al usuario a la URL devuelta por la vista
+                }
+                else {
+                    throw new Error('No se recibió URL de redirección');
+                }
             }
             else {
-                throw new Error('No se recibió URL de redirección');
+                throw new Error(data.detallerr);
+            }
+        } catch (error) {
+            //console.error('Error en submit :', error);
+            swal.fire("Oops!", "Ocurrio un error (" + error.message + "); comunique a sistemas", "error");
+        }
+    })
+}
+
+
+//Funciones sobre datos contables, agregadas (27-10) se agrupa en su solo template
+//Carga listado de Subgrupo, llamado cuando cambia codigo de grupo
+const cargarSubgrupos = async () => {
+    try {
+        //Parametros
+        const codigo = document.getElementById("codCentroG").value;
+        const codprov = document.getElementById("codProveedor").value;
+        let response;
+
+        response = await fetch(`/comprasapp/consultarSubcentrosGastos/${codigo}/${codprov}`);
+        const data = await response.json();
+        let content = ``;
+        data.subgruposGastos.forEach((subgrupo) => {
+            content += `
+                <tr>
+                    <td>${subgrupo.mc_codpro == null ? "<a id='asignar-btn' class='btn btn-sm btn-success btnAsignar' >Asignar</a>" : ""}</td>
+                    <td>${subgrupo.ct_secgrp}</td>
+                    <td>${subgrupo.ct_cuenta}</td>
+                    <td>${subgrupo.ct_descripcion}</td>
+                    <td style="text-align: center; white-space: nowrap; overflow-x: auto">
+                                    <input type="number" step="any" min="0" class="porcentaje" onclick="this.select()"
+                                    ${subgrupo.mc_codpro == null ? "disabled" : "value = 0"}
+                                    style="border: 0;text-align: center"  />
+                                  
+                    </td>
+                </tr>
+            `;
+        });
+        listCentroG_body.innerHTML = content;
+        document.getElementById('tableCentroG').removeAttribute('hidden');
+        document.getElementById('divAlerta').setAttribute('hidden', '');
+        document.getElementById("sumporcentaje").value = 0 //inicializo total %
+    } catch (error) {
+        alert(error);
+    }
+}
+
+
+
+//Se ejecuta eventos sobre el elemento padre del input porcentaje y boton asignar por creación dinamica posterior aL DOM, que no captura evento directamente sobre el contrl
+//Mientras digita va sumando automaticamente
+document.getElementById("listCentroG_body").addEventListener("input", function (e) {
+    if (e.target.classList.contains("porcentaje")) {
+        sumarPorcentajes();
+    }
+});
+
+//Activa input de ingreso de porcentaje
+document.getElementById("listCentroG_body").addEventListener("click", function (e) { //el evento capturado en el objeto e identifica (del conjunto) el control especifico sobre el que se ejecutó el evento
+    e.preventDefault(); //usual en clic de button pa prevenir algun evento incontrolable
+    //Seleecciono fila del boton y activo su input
+    const row = e.target.closest("tr");
+    const inputPorcen = row.querySelector(".porcentaje");
+    if (e.target.classList.contains("btnAsignar")) {
+        inputPorcen.removeAttribute('disabled');
+        inputPorcen.focus();
+        inputPorcen.select();
+        //Cambio diseño de boton 
+        e.target.classList.remove("btn-success", "btnAsignar")
+        e.target.classList.add("btn-danger", "btnCancelarAsig")
+        e.target.textContent = "Quitar Asignacion"
+
+    }
+    else if ((e.target.classList.contains("btnCancelarAsig"))) {
+        inputPorcen.value = '';
+        inputPorcen.setAttribute('disabled', '');
+        //Cambio diseño de boton 
+        e.target.classList.remove("btn-danger", "btnCancelarAsig")
+        e.target.classList.add("btn-success", "btnAsignar")
+        e.target.textContent = "Asignar"
+    }
+    sumarPorcentajes();
+});
+
+
+async function validarCentroProveedor(codigo, proveedor) {
+    console.log("parametros ", codigo, " + ", proveedor)
+    //Parametros vacios retorna
+    if ((!codigo) || (!proveedor))
+        return false;
+    try {
+        const inputCentro = document.getElementById("nomCentroG");
+        let response = await fetch(`../consultarExistencia/?validador=codgrupo&codigo=${codigo}&condicion=${proveedor}`);
+        let data = await response.json();
+        //valido el ok del retorno
+        if (!response.ok) {
+            throw new Error(data.error)
+        }
+        else {
+            if (data.existe == 0) {
+                return false;
+            }
+        }
+        return true;
+    } catch (error) {
+        inputCentro.focus();
+        alert(error + " en validarCentroProveedor; Comunique a sistemas")
+        return false;
+    }
+}
+
+$("#codCentroG").on("change", async function () {
+    proveedor = document.getElementById("codProveedor").value;
+    if (!proveedor) {
+        console.log("Entra")
+        alert("Se debe seleccionar primero proveedor2")
+        document.getElementById("nomCentroG").value = null
+        document.getElementById("codCentroG").value = null
+        return
+    }
+
+    //campo con valor se valida asignación a proveedor
+    if ($(this).val() != '') {
+        validado = await (validarCentroProveedor($(this).val(), proveedor));
+        if (validado) {
+            //se carga tabla de subgrupos
+            cargarSubgrupos()
+        }
+        else {
+            swal.fire({
+                title: "Centro de gastos no asignada a proveedor ¿Desea asignarla?",
+                text: "Se registrarán automaticamente subgrupos usados en plantilla a proveedor",
+                icon: "warning",
+                showCancelButton: true,
+                showConfirmButton: true,
+                confirmButtonText: "Si",
+                cancelButtonText: "No",
+                confirmButtonColor: "#DD6B55"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    //se carga tabla de subgrupos
+                    cargarSubgrupos()
+                }
+                else {
+                    //se inicializa controles y se pone alerta constante
+                    document.getElementById("nomCentroG").focus();
+                    //vacío contenido de tabla y oculto en caso que este llena y desplegada, se inicializa campo de suma de %s
+                    listCentroG_body.innerHTML = ''
+                    document.getElementById('tableCentroG').setAttribute('hidden', '');
+                    document.getElementById("sumporcentaje").value = 0
+                    //despliego alerta constante de no asignación 
+                    const divalerta = document.getElementById('divAlerta');
+                    if (divalerta !== null) {
+                        divalerta.removeAttribute('hidden');
+                        divalerta.textContent = "Centro de gastos no asignada a proveedor!"
+                    }
+                }
+            })
+
+
+
+        }
+    }
+    //campo vacio se inicializa controles
+    else {
+        //oculto div alerta en caso de estar desplegada
+        const divalerta = document.getElementById('divAlerta');
+        if (divalerta !== null) {
+            divalerta.setAttribute('hidden', '');
+        }
+        //vacío contenido de tabla en caso que este llena y campo de suma de %s
+        listCentroG_body.innerHTML = ''
+        document.getElementById("sumporcentaje").value = 0
+        nombreCentroG = ''
+    }
+});
+
+//Sumar porcentajes de lista subgrupo
+function sumarPorcentajes() {
+    var grid = document.getElementById("listCentroG");
+    var rows = grid.getElementsByTagName("tr");
+    var sum = 0;
+
+    for (var i = 1; i < rows.length - 1; i++) {
+        var cells = rows[i].querySelector(".porcentaje").value;
+        if (cells.length === 0) {
+            cells = 0;
+        }
+        sum += parseFloat(cells);
+        //validación total asignación, despliego alerta o quito en caso q este desplegada
+        const divalerta = document.getElementById('divAlerta');
+        if (sum > 100) {
+            if (divalerta !== null) {
+                divalerta.removeAttribute('hidden');
+                divalerta.textContent = "El total de asignación no pueder ser mayor al 100%"
             }
         }
         else {
-            throw new Error(data.detallerr);
+            if (divalerta !== null) {
+                divalerta.setAttribute('hidden', '');
+                divalerta.textContent = ""
+            }
         }
-    } catch (error) {
-        console.error('Error en submit :', error);
-        swal.fire("Oops!", "Ocurrio un error (" + error.message + "); comunique a sistemas", "error");
+
     }
-})
+    document.getElementById("sumporcentaje").value = sum;
+};
+
+//Obtiene nombre del centro de gastos o plantilla
+async function consultarNombre(codigo, entidad) {
+
+    if (!codigo || !entidad) return null;
+
+    try {
+        let response = await fetch(`/comprasapp/consultarRegistro/?entidad=${entidad}&codigo=${codigo}`);
+        let data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error)
+        }
+
+        if (data) {
+            if (entidad == "centroGastos") {
+                nombre = data[0].ct_grupo.trim();
+                return nombre
+            }
+            if (entidad == "plantillaPeriodica") {
+                return data[0].pc_concepto.trim();
+            }
+        }
+        else {
+            return null
+        }
+
+
+    } catch (error) {
+        alert(error + " en consultarNombre; Comunique a sistemas")
+        return null
+    }
+};
+
+//pierde foco nombre centro gastos, si deja vacio y existe codigo retorna nombre del codigo
+$("input[id='nomCentroG']").blur(async function (e) {
+    proveedor = document.getElementById("codProveedor").value;
+    codigo = document.getElementById("codCentroG").value;
+
+    //Sin proveedor y codigo de grupo, inicializo campo (escenario creación)
+    if (!proveedor && !codigo) {
+        document.getElementById("nomCentroG").value = null
+    }
+    else {
+        //Si campo con valor y codigo con valor, seteo campo con nombre de codigo
+        if (this.value.trim() == '') {
+            if (codigo) {
+                console.log("entra con codigo")
+                const nombre = await consultarNombre(codigo, 'centroGastos');
+                $(this).val(nombre);
+            }
+            else {
+                $("#codCentroG").val('').trigger("change");
+            }
+        }
+        else {
+            console.log("entra con valor ", nombreCentroG)
+            if (codigo && this.value.trim() != nombreCentroG) {
+                console.log("entra con valor1")
+                $(this).val(nombreCentroG);
+            }
+        }
+    }
+});
+
+
+

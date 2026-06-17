@@ -1,3 +1,4 @@
+//js de template para consultar y listar las plantillas periodicas (consultaPlantillasPeriodicas.html) 
 let dataTable;
 let dataTableIniciada = false;
 const opcionesDataTable = {
@@ -29,9 +30,9 @@ const iniciarDataTable = async () => {
 
 const listPlantillas = async () => {
     try {
+        ck = sessionStorage.getItem('company_key') || '';
         //Parametro
         const codigo = document.getElementById("codPlantilla").value;
-
         const parametro = {
             codigo: codigo.toUpperCase()
         };
@@ -64,12 +65,14 @@ const listPlantillas = async () => {
                     <td>${plantilla.pc_codigo}</td>
                     <td>${plantilla.pc_concepto}</td>
                     <td>${plantilla.pv_nombre}</td>
-                    <td><a href="/comprasapp/editarPlantilla/${plantilla.pc_codigo}" 
-               class='btn btn-sm btn-outline-primary' style='text-decoration: none;' >
+                    <td><a href="/comprasapp/verPlantillaPeriodica/${plantilla.pc_codigo}" title = "Consultar"
+               class='btn btn-sm btn-primary' style='text-decoration: none;' >
             <i class='fa-solid fa-search'></i></a>  </td>
-            <td><a href="/comprasapp/cargarTmplPlantillaCtb/${plantilla.pc_codigo}" 
-               class='btn btn-sm btn-outline-primary' style='text-decoration: none;' >
-            <i class='fa-solid fa-percent'></i></a>  </td>
+
+                <td><a href="/comprasapp/editarPlantilla/?codigo=${plantilla.pc_codigo}" title = "Editar"
+               class='btn btn-sm btn-success' style='text-decoration: none;' >
+            <i class='fa-solid fa-edit'></i></a>  </td>
+
                 </tr>
             `;
         });

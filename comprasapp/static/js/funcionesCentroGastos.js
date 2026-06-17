@@ -1,3 +1,4 @@
+//js para template de CRUD de centro de gastos (centroGastos.html)
 //Clic boton editar subcentros 
 document.getElementById("listSubcentroG_body").addEventListener("click", function (e) {
     e.preventDefault();

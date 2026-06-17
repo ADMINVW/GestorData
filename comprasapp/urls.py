@@ -23,25 +23,28 @@ urlpatterns = [
     path('comprasapp/cargarDivisiones/', views.cargarDivisiones , name='cargarDivisiones'),
     path('comprasapp/cargarProveedores/', views.cargarProveedores , name='cargarProveedores'),
     path('detalleOrdenT/<int:numOrden>/<str:codAge>/', views.obtenerDetalleOrdenCompraT, name='detalleOrdenT'),
+    
     path('comprasapp/cargarTmplPlantillas/', views.cargarTmplConsultaPlantillas , name='cargarTmplPlantillas'),
     path('comprasapp/consultarPlantillas/', views.consultarPlantillas, name="consultarPlantillas"),
     path('comprasapp/cargarConceptoPlantillas/', views.cargarConceptoPlantillas, name='cargarConceptoPlantillas'),
     path('comprasapp/crearPlantilla/', views.crearPlantilla, name='crearPlantilla'),
-    path('comprasapp/editarPlantilla/<str:codigo>/', views.editarPlantilla, name='editarPlantilla'),
+    path('comprasapp/editarPlantilla/', views.editarPlantilla, name='editarPlantilla'),
     path('comprasapp/consultarExistencia/', views.consultarExistencia, name='consultarExistencia'),
     path('comprasapp/consultarRegistro/', views.consultarFromTemplate, name='consultarFromTemplate'),
     path('comprasapp/guardarPlantilla/', views.guardarPlantilla, name='guardarPlantilla'),
-    path('comprasapp/cargarTmplPlantillaCtb/<str:codigo>/', views.cargarTmplPlantillaCtb, name='cargarTmplPlantillaCtb'),
     path('comprasapp/cargarCentroGastos/', views.cargarCentroGastos , name='cargarCentroGastos'),
     path('comprasapp/consultarSubcentrosGastos/<str:codigo>/<int:codprov>/', views.consultarSubcentrosGastos, name="consultarSubcentrosGastos"),
-    path('comprasapp/guardarPlantillaCtb/', views.guardarPlantillaCtb, name='guardarPlantillaCtb'),
     path('comprasapp/eliminarPlantilla/', views.eliminarPlantilla, name='eliminarPlantilla'),
+    
     path('comprasapp/cargarTmplConsultaCentroGastos/', views.cargarTmplConsultaCentroGastos , name='cargarTmplConsultaCentroGastos'),
     path('comprasapp/consultarCentroGastos/', views.consultarCentroGastos, name='consultarCentroGastos'),
     path('comprasapp/cargarTmplCentroGastos/', views.cargarTmplCentroGastos, name='cargarTmplCentroGastos'),
     path('comprasapp/cargarCuentasCtb/', views.cargarCuentasCtb , name='cargarCuentasCtb'),
     #mineoctubre
     path('detalleOrdenR/<int:numOrden>/<str:codAge>/', views.obtenerDetalleOrdenCompraR, name='detalleOrdenR'),
+    path('comprasapp/verPlantillaPeriodica/<str:codigo>/', views.verPlantillaPeriodica, name='verPlantillaPeriodica'),
+    path('comprasapp/verCentroGastos/<str:codigo>/', views.verCentroGastos, name='verCentroGastos'),
+    path('comprasapp/cargarAsignacionCentroGastos', views.cargarTmplAsignacionCentro, name='cargarAsignacionCentroGastos')
     #path('comprasapp/templates/ordenCompra', views.tipoOrden),
 
 ]

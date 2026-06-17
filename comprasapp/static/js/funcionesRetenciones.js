@@ -1,15 +1,16 @@
+//js de template de creación de retencion (retencionCompra.html)
 $.ajaxSetup({
-    beforeSend: function (xhr) {
-        var ck = sessionStorage.getItem('company_key');
-        if (ck) xhr.setRequestHeader('X-Company-Key', ck);
-    }
+  beforeSend: function (xhr) {
+    var ck = sessionStorage.getItem('company_key');
+    if (ck) xhr.setRequestHeader('X-Company-Key', ck);
+  }
 });
 //Eventos al cargar plantilla
 document.addEventListener("DOMContentLoaded", function (event) {
   // ── SCROLL TOP DESPUÉS DE RELOAD ──
   if (new URLSearchParams(window.location.search).get('scrollTop')) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    window.history.replaceState({}, '', window.location.pathname + 
+    window.history.replaceState({}, '', window.location.pathname +
       window.location.search.replace(/[?&]scrollTop=1/, '').replace(/^\?$/, ''));
     // Mostrar mensaje de error si existe
     const errorMsg = sessionStorage.getItem('errorMsg');
@@ -31,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
   agencia.value = sessionStorage.getItem("agencia");
   bodega.value = sessionStorage.getItem("bodega");
 
-
+  console.log(sessionStorage.getItem('username'))
   //TRATAMIENTO ORDEN PERIODICA, SE PONE AUTOMATICAMENTE CHECK EN ITEMS
   let periodica = document.getElementById("dataPeriodica");
 
@@ -328,13 +329,6 @@ function sumarValoresFte() {
 
 //CANCELO PROCESO
 document.getElementById('cancelar-btn').addEventListener('click', function () {
-  let url = this.getAttribute("data-url"); //Obtengo nombre vista a direccionar añadida como atributo en el boton
-
-  let agencia = sessionStorage.getItem("agencia");
-  let division = document.getElementById("division").value;
-  //probar
-  let urlParam = `${url}/?agencia=` + agencia + `&division=` + division + `+&proceso=I`;
-  console.log(urlParam);
   swal.fire({
     title: "¿Desea cancelar proceso retención ?",
     text: "No se generará retención de la factura en proceso",
@@ -346,6 +340,12 @@ document.getElementById('cancelar-btn').addEventListener('click', function () {
     confirmButtonColor: "#DD6B55"
   }).then((result) => {
     if (result.isConfirmed) {
+      let url = this.getAttribute("data-url"); //Obtengo nombre vista a direccionar añadida como atributo en el boton
+      let agencia = sessionStorage.getItem("agencia");
+      let division = document.getElementById("division").value;
+      var ck = sessionStorage.getItem('company_key') || '';
+      let urlParam = `${url}/?agencia=` + agencia + `&division=` + division + `&proceso=I&company=` + ck;
+
       //window.location.href = "{% url 'mimenu' %}"; //no se puede usar en js extreno funcionario en scrpt dentro de hmtl
       window.location.href = urlParam;
     }
@@ -367,6 +367,13 @@ document.getElementById("form-retencion").addEventListener("submit", function (e
   const jsonData = {};
   const filas = [];
   let tabla;
+
+  //caso proveedor sin retencion iva, sin retencion fte, mensajes informativos en pantalla, no se muestran listados de items de retencion
+  if (retIva == "N" && retFte == "N") {
+    alert("Nada que guardar, factura no aplica a proceso de retencion, deberá cancelar proceso!")
+    return;
+  }
+
 
   //Capturo item seleccionado en tablas
   //Si no tengo base iva no muestro seccion iva, tampoco cuando no es agente de retencion de iva, por tanto tampoco valido

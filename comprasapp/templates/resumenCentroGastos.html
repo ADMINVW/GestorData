@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block titulo %} Centro de Gastos {% endblock %}
+{% block contenido %}
+ <div class="col-12 col-md-11 offset-md-1">
+    <h5 class="text-center mb-40 mt-50 " style="color: cornflowerblue;">Centro de Gastos</h5>
+      <div class="card">
+        <div class="card-header">
+            <h5>DETALLE CENTRO DE GASTOS</h5>
+        </div>
+        <div class="card-body">
+             <div class="row" style="margin-bottom: 1%;">
+                <div class="col-2"><b>Código:</b></div><div class="col-10">{{ncodigoCentro}}</div>
+            </div>
+             <div class="row" style="margin-bottom: 1%;">
+                <div class="col-2"><b>Nombre: </b></div> <div class="col-10"> {{nnombreCentro}}</div>
+            </div>
+            <br>
+            <div class="table-responsive" id="tableCentroG">
+                          <table class="table table-hover  table-sm" id="listCentroG">
+                            <thead class="border-bottom font-weight-bold">
+                              <tr>
+                                <th style="text-align: center">
+                                  SubGrupo
+                                </th>
+                                <th style="text-align: center">
+                                  Cuenta
+                                </th>
+                                <th style="text-align: center">
+                                  Descripción
+                                </th>
+                              </tr>
+                            </thead>
+                           {% for subgrupo in ndataSubgrupos %}
+                            <tbody id="listCentroG_body">
+                              <tr>
+                                <td>
+                                  <p > {{subgrupo.ct_secgrp}}</p>
+                                </td>
+                                <td >
+                                  <p >{{subgrupo.ct_cuenta}}</p>
+                                </td>
+                                <td >
+                                  <p>{{subgrupo.ct_descripcion}}</p>
+                                </td>
+                              </tr>
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                        </div>
+        </div>
+        <div class="card-footer">            
+            <a class="btn btn-primary" role="button" id="editar-btn" href="">Editar</a>
+            <a class="btn btn-danger" role="button" href="{% url 'mimenu' %}" id="cancelar-btn">Cancelar</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
