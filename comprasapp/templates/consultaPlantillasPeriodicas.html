@@ -48,8 +48,8 @@
                         <!-- type="button" solo ejecuta el onclick sin enviar el formulario o recargar pagina esto lo hace con type ="submit"-->
                         <button class="btn btn-primary" type="button" id="consultar-btn"
                             onclick="iniciarDataTable()">Consultar</button>
-                        <a class="btn btn-danger" role="button" href="{% url 'mimenu' %}" id="cancelar-btn">Cancelar</a>
-                        <a class="btn btn-success" role="button" href="{% url 'crearPlantilla' %}"
+                        <a class="btn btn-danger" role="button" href="{% url 'mimenu' %}?company={{ company_key }}" id="cancelar-btn">Cancelar</a>
+                        <a class="btn btn-success" role="button" href="{% url 'crearPlantilla' %}?company={{ company_key }}"
                             id="nuevo-btn">Nueva</a>
                     </div>
                 </div>

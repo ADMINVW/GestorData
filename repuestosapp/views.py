@@ -30,9 +30,10 @@ def comprasRepuestos(request):
     from core.models import Company
 
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
 

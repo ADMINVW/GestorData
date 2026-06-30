@@ -41,8 +41,6 @@ const listOrdenes = async () => {
         const factura = document.getElementById("numFactura").value;
         const ordenTaller = document.getElementById("numOrdenTaller").value;
 
-        console.log("filtro ", agencia)
-
         const parametros = {
             agencia: agencia,
             proveedor: proveedor,
@@ -64,19 +62,19 @@ const listOrdenes = async () => {
         let response;
         //Si parametros vacios 
         if (!filtros) {
-            response = await fetch("/comprasapp/consultarOrdenes/");
+            response = await fetch(`/comprasapp/consultarOrdenes?company=${ck}`);
         } else {
-            response = await fetch("/comprasapp/consultarOrdenes/", {
+            response = await fetch(`/comprasapp/consultarOrdenes/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value, // siempre que tengp {% csrf_token %} en el formulario de html, otra opcion getCookie('csrftoken')
+                    'X-Company-Key': ck,
                 },
                 body: JSON.stringify(parametros)
             });
 
         }
-        var ck = sessionStorage.getItem('company_key') || '';
         const data = await response.json();
         let content = ``;
         data.ordenes.forEach((orden) => {
@@ -105,6 +103,7 @@ const listOrdenes = async () => {
 }
 
 document.addEventListener("DOMContentLoaded", function (event) {
+    ck = sessionStorage.getItem('company_key');
     cargarAgencias();
     cargarDivisiones();
     iniciarDataTable();
@@ -112,7 +111,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
 const cargarAgencias = async () => {
     try {
-        const response = await fetch("/comprasapp/cargarAgencias/");
+        const response = await fetch(`/comprasapp/cargarAgencias?company=${ck}`);
         const data = await response.json();
 
         const selectAgencia = document.getElementById("codAgencia");
@@ -129,7 +128,7 @@ const cargarAgencias = async () => {
 
 const cargarDivisiones = async () => {
     try {
-        const response = await fetch("/comprasapp/cargarDivisiones/");
+        const response = await fetch(`/comprasapp/cargarDivisiones?company=${ck}`);
         const data = await response.json();
         const selectDivision = document.getElementById("codDivision");
 
@@ -147,7 +146,7 @@ const cargarDivisiones = async () => {
 
 $(function () {
     $("#nomProveedor").autocomplete({
-        source: "/comprasapp/cargarProveedores/",
+        source: `/comprasapp/cargarProveedores?company=${ck}`,
         minLength: 3,
         select: function (event, ui) {
             $("#codProveedor").val(ui.item.codigo);

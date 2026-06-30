@@ -12,23 +12,11 @@ import pyodbc
 import traceback
 
 def mimenu(request):
-    db_alias = company_context(request).get('db_alias', 'default')
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
     user_data = request.session.get(f'user_data_{company_key}', {})
-
-    if not db_alias:
-        return JsonResponse({'error': 'No se pudo determinar la base de datos'}, status=400)
-    
-    # Obtener objeto company para el navbar
-    from core.models import Company
-    try:
-        company = Company.objects.get(key=company_key)
-    except Company.DoesNotExist:
-        company = None
-
     context = {
         'company_key': company_key,
-        'company':     company,        # ← para el navbar
+        'company':     company_context(request).get('company', ''),        # ← para el navbar
         'username':    company_context(request).get('db_user', ''),
         'nombre_user': company_context(request).get('db_user_name', ''),
         'compania':    user_data.get('compania', ''),

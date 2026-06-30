@@ -11,6 +11,7 @@ let user = sessionStorage.getItem('username');
 let nombreCentroG = ""
 
 document.addEventListener("DOMContentLoaded", function (event) {
+    ck = sessionStorage.getItem('company_key');
     proceso = document.getElementById("proceso").value;
     //Proceso UPDATE inicializo controles
     if (proceso == 'U') {
@@ -24,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
 //funciones ejecutadas al cargar el DOM
 $(function () {
     $("#nomProveedor").autocomplete({
-        source: "/comprasapp/cargarProveedores/",
+        source: `/comprasapp/cargarProveedores?company=${ck}`,
         minLength: 3,
         select: function (event, ui) {
             $("#codProveedor").val(ui.item.codigo).trigger("change");
@@ -33,7 +34,7 @@ $(function () {
     });
 
     $("#nomCentroG").autocomplete({
-        source: "/comprasapp/cargarCentroGastos/",
+        source: `/comprasapp/cargarCentroGastos?company=${ck}`,
         minLength: 3,
         select: function (event, ui) {
             $("#codCentroG").val(ui.item.codigo).trigger("change");
@@ -66,7 +67,7 @@ async function validarExistencia(codigo) {
 
     codigo = codigo.toUpperCase()
     try {
-        let response = await fetch(`../consultarExistencia/?validador=codplantilla&codigo=${codigo}`);
+        let response = await fetch(`../consultarExistencia/?validador=codplantilla&codigo=${codigo}&company=${ck}`);
         let data = await response.json();
 
         //valido el ok del retorno
@@ -260,7 +261,7 @@ async function consultarProveedor(codigo) {
     if (!codigo) return;
 
     try {
-        let response = await fetch(`/comprasapp/consultarRegistro/?entidad=proveedor&codigo=${codigo}`);
+        let response = await fetch(`/comprasapp/consultarRegistro/?entidad=proveedor&codigo=${codigo}&company=${ck}`);
         let data = await response.json();
 
         if (!response.ok) {
@@ -316,7 +317,9 @@ $("input[id='nomPlantilla']").blur(async function (e) {
 
 //Al perder foco codigo plantilla en proceso de creación valida existencia
 $("input[id='codPlantilla']").blur(async function (e) {
+    console.log("ejecuta")
     if (this.value.trim() != '' && proceso == 'C') {
+        console.log("entra con proceso")
         if (await validarExistencia(this.value.trim()) == false) {
             this.value = null;
             this.focus();
@@ -327,8 +330,6 @@ $("input[id='codPlantilla']").blur(async function (e) {
 
 //CANCELO PROCESO
 document.getElementById('cancelar-btn').addEventListener('click', function () {
-    let url = this.getAttribute("data-url"); //Obtengo nombre vista a direccionar añadida como atributo en el boton
-    let urlParam = `${url}`;
     swal.fire({
         title: "¿Desea cancelar proceso?",
         text: "No se guardará registro de plantilla",
@@ -340,6 +341,8 @@ document.getElementById('cancelar-btn').addEventListener('click', function () {
         confirmButtonColor: "#DD6B55"
     }).then((result) => {
         if (result.isConfirmed) {
+            let url = this.getAttribute("data-url"); //Obtengo nombre vista a direccionar añadida como atributo en el boton
+            let urlParam = `${url}?company=` + ck;
             //window.location.href = "{% url 'mimenu' %}"; //no se puede usar en js extreno funcionario en scrpt dentro de hmtl
             window.location.href = urlParam;
         }
@@ -480,6 +483,7 @@ document.getElementById("form-plantilla").addEventListener("submit", async funct
         headers: {
             "Content-Type": "application/json",
             "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+            "X-Company-Key": ck,
         },
         body: JSON.stringify({ otrosDatos: otrosDatos, forma: jsonData, filassubgrp: tfilas }),
     })
@@ -546,11 +550,13 @@ if (eliminar) {
 
         try {
             //envío datos
-            const response = await fetch(`/comprasapp/eliminarPlantilla/?codigo=${codigo}`, {
+            const response = await fetch(`/comprasapp/eliminarPlantilla/?codigo=${codigo}&company=${ck}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'X-Company-Key': ck,
+
                 },
                 body: JSON.stringify(),
             });
@@ -596,7 +602,7 @@ const cargarSubgrupos = async () => {
         const codigo = document.getElementById("codCentroG").value;
         const codprov = document.getElementById("codProveedor").value;
         let response;
-
+        //revisar no se envía company
         response = await fetch(`/comprasapp/consultarSubcentrosGastos/${codigo}/${codprov}`);
         const data = await response.json();
         let content = ``;
@@ -670,7 +676,7 @@ async function validarCentroProveedor(codigo, proveedor) {
         return false;
     try {
         const inputCentro = document.getElementById("nomCentroG");
-        let response = await fetch(`../consultarExistencia/?validador=codgrupo&codigo=${codigo}&condicion=${proveedor}`);
+        let response = await fetch(`../consultarExistencia/?validador=codgrupo&codigo=${codigo}&condicion=${proveedor}&company=${ck}`);
         let data = await response.json();
         //valido el ok del retorno
         if (!response.ok) {
@@ -792,6 +798,7 @@ async function consultarNombre(codigo, entidad) {
     if (!codigo || !entidad) return null;
 
     try {
+        //revisar no se envía company
         let response = await fetch(`/comprasapp/consultarRegistro/?entidad=${entidad}&codigo=${codigo}`);
         let data = await response.json();
 

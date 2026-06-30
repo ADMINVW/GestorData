@@ -5,7 +5,15 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block titulo %}{% endblock %} — GestorData</title>
-
+  {% if company.key ==  'ecuawagen' %}
+  <link rel="icon" href='/static/imagenes/LOGO-EW-ICO.ico' type="image/x-icon">
+  {% else %}
+  <link rel="icon" href='/static/imagenes/LOGO-GM-ICO.ico' type="image/x-icon">
+  {% endif %}
+  <!--Control cache-->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">  
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -297,6 +305,13 @@
       border-radius: 8px; padding: 10px 20px;
     }
 
+    .btn-danger:hover:not(:disabled) {
+      background: #d87070 !important;
+      border-color: #da4b31 !important;
+      box-shadow: 0 4px 16px color-mix(in srgb, #f51a1a 35%, transparent);
+      transform: translateY(-1px);
+    }
+
     .btn-success {
       background: #198754 !important;
       border-color: #88d6af !important;
@@ -304,6 +319,22 @@
       font-size: 13.5px; font-weight: 500;
       border-radius: 8px; padding: 10px 20px;
       transition: background .2s, transform .15s, box-shadow .2s;
+    }
+
+    .btn-secondary{
+      background: #595a5a !important;
+      border-color: #b3b8b5 !important;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13.5px; font-weight: 500;
+      border-radius: 8px; padding: 10px 20px;
+      transition: background .2s, transform .15s, box-shadow .2s;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #939496 !important;
+      border-color: #575858 !important;
+      box-shadow: 0 4px 16px color-mix(in srgb, #2c2c2c 35%, transparent);
+      transform: translateY(-1px);
     }
 
     /* ─── SECTION LABELS ─── */

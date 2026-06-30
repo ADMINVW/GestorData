@@ -36,7 +36,7 @@ urlpatterns = [
     path('comprasapp/consultarSubcentrosGastos/<str:codigo>/<int:codprov>/', views.consultarSubcentrosGastos, name="consultarSubcentrosGastos"),
     path('comprasapp/eliminarPlantilla/', views.eliminarPlantilla, name='eliminarPlantilla'),
     
-    path('comprasapp/cargarTmplConsultaCentroGastos/', views.cargarTmplConsultaCentroGastos , name='cargarTmplConsultaCentroGastos'),
+    path('comprasapp/cargarTmplConsultaCentroGastos/', views.cargarTmplConsultaCentroGastos , name='consultarCentroGastosTodos'),
     path('comprasapp/consultarCentroGastos/', views.consultarCentroGastos, name='consultarCentroGastos'),
     path('comprasapp/cargarTmplCentroGastos/', views.cargarTmplCentroGastos, name='cargarTmplCentroGastos'),
     path('comprasapp/cargarCuentasCtb/', views.cargarCuentasCtb , name='cargarCuentasCtb'),
@@ -44,7 +44,10 @@ urlpatterns = [
     path('detalleOrdenR/<int:numOrden>/<str:codAge>/', views.obtenerDetalleOrdenCompraR, name='detalleOrdenR'),
     path('comprasapp/verPlantillaPeriodica/<str:codigo>/', views.verPlantillaPeriodica, name='verPlantillaPeriodica'),
     path('comprasapp/verCentroGastos/<str:codigo>/', views.verCentroGastos, name='verCentroGastos'),
-    path('comprasapp/cargarAsignacionCentroGastos', views.cargarTmplAsignacionCentro, name='cargarAsignacionCentroGastos')
+    path('comprasapp/cargarAsignacionCentroGastos', views.cargarTmplAsignacionCentro, name='cargarAsignacionCentroGastos'),
+    #minejunio
+    path('comprasapp/guardarCentroGastos/', views.guardarCentroGastos, name = 'guardarCGastos'),
+    path('comprasapp/eliminarCentroGastos/', views.eliminarCentroGastos, name='eliminarCGastos'),
     #path('comprasapp/templates/ordenCompra', views.tipoOrden),
 
 ]

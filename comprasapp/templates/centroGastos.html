@@ -4,6 +4,9 @@
  <div class="col-12 col-md-11 offset-md-1">
     <form id="form-cgasto" method="post" class="form-horizontal">
         {% csrf_token %}
+        <div>
+                <input id="proceso" name="proceso" type="hidden" value="{{nproceso}}">
+        </div>
         <div class="col-12">
             <div class="card">
               
@@ -15,8 +18,8 @@
                             <label for="codGastos" class="col-sm-2 col-form-label">Codigo </label>
                             
                             <div class="col-sm-2">
-                                <input type="text" class="form-control" id="codGastos" name="ncodGastos"  style="text-transform: uppercase;" 
-                                placeholder="Ingrese codigo" {% if nproceso == 'U' %} value={{ncodigoCentro}} readonly disabled {% endif %}/>
+                                <input type="number" class="form-control" id="codGastos" name="ncodGastos"  style="text-transform: uppercase;" 
+                                placeholder="Ingrese codigo" {% if nproceso == 'U' %} value="{{ncodigoCentro}}" readonly disabled {% endif %}/>
                             </div>
                             <div class="col-sm-8">
                                 
@@ -26,7 +29,7 @@
                             <label for="nomGastos" class="col-sm-2 col-form-label">Nombre </label>
                             <div class="col-sm-10">
                                 <input type="text" class="form-control" id="nomGastos" name="nnomGastos" style="text-transform: uppercase;"
-                                placeholder="Ingrese nombre" {% if nproceso == 'U' %} value={{nnombreCentro}} {% endif %} maxlength="50"/>
+                                placeholder="Ingrese nombre" {% if nproceso == 'U' %} value="{{nnombreCentro}}" {% endif %} maxlength="50"/>
                             </div>
                         </div>
                         <hr class="hr hr-blurry my-4" />
@@ -46,7 +49,7 @@
                                 <input type="text" class="form-control nombreCta" id="nomCuenta" name="nnomCuenta" style="text-transform: uppercase;" disabled readonly/>
                             </div>
                              <div class="col-12 col-sm-2 d-grid">
-                                <a role="button" class="btn btn-success w-100">Añadir</a>
+                                <button type="button" id="btnAgregar" class="btn btn-success w-100" disabled onclick="agregar()">Añadir</button>
                             </div>
                         </div>
                         <br>
@@ -91,7 +94,7 @@
                                     <i class="fa-solid fa-edit btnEditar" aria-hidden="true"></i>
                                   </a>
                                 </td>
-                                <td><a href="" class='btn btn-sm btn-danger' style='text-decoration: none;' id='eliminar-btn' title="Eliminar" >
+                                <td><a href="" class='btn btn-sm btn-danger btnEliminar' style='text-decoration: none;' id='eliminar-fila' title="Eliminar" >
                                       <i class='fa fa-trash'  aria-hidden="true"></i>
                                     </a>
                                 </td>
@@ -103,15 +106,11 @@
                 </div>
                
                 <div class="card-footer">
-                  {% if nproceso == 'C' %} 
-                      <a class="btn btn-danger" role="button" data-url="/comprasapp/cargarTmplCentroGastos" id="cancelar-btn">Cancelar</a>
-                  {% else %}
-                      <button class="btn btn-primary" type="submit" id="guardar-btn">Guardar</button>
-                      {% if nplantillaCtb != None %} 
-                        <button type="button" class="btn btn-secondary" id="eliminar-btn">Eliminar</button>
-                      {% endif %}
-                      <a class="btn btn-danger" role="button" data-url="/comprasapp/cargarTmplCentroGastos" id="cancelar-btn">Cancelar</a>
+                  <button class="btn btn-primary" type="submit" id="guardar-btn">Guardar</button>
+                  {% if ncodigoCentro != None %} 
+                    <button type="button" class="btn btn-secondary" id="eliminar-btn">Eliminar</button>
                   {% endif %}
+                  <a class="btn btn-danger" role="button" data-url="/comprasapp/cargarTmplConsultaCentroGastos" id="cancelar-btn">Cancelar</a>
                 </div>
                 
             </div>

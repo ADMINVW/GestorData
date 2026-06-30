@@ -29,6 +29,14 @@ def consultarRegistrosTemplate(entidad, codigo, db_alias=None):
 
     tabla =  CONSULTAS[entidad]["tabla"]
     condicion =  CONSULTAS[entidad]["condicion"]
+    
+    condicionAux = CONSULTAS[entidad]["condicionAux"]
+    
+    if (condicionAux):
+        ssql_aux = condicionAux
+    else:
+        ssql_aux = " 1 = 1 "
+        
     campos =  ",".join(CONSULTAS[entidad]["campos"])
     
     estado = CONSULTAS[entidad]["estado"]
@@ -40,11 +48,11 @@ def consultarRegistrosTemplate(entidad, codigo, db_alias=None):
     ssql_grp =""
     if (grupo):
          ssql_grp = f"GROUP BY {grupo}"   
-       
-    ssql = f"SELECT {campos} FROM {tabla} WHERE {condicion} = ? AND  {ssql_est} {ssql_grp}" 
+   
+    ssql = f"SELECT {campos} FROM {tabla} WHERE {condicion} = ? AND  {ssql_est} AND {ssql_aux} {ssql_grp}" 
     print (ssql)
     registros = consultarRegistros(ssql,[codigo],db_alias)
-    
+    print(registros)
     if (registros):
         return registros, 200
     else:

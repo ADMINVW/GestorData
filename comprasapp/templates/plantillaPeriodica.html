@@ -173,7 +173,7 @@
                                         </div>
                                         <div class="col-sm-1">
                                             <input type="text" class="form-control" id="porcenIva" name="porcenIva" readonly disabled
-                                            {% if nplantilla and nplantilla.pc_secuencia_iva > 0 %}value={{nplantilla.pc_porc_ivaret}}{% endif %} />
+                                            {% if nplantilla and nplantilla.pc_secuencia_iva > 0 %} value="{{nplantilla.pc_porc_ivaret}}" {% endif %} />
                                         </div>
                                         <div class="col-sm-5">
                                             <select class="form-select" id="selectIva" name="selectIva" 
@@ -203,7 +203,7 @@
                                         </div>
                                         <div class="col-sm-1">
                                             <input type="text" class="form-control" id="porcenFte" name="porcenFte" readonly disabled
-                                            {% if nplantilla and nplantilla.pc_secuencia_renta > 0 %}value={{nplantilla.pc_porc_rentaret}}{% endif %} />
+                                            {% if nplantilla and nplantilla.pc_secuencia_renta > 0 %} value="{{nplantilla.pc_porc_rentaret}}" {% endif %} />
                                         </div>
                                         <div class="col-sm-5">
                                             <select class="form-select" id="selectFte" name="selectFte"  

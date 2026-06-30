@@ -49,8 +49,8 @@
                         </div>
         </div>
         <div class="card-footer">            
-            <a class="btn btn-primary" role="button" id="editar-btn" href="">Editar</a>
-            <a class="btn btn-danger" role="button" href="{% url 'mimenu' %}" id="cancelar-btn">Cancelar</a>
+            <a class="btn btn-primary" role="button" id="editar-btn" href="/comprasapp/cargarTmplCentroGastos/?codigo={{ncodigoCentro}}&proceso=U&company={{company_key}}" >Editar</a>
+            <a class="btn btn-danger" role="button" href="{% url 'consultarCentroGastosTodos' %}?company={{company_key}}" id="cancelar-btn">Cancelar</a>
         </div>
     </div>
 </div>

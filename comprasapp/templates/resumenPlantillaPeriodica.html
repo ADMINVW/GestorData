@@ -86,9 +86,9 @@
                             <tfoot>
                                <tr>
                                 <td style="text-align: right;" colspan="3"><b>Total Asignado</b></td>
-                                <td style="text-align: center; white-space: nowrap; overflow-x: auto"><b>
-                                    <input type="number" step="any" id="sumporcentaje" readonly                                    
-                                    style="border: 0;text-align: center"  />
+                                <td style="text-align: right; white-space: nowrap; overflow-x: auto"><b>
+                                    <input type="text" id="sumporcentaje" readonly  value="100%"                                 
+                                    style="border: 0;text-align: right"  />
                                 </b></td>
                               </tr>
                             </tfoot>
@@ -102,8 +102,8 @@
       {% endif %}
     </ul>
     <div class="card-footer">
-        <a class="btn btn-success"  role="button" href="/comprasapp/editarPlantilla/?codigo={{nplantilla.pc_codigo}}" id="editar-btn">Editar</a>
-      <a class="btn btn-danger" role="button" href="{% url 'cargarTmplPlantillas' %}" id="cancelar-btn">Cancelar</a>
+        <a class="btn btn-success"  role="button" href="/comprasapp/editarPlantilla/?codigo={{nplantilla.pc_codigo}}&company={{ company_key }}" id="editar-btn">Editar</a>
+      <a class="btn btn-danger" role="button" href="{% url 'cargarTmplPlantillas' %}?company={{ company_key }}" id="cancelar-btn">Cancelar</a>
     </div>
   </div>
 </div>

@@ -468,9 +468,10 @@ def ingresarRetencion(request,id,codDiv):
     
     # Obtener company_key para el contexto
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     from core.models import Company
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
 
@@ -663,6 +664,7 @@ def calcularValoresBaseXml(codAge, codDiv, numOrden,request):
 
 
 #minejulio
+#Para desglosar valores en template ingresoRetencion, resumen transaccion
 def calcularvaloresBaseNew(request, codAge, codDiv, numOrden):
     db_alias = get_db_from_request(request)
     parametros=[codAge,codDiv,numOrden]
@@ -781,9 +783,10 @@ def verTransaccionResumen(request, numOrden):
     
     # Obtener company_key para el contexto
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     from core.models import Company
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
     
@@ -941,25 +944,6 @@ def obtenerOrdenCompra(request, db_alias=None, codAge=None, codDiv=None, numOrde
             print(f"Error: No se encontró la orden {numOrden} en la agencia {codAge}, desde obtenerOrdenCompra")
             return None
         datosOrden = dict(zip(columnas, orden)) 
-               
-        # #DETALLE --> se suprime 08-10-25 por calculo nuevo tipo de item e iva en detalle
-        # ssql = """
-        #     SELECT *  FROM ocxxt002 WHERE od_agencia = ? AND od_division = ? AND od_numero = ?
-        #     UNION 
-        #     SELECT *  FROM ocxxt802 WHERE od_agencia = ? AND od_division = ? AND od_numero = ?
-        # """    
-        # cur.execute(ssql,parametros+parametros)
-        # detalleOrden = cur.fetchall()
-        
-        # vBienes = 0
-        # vServicios = 0
-        # for detalle in detalleOrden:
-        #     valDetalle =  detalle[6] * (float(detalle[10]) -  (float(detalle[10]) * (detalle[12]/100)))
-        #     if str(detalle[13]).rstrip() == "BIENES" :
-        #         vBienes= vBienes + valDetalle
-        #     else:
-        #         vServicios= vServicios + valDetalle
-    #return datosOrden, vBienes, vServicios
     return datosOrden
 
 def obtenerDetalleOrdenCompraT(request,numOrden,codAge):
@@ -968,9 +952,10 @@ def obtenerDetalleOrdenCompraT(request,numOrden,codAge):
     
     # Obtener company_key para el contexto
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     from core.models import Company
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
     
@@ -1013,9 +998,10 @@ def obtenerDetalleOrdenCompraR(request,numOrden,codAge):
     
     # Obtener company_key para el contexto
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     from core.models import Company
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
     
@@ -1062,9 +1048,10 @@ def obtenerDetalleOrdenCompra(request,numOrden,codAge, codDiv, periodica, verifi
     
     # Obtener company_key para el contexto
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     from core.models import Company
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
     
@@ -1484,6 +1471,8 @@ def crearXmlRetencion(request, datos):
     #Desarrollo
     tree.write("new_data.xml",encoding='utf-8',xml_declaration=True)
     print("XML CREADO!!", clave)
+
+
     return clave
 
 #Genera clave de autorizacion al crear retencion
@@ -1521,8 +1510,9 @@ def prueba(request):
 def cargarTmplConsultaOrdenes(request):
     from core.models import Company
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
     return render(request,'consultaOrdenes.html', {'company': company, 'company_key': company_key})
@@ -1557,7 +1547,6 @@ def consultarOrdenesCompra(request):
         hoy = date.today().strftime("%d/%m/%Y")
         ssql_aux  += " AND DATE(oc_fecing) = ? "
         valfiltros.append(hoy)
-        print("consulta get ", ssql_aux, valfiltros)
     elif request.method == "POST":
         #Ejecuta un consulta con boton consulta que hace un post, obtenemos filtros
         
@@ -1600,7 +1589,6 @@ def consultarOrdenesCompra(request):
 
     else:
         return JsonResponse({'ERROR': 'Método no permitido'}, status=405)
-
     db_alias = get_db_from_request(request)
     with connections[db_alias].cursor() as cur:
         sql= f"""
@@ -1674,12 +1662,13 @@ def cargarProveedores(request):
         })
     return JsonResponse(listproveedores, safe=False)
 
-#Carga template de consulta de plantillas de ordenes de compra periodicas
+#Carga template para consultar y/o listar plantillas de ordenes de compra periodicas
 def cargarTmplConsultaPlantillas(request):
     from core.models import Company
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
     return render(request,'consultaPlantillasPeriodicas.html', {'company': company, 'company_key': company_key})
@@ -1739,8 +1728,9 @@ def cargarConceptoPlantillas(request):
 def crearPlantilla(request):
     from core.models import Company
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
     
@@ -1763,8 +1753,9 @@ def editarPlantilla(request):
     db_alias = get_db_from_request(request);
     from core.models import Company
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
     
@@ -1875,6 +1866,7 @@ def consultarExistencia(request):
     ssql = f"SELECT COUNT(*) AS existe FROM {tabla} WHERE {campo} = ? AND {ssql_aux}" 
     print(ssql)
     existe = consultarDato(request, ssql,[codigo], db_alias=db_alias)
+    print("existe :", existe)
     return JsonResponse({"existe": existe})
 
 #Funcion para consultar datos (específicos) desde template
@@ -1946,7 +1938,6 @@ def guardarPlantilla(request):
 
         #Detalle de %s para datos contables
         itemsPorcen = data.get('filassubgrp',[])
-        print(itemsPorcen)
         try:
             with transaction.atomic(using=db_alias):    
                 with connections[db_alias].cursor() as cur:
@@ -1984,7 +1975,6 @@ def guardarPlantilla(request):
                     
                     #Inserto
                     for item in itemsPorcen: 
-                        print("grupo", grupo)
                         #Valido existencia de registro de activacion subgrupo 
                         ssql = "SELECT COUNT(*) FROM ocxxt013 WHERE mc_codgrp = ? AND mc_secgrp = ? AND mc_codpro = ?"
                         parametros=[grupo,item["subgrupo"],plantilla["codpro"]]
@@ -2003,12 +1993,11 @@ def guardarPlantilla(request):
                         
                         ssql = "INSERT INTO cgrta035 VALUES (?,?,?,?,?)"
                         parametros=[plantilla["codigo"],plantilla["codpro"],grupo,item["subgrupo"],item["porcentaje"]]
-                        print(parametros)
                         cur.execute(ssql,parametros)
                         if cur.rowcount == 0:
                             raise Exception("En inserción plantilla contable (cgrta035)")  
                         
-            return JsonResponse({'status': 'success', 'redirect_url': f'../../../comprasapp/verPlantillaPeriodica/{plantilla["codigo"]}' },status=200)
+            return JsonResponse({'status': 'success', 'redirect_url': f'../../../comprasapp/verPlantillaPeriodica/{plantilla["codigo"]}?company={company_key}' },status=200)
         except Exception as e:
             return JsonResponse({'status': 'error', 'detallerr': str(e)}, status=400) 
             
@@ -2061,8 +2050,8 @@ def consultarSubcentrosGastos(request, codigo, codprov):
 #Elimina registro de plantilla periodica (incluyendo su plantilla contable)
 def eliminarPlantilla(request):
     db_alias = get_db_from_request(request)
+    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
     codigo = request.GET.get("codigo")
-    
     if request.method == "POST":
         try:
             with transaction.atomic(using=db_alias):
@@ -2091,22 +2080,23 @@ def eliminarPlantilla(request):
                         if cur.rowcount == 0:
                             raise Exception("En eliminacion de plantilla (ocxxt010)")
 
-            return JsonResponse({'status': 'success', 'redirect_url': f'../../../comprasapp/cargarTmplPlantillas/' },status=200)    
+            return JsonResponse({'status': 'success', 'redirect_url': f'../../../comprasapp/cargarTmplPlantillas?company={company_key}' },status=200)    
         except Exception as e:
             print (e)
             return JsonResponse({'status':'error', 'detallerr': str(e)}, status=400)
              
-#Carga template para consultar y listar Centro de Gastos
+#Carga template para consultar y/o listar Centro de Gastos
 def cargarTmplConsultaCentroGastos(request):
     from core.models import Company
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
     return render(request,'consultaCentroGastos.html', {'company': company, 'company_key': company_key})
 
-#Ejecuta consulta de centro de gastos
+#Ejecuta consulta de centro de gastos (no se definen filtros, se trabaja con caja de busqueda de la misma datatable)
 def consultarCentroGastos(request):
     db_alias = get_db_from_request(request)
     with connections[db_alias].cursor() as cur:
@@ -2121,8 +2111,9 @@ def consultarCentroGastos(request):
 def cargarTmplCentroGastos(request):
     from core.models import Company
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
     
@@ -2132,11 +2123,12 @@ def cargarTmplCentroGastos(request):
         codigo = request.GET.get('codigo')
         proceso = request.GET.get('proceso')
 
-        print (codigo)
+        print (codigo,"proceso :", proceso)
         if (codigo):
             #Nombre Grupo
             ssql = f"SELECT UNIQUE(ct_grupo) FROM ocxxt012 WHERE ct_codgrp = {codigo} GROUP BY ct_grupo"
             nombreCentro = consultarDato(request,ssql, None, db_alias)
+            print(nombreCentro)
             #Subgrupos en caso de edición
             ssql = """
                 SELECT a.ct_secgrp, a.ct_cuenta, b.ct_descripcion FROM ocxxt012 a, cgrta001 b
@@ -2151,6 +2143,7 @@ def cargarTmplCentroGastos(request):
                 'company': company,
                 'company_key': company_key,
             }
+            print(context)
         else:
             context={
                 'nproceso':'C',
@@ -2160,13 +2153,13 @@ def cargarTmplCentroGastos(request):
 
     return render(request,'centroGastos.html',context)
 
-#Carga template para consulta especifica de una plantilla periodica
+#Carga template para solo consulta especifica de una plantilla periodica
 def verPlantillaPeriodica(request,codigo):
     from core.models import Company
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
-    print("company_key", company_key)
+    key = company_key.split('__')[0]
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
     
@@ -2220,12 +2213,13 @@ def verPlantillaPeriodica(request,codigo):
 
     return render(request,'resumenPlantillaPeriodica.html',context)
 
-#Carga template para consultar y listar centro de gastos
+#Carga template para solo consulta especifica de un centro de gastos
 def verCentroGastos(request,codigo):
     from core.models import Company
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
     
@@ -2250,6 +2244,78 @@ def verCentroGastos(request,codigo):
             'company_key': company_key
         }
         return render(request,'resumenCentroGastos.html',context)
+#Guarda registro de centro de gastos (para create o update)
+def guardarCentroGastos(request):
+    print("guardarCentroGastos")
+    db_alias = get_db_from_request(request)
+    company_key = request.GET.get('company') or request.session.get('active_company_key','')
+    if request.method == 'POST':
+        #Capturo datos
+        data = json.loads(request.body)
+
+        itemsSubgrupo = data.get('filassubgrp',[])
+        print(itemsSubgrupo)
+        codGrupo = data.get('codigo','')
+        nomGrupo = data.get('nombre','')
+        proceso = data.get('proceso','')
+        print(proceso," ", nomGrupo," ", codGrupo)
+        try:
+            with transaction.atomic(using=db_alias):    
+                with connections[db_alias].cursor() as cur:
+                    #No se mira proceso, create o update (se elimina y se vuelve a insertar)
+                    if (proceso == 'U'):
+                        ssql = "DELETE FROM ocxxt012 WHERE ct_codgrp = ?"
+                        cur.execute(ssql,[codGrupo])
+                        if cur.rowcount == 0:
+                            raise Exception("En eliminar centro de gastos (ocxxt012)")  
+                        
+                    for item in itemsSubgrupo:
+                        ssql = "INSERT INTO ocxxt012 VALUES (?,?,?,?)"
+                        parametros=[codGrupo,item["secgrp"],nomGrupo,item["cta"]]
+                        cur.execute(ssql,parametros)
+                        if cur.rowcount == 0:
+                            raise Exception("En inserción centro de gastos (ocxxt012)")  
+                        
+                    #Asignacion en proveedores, borro subgrupos en caso de haber sido eliminados
+                    ssql = "DELETE FROM ocxxt013 WHERE mc_codgrp = ? AND mc_secgrp NOT IN (SELECT ct_secgrp FROM ocxxt012 WHERE ct_codgrp = ?)"
+                    cur.execute(ssql,[codGrupo,codGrupo])
+
+            return JsonResponse({'status': 'success', 'redirect_url': f'../../../comprasapp/verCentroGastos/{codGrupo}?company={company_key}' },status=200)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'detallerr': str(e)}, status=400) 
+        
+
+def eliminarCentroGastos(request):
+    print("eliminarCentroGastos")
+    db_alias = get_db_from_request(request)
+    company_key=request.GET.get('company') or request.session.get('active_company_key','')
+    codigo = request.GET.get('codigo')
+    print("codigo ", codigo)
+    if request.method == 'POST':
+        try:
+            with connections[db_alias].cursor() as cur:
+                #Se debe validar que no exista el centro y subcentro en plantillas periodicas 
+                ssql = "SELECT COUNT(*) FROM cgrta035 WHERE pt_grupo = ? "
+                periodicas = consultarDato(request, ssql,[codigo],db_alias)
+                if (periodicas > 0):
+                     raise Exception("Centro de gastos asignados a plantillas periodicas, no se puede eliminar")
+                else:
+                    #Se elimina de asignacion de proveedores (puedan como que no, existan registros por eso no se valida si se ejecutó)
+                    ssql = "DELETE FROM ocxxt013 WHERE mc_codgrp = ?"
+                    cur.execute(ssql,[codigo])
+                    #Se elimina registro de centro de gastos
+                    ssql = "DELETE FROM ocxxt012 WHERE ct_codgrp = ?"
+                    cur.execute(ssql,[codigo])
+                    if cur.rowcount == 0:
+                          raise Exception("En eliminar centro de gastos (ocxxt012)")  
+                    
+            return JsonResponse({'status': 'success', 'redirect_url': f'../../../comprasapp/cargarTmplConsultaCentroGastos?company={company_key}' },status=200)    
+    
+        except Exception as e:
+            print (e)
+            return JsonResponse({'status':'error', 'detallerr': str(e)}, status=400)
+            
+                
 
 #Carga template para asignacion Centro Gastos
 def cargarTmplAsignacionCentro(request):

@@ -19,7 +19,7 @@ const opcionesDataTable = {
 
 const listarGastos = async () => {
     try {
-        response = await fetch('/comprasapp/consultarCentroGastos/');
+        response = await fetch(`/comprasapp/consultarCentroGastos?company=${ck}`);
         const data = await response.json();
         let content = ``;
         data.cgastos.forEach((cgasto) => {
@@ -27,11 +27,11 @@ const listarGastos = async () => {
                 <tr>
                     <td>${cgasto.ct_codgrp}</td>
                     <td>${cgasto.ct_grupo}</td>
-                     <td><a href="/comprasapp/verCentroGastos/${cgasto.ct_codgrp}" title="Consultar"
+                     <td><a href="/comprasapp/verCentroGastos/${cgasto.ct_codgrp}?company=${ck}" title="Consultar"
                class='btn btn-sm btn-primary' style='text-decoration: none;' id='editar-btn' >
             <i class='fa-solid fa-search'></i></a>  </td>  
             
-                  <td><a href="/comprasapp/cargarTmplCentroGastos/?codigo=${cgasto.ct_codgrp}&proceso=U" title="Editar"
+                  <td><a href="/comprasapp/cargarTmplCentroGastos/?codigo=${cgasto.ct_codgrp}&proceso=U&company=${ck}" title="Editar"
                class='btn btn-sm btn-success' style='text-decoration: none;' id='editar-btn' >
             <i class='fa-solid fa-edit'></i></a>  </td>                    
                 </tr>
@@ -54,5 +54,6 @@ const iniciarDataTable = async () => {
 }
 
 document.addEventListener("DOMContentLoaded", function (event) {
+    ck = sessionStorage.getItem('company_key');
     iniciarDataTable();
 });
