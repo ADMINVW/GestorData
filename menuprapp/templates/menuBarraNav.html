@@ -13,6 +13,8 @@
       GestorData
     </a>
 
+    {{ accesos|json_script:"accesos" }}
+    
     {% if company %}
     <span class="nav-company-badge d-none d-md-inline ms-2">{{ company.name }}</span>
     {% endif %}
@@ -44,14 +46,14 @@
           <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
             <i class="fas fa-shopping-cart me-1" style="font-size:12px; opacity:.7;"></i> Compras
           </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="/comprasapp/templates/ordenCompra?company={{ company_key }}">Orden de Compra</a></li>
-            <li><a class="dropdown-item" href="/comprasapp/cargarTmplOrdenes?company={{ company_key }}">Consulta</a></li>
-            <li><a class="dropdown-item" href="/comprasapp/cargarTmplPlantillas?company={{ company_key }}">Plantillas Periódicas</a></li>
+          <ul class="dropdown-menu" id = "COMPRAS">
+            <li><a class="dropdown-item" id = "IG" href="/comprasapp/templates/ordenCompra?company={{ company_key }}">Orden de Compra</a></li> 
+            <li><a class="dropdown-item" id = "CO" href="/comprasapp/cargarTmplOrdenes?company={{ company_key }}">Consulta</a></li>
+            <li><a class="dropdown-item" id = "PP" href="/comprasapp/cargarTmplPlantillas?company={{ company_key }}">Plantillas Periódicas</a></li>
             <li class="dropend">
               <a class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" href="#">Centro de Gastos</a>
               <ul class="dropdown-menu dropdown-submenu">
-                <li><a class="dropdown-item" href="/comprasapp/cargarTmplConsultaCentroGastos?company={{ company_key }}">Consulta</a></li>
+                <li><a class="dropdown-item" id = "CG" href="/comprasapp/cargarTmplConsultaCentroGastos?company={{ company_key }}">Consulta</a></li>
                 <li><a class="dropdown-item" href="#">Asignación a Proveedor</a></li>
               </ul>
             </li>
@@ -66,7 +68,7 @@
             <i class="fas fa-cog me-1" style="font-size:12px; opacity:.7;"></i> Repuestos
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="/repuestosapp/templates/compraRepuestos?company={{ company_key }}">Orden de Compra</a></li>
+            <li><a class="dropdown-item" id = "CL" href="/repuestosapp/templates/compraRepuestos?company={{ company_key }}" >Orden de Compra</a></li>
             <li><a class="dropdown-item" href="/repuestosapp/pruebas?company={{ company_key }}">Pruebas</a></li>
             <li><hr class="dropdown-divider my-1"></li>
             <li><a class="dropdown-item" href="#">Proveedores</a></li>
@@ -103,12 +105,4 @@
   </div>
 </nav>
 
-<script>
-  function cerrarSesion() {
-    sessionStorage.removeItem("username");
-    sessionStorage.removeItem("compania");
-    sessionStorage.removeItem("agencia");
-    sessionStorage.removeItem("bodega");
-    sessionStorage.removeItem("company_key");
-  }
-</script>
+<script src="/static/js/funcionesMenu.js" defer ></script>

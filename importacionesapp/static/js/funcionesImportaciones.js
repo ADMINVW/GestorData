@@ -95,9 +95,9 @@ function leerArchivoXML() {
             FechaIngresoHora.value = formatoFechaHora();
 
             if (validaFecha(FechaEmision.value) === false) {
-                alert("Pasoron 5 días de la fecha de la factura, ya no se la puede ingresar.");
+                alert("Factura no puede ser ingresada: Fecha de emisión del mes anterior o de mas de 5 días");
                 document.getElementById('botonGuardar').disabled = true;
-              }
+            }
 
 
             //Detalle factura
@@ -161,7 +161,7 @@ function leerArchivoXML() {
                     tempSelect.innerHTML = opcionesHTML;
                     var options = tempSelect.querySelectorAll('option');
 
-                    options.forEach(function(opt, j) {          // <-- agrega el índice j
+                    options.forEach(function (opt, j) {          // <-- agrega el índice j
                         var val = opt.value;
                         var texto = opt.textContent.trim();
                         tabla += "<li class='dropdown-item p-1'>";
@@ -175,7 +175,7 @@ function leerArchivoXML() {
                     tabla += "  </ul>";
                     tabla += "</div>";
                     tabla += "</th>";
-                
+
                 }
 
                 document.getElementById("tablaDetalle").innerHTML = tabla;
@@ -351,32 +351,37 @@ function formatoFechaHora() {
 };
 
 function validaFecha(fecha) {
-        let fechaStr = fecha;  
+    let fechaStr = fecha;
 
-        // Separar día, mes y año
-        let partes = fechaStr.split("/");
-        let dia = parseInt(partes[0], 10);
-        let mes = parseInt(partes[1], 10) - 1; // Los meses en JS van de 0 a 11
-        let anio = parseInt(partes[2], 10);
+    // Separar día, mes y año
+    let partes = fechaStr.split("/");
+    let dia = parseInt(partes[0], 10);
+    let mes = parseInt(partes[1], 10) - 1; // Los meses en JS van de 0 a 11
+    let anio = parseInt(partes[2], 10);
 
-        // Crear objeto Date
-        let fechaFactura = new Date(anio, mes, dia);
+    // Crear objeto Date
+    let fechaFactura = new Date(anio, mes, dia);
 
-        // Fecha actual (sin horas para evitar errores)
-        let hoy = new Date();
-        hoy.setHours(0,0,0,0);
+    // Fecha actual (sin horas para evitar errores)
+    let hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
 
-        // Calcular diferencia en milisegundos
-        let diferenciaMs = hoy - fechaFactura;
+    // Calcular diferencia en milisegundos
+    let diferenciaMs = hoy - fechaFactura;
 
-        // Convertir a días
-        let diferenciaDias = diferenciaMs / (1000 * 60 * 60 * 24);
+    // Convertir a días
+    let diferenciaDias = diferenciaMs / (1000 * 60 * 60 * 24);
 
-        if (diferenciaDias <= 5 && diferenciaDias >= 0) {
-            return true;  // La fecha es válida
-        } else {
-            return false; // La fecha no es válida
+    if (diferenciaDias <= 5 && diferenciaDias >= 0) {
+        //validacion mes anterior
+        mesActual = hoy.getMonth()
+        if (mes != mesActual) {
+            return false;
         }
+        return true;  // La fecha es válida
+    } else {
+        return false; // La fecha no es válida
+    }
 };
 
 function formatoFechaInput(fechaStr) {
@@ -399,7 +404,7 @@ async function enviarDatosFactura() {
     }
 
     //var DescripTemp = 
-    
+
     var datosEX = {
         Bodega: sessionStorage.getItem('bodega'),
         RucProveedor: document.getElementById("rucProveedor").value,
@@ -426,14 +431,14 @@ async function enviarDatosFactura() {
         oc_iva_rp: 0,
         oc_recargo: 0,
         oc_bodprn: sessionStorage.getItem('bodega'),
-        oc_obser1: document.getElementById("descripcionFactura").value.toUpperCase(), 
-        oc_obser2: '',  
-        oc_clasif1:'',
+        oc_obser1: document.getElementById("descripcionFactura").value.toUpperCase(),
+        oc_obser2: '',
+        oc_clasif1: '',
         oc_porcret1: 0,
         oc_porcret2: 0,
         oc_moneda: 'DO',
-        oc_atencion : 'SRS',
-        oc_cta_aux : '', 
+        oc_atencion: 'SRS',
+        oc_cta_aux: '',
         oc_retiva: 0.0,
         oc_numdia: 0,
         oc_cod_tip: '01',
@@ -442,11 +447,11 @@ async function enviarDatosFactura() {
         oc_serie: document.getElementById("serieFactura").value,
         oc_aut_sri: document.getElementById("autorizacionSri").value,
         oc_fec_val: formatoFechaInput(document.getElementById("fechaEmision").value),
-        oc_cuenta:'',
-        oc_subtipo:'',
-        
+        oc_cuenta: '',
+        oc_subtipo: '',
+
     };
-    
+
     FechaIngreso: formatoFecha()
     var tabla = document.getElementById("tablaDetalle");
     var tablaTarifa = document.getElementById("tablaIva"); //tabla de porcentaje y valor iva
@@ -475,7 +480,7 @@ async function enviarDatosFactura() {
         filaDatos.push(celdas[3].innerText);    // Descripcion (2)
         filaDatos.push(celdas[4].innerText);    // Precio Unitario (3)
         filaDatos.push(celdas[5].innerText);    // Descuento (4)
-        
+
 
         filaDatos.push(celdas[6].innerText);    // Total (6)
 
@@ -483,19 +488,19 @@ async function enviarDatosFactura() {
 
         if (checkboxesSeleccionados.length === 0) {
             alert('Debe seleccionar al menos un Centro de Gastos para cada ítem.');
-            
+
             var botonDropdown = celdas[7].querySelector(".cg-dropdown-btn");
-            if (botonDropdown) botonDropdown.click(); 
-            
+            if (botonDropdown) botonDropdown.click();
+
             return false;
         }
 
         var valoresCG = [];
-        checkboxesSeleccionados.forEach(function(cb) {
+        checkboxesSeleccionados.forEach(function (cb) {
             valoresCG.push(cb.value); // Guarda el ID/Código del Centro de Gasto
         });
         filaDatos.push(valoresCG);
-    
+
         filaDatos.push(celdasIva[1].innerText);    // Porcentaje IVA (8)
         filaDatos.push(celdasIva[2].innerText);    // Valor IVA (9)
         // Agrega la submatriz a la matriz principal
@@ -653,7 +658,7 @@ function actualizarPrecio(index) {
     var cantidad = cantidadInput.value;
     var precioTotal = factura[index].getElementsByTagName("precioTotalSinImpuesto")[0].textContent;
     var descuento = factura[index].getElementsByTagName("descuento")[0].textContent;
-    var nuevoPrecioUnitario  = parseFloat(precioTotal) + parseFloat(descuento);
+    var nuevoPrecioUnitario = parseFloat(precioTotal) + parseFloat(descuento);
     nuevoPrecioUnitario = nuevoPrecioUnitario / cantidad;
 
     cantidadInput.value = cantidad;
