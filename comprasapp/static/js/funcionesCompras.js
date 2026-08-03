@@ -85,7 +85,7 @@ function leerArchivoXML() {
             FechaIngresoHora.value = formatoFechaHora();
 
             if (validaFecha(FechaEmision.value) === false) {
-                alert("Pasoron 5 días de la fecha de la factura, ya no se la puede ingresar.");
+                alert("Factura no puede ser ingresada: Fecha de emisión del mes anterior o de mas de 5 días");
                 document.getElementById('botonGuardar').disabled = true;
             }
 
@@ -428,6 +428,11 @@ function validaFecha(fecha) {
     let diferenciaDias = diferenciaMs / (1000 * 60 * 60 * 24);
 
     if (diferenciaDias <= 5 && diferenciaDias >= 0) {
+        //validacion mes anterior
+        mesActual = hoy.getMonth()
+        if (mes != mesActual){
+            return false;
+        }
         return true;  // La fecha es válida
     } else {
         return false; // La fecha no es válida

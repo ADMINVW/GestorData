@@ -182,8 +182,13 @@ def guardaFacturaRepuestos(request):
                     totParcial = 0.0
                     
                     totParcial = float(fila[4]) * float(fila[0])          
+<<<<<<< HEAD
                     fila[5] = round((float(fila[5]) / totParcial) * 100, 2)
                     print("pre: ", fila[4], "cant: " , fila[0], "desc: ", fila[5], "totParcial: ", totParcial)
+=======
+                    fila[5] = round((float(fila[5]) / totParcial) * 100,2) 
+
+>>>>>>> 387fac7 (importaciones-t)
                     #if not Periodicas:
                     CenGastos = "0" 
                     ##mineoctubre

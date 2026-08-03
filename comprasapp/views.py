@@ -249,7 +249,7 @@ def guardaFacturaCompra(request):
                     totParcial = 0 
                     print("pre: ", fila[3], "cant: " , fila[0])
                     totParcial = float(fila[3]) * float(fila[0])          
-                    fila[4] = (float(fila[4]) / totParcial) * 100
+                    fila[4] = round((float(fila[4]) / totParcial) * 100,2)
                     if not Periodicas:
                         CenGastos = fila[7]
 
