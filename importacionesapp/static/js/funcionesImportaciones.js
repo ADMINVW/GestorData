@@ -175,8 +175,7 @@ function leerArchivoXML() {
                     tabla += "  </ul>";
                     tabla += "</div>";
                     tabla += "</th>";
-                
-                }
+             }
 
                 document.getElementById("tablaDetalle").innerHTML = tabla;
                 document.getElementById("tablaIva").innerHTML = tablaTarifa;
@@ -219,11 +218,18 @@ function obtenerSeleccion() {
 
 }
 
+function tipoImportacion() {
+    // Obtener el elemento select de tipo factura importación
+    var selectElement = document.getElementById("imporTipoSelect");
+    var texto = selectElement.options[selectElement.selectedIndex].text;
+    document.getElementById("claveBuscar").value = texto;
+}
+
 function fetchSubTipo() {
 
-    var selectElement = document.getElementById("divisionSelect");
-    var division = selectElement.value;
-
+    //var selectElement = document.getElementById("divisionSelect");
+    //var division = selectElement.value;
+    var division = "i";
     if (division) {
         var ck = sessionStorage.getItem('company_key') || '';
         $.ajax({
@@ -270,17 +276,19 @@ function fetchSubTipo() {
 function fetchCuentaProv() {
     return new Promise((resolve, reject) => {
         var tabla = document.getElementById("tablaDetalle");
-        var selectElement = document.getElementById("rucProveedor");
-        var rucprov = selectElement.value;
+        //var selectElement = document.getElementById("rucProveedor");
+        //var rucprov = selectElement.value;
+        var selectElement = document.getElementById("claveBuscar");
+        var clavebusqueda = selectElement.value;
         var ck = sessionStorage.getItem('company_key') || '';
 
-        if (rucprov) {
+        if (clavebusqueda) {
             $.ajax({
                 url: '/importacionesapp/cuentaProv/',
                 method: 'GET',
                 data: {
-                    'rucprov': rucprov,
-                    'company': ck
+                    'company': ck,
+                    'clavebusqueda': clavebusqueda
                 },
                 success: function (data) {
                     //var nuevoSelect = document.getElementById("selectCuentaProv");
@@ -408,19 +416,19 @@ async function enviarDatosFactura() {
         oc_numero: 0, // Este campo se llenará con la secuencia generada en el backend
         oc_compania: sessionStorage.getItem('compania'),
         oc_agencia: sessionStorage.getItem('agencia'),
-        oc_division: document.getElementById("divisionSelect").value,
+        oc_division: 'd', //document.getElementById("divisionSelect").value,
         oc_usring: document.getElementById("userName").value,
         oc_fecing: formatoFechaHora(),
         oc_solicit: document.getElementById("selSolicita").value,
         oc_estado: 'A',
-        oc_tipo: document.getElementById("subTipoSelect").value,
+        oc_tipo: 'M', //document.getElementById("subTipoSelect").value,
         oc_codpro: '', // Este campo se llenará con el código del proveedor obtenido en el backend
         oc_fecent: formatoFecha(),
         oc_facpro: document.getElementById("numeroFactura").value,
         oc_fecfac: formatoFechaInput(document.getElementById("fechaEmision").value),
-        oc_valfac: document.getElementById("importeTotal").value,
-        oc_valcst: document.getElementById("subtotalSinImpuestos").value,
-        oc_descto: document.getElementById("totalDescuento").value,
+        oc_valfac: parseFloat(document.getElementById("importeTotal").value).toFixed(2),
+        oc_valcst: parseFloat(document.getElementById("subtotalSinImpuestos").value).toFixed(2),
+        oc_descto: parseFloat(document.getElementById("totalDescuento").value).toFixed(2),
         oc_plazo: document.getElementById("plazoPago").value,
         oc_iva_mo: 0,
         oc_iva_rp: 0,
@@ -428,7 +436,7 @@ async function enviarDatosFactura() {
         oc_bodprn: sessionStorage.getItem('bodega'),
         oc_obser1: document.getElementById("descripcionFactura").value.toUpperCase(), 
         oc_obser2: '',  
-        oc_clasif1:'',
+        oc_clasif1:null,
         oc_porcret1: 0,
         oc_porcret2: 0,
         oc_moneda: 'DO',
@@ -592,18 +600,18 @@ async function validaDatosFactura() {
     const factura = document.getElementById('numeroFactura');
 
     // Validación de select
-    if (divisionselect.selectedIndex == 0) {
-        alert('Debe seleccionar una División.');
-        divisionselect.focus();
-        return false;
-    }
+    //if (divisionselect.selectedIndex == 0) {
+    //    alert('Debe seleccionar una División.');
+    //    divisionselect.focus();
+    //    return false;
+    //}
 
     // Valida subtipo
-    if (subtiposelect.selectedIndex == 0) {
-        alert('Debe seleccionar un Sub Tipo.');
-        subtiposelect.focus();
-        return false;
-    }
+    //if (subtiposelect.selectedIndex == 0) {
+    //    alert('Debe seleccionar un Sub Tipo.');
+    //    subtiposelect.focus();
+    //    return false;
+    //}
 
     // Validación de campo de texto
     if (selsolicita.selectedIndex == 0) {
@@ -630,8 +638,8 @@ async function validaDatosFactura() {
         return false;
     }
 
-    const result = await validaExisteFactura();
-
+    //const result = await validaExisteFactura();
+    const result = false;
     if (result) {
         // Ejecuta el código cuando la factura existe
         alert("La factura ya existe.");
