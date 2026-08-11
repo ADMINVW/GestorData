@@ -243,21 +243,21 @@ def guardaFacturaCompra(request):
 
                     Cantidad = 0
 
-                    print("paso 3 cabecera:",Usuario)
-                    # GUARDO EL DETALLE DE LA COMPRA
-                    for fila in datos_tabla:
-                        CenGastos = ''
-                        # precio total sin impuestos fila[5]
-                        # precio unitario fila[3]
-                        # descuento fila[4]
-                        # cantidad fila[0]
-                        # CALCULO PORCENTAJE DESCUENTO
-                        totParcial = 0 
-                        print("pre: ", fila[3], "cant: " , fila[0])
-                        totParcial = float(fila[3]) * float(fila[0])          
-                        fila[4] = (float(fila[4]) / totParcial) * 100
-                        if not Periodicas:
-                            CenGastos = fila[7]
+                print("paso 3 cabecera:",Usuario)
+                # GUARDO EL DETALLE DE LA COMPRA
+                for fila in datos_tabla:
+                    CenGastos = ''
+                    # precio total sin impuestos fila[5]
+                    # precio unitario fila[3]
+                    # descuento fila[4]
+                    # cantidad fila[0]
+                    # CALCULO PORCENTAJE DESCUENTO
+                    totParcial = 0 
+                    print("pre: ", fila[3], "cant: " , fila[0])
+                    totParcial = float(fila[3]) * float(fila[0])          
+                    fila[4] = round((float(fila[4]) / totParcial) * 100,2)
+                    if not Periodicas:
+                        CenGastos = fila[7]
 
                         fila1 = limpiar_texto_informix(fila[1])
                         fila2 = limpiar_texto_informix(fila[2])

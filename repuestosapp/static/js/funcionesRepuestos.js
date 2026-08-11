@@ -477,7 +477,9 @@ async function validaDatosFactura() {
         return false;
     }
 
-    const result = await validaExisteFactura();
+    //const result = await validaExisteFactura();
+
+    const result = false;
 
     if (result) {
         // Ejecuta el código cuando la factura existe

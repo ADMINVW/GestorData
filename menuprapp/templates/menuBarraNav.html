@@ -43,14 +43,14 @@
         </li>
 
         <!-- Compras -->
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown" data-menu-id="COMPRAS">
           <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
             <i class="fas fa-shopping-cart me-1" style="font-size:12px; opacity:.7;"></i> Compras
           </a>
-          <ul class="dropdown-menu" id = "COMPRAS">
-            <li><a class="dropdown-item" id = "IG" href="/comprasapp/templates/ordenCompra?company={{ company_key }}">Orden de Compra</a></li> 
-            <li><a class="dropdown-item" id = "CO" href="/comprasapp/cargarTmplOrdenes?company={{ company_key }}">Consulta</a></li>
-            <li><a class="dropdown-item" id = "PP" href="/comprasapp/cargarTmplPlantillas?company={{ company_key }}">Plantillas Periódicas</a></li>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" data-menu-id="COMPRAS_OC" href="/comprasapp/templates/ordenCompra?company={{ company_key }}">Orden de Compra</a></li>
+            <li><a class="dropdown-item" data-menu-id="COMPRAS_CONSULTA" href="/comprasapp/cargarTmplOrdenes?company={{ company_key }}">Consulta</a></li>
+            <li><a class="dropdown-item" href="/comprasapp/cargarTmplPlantillas?company={{ company_key }}">Plantillas Periódicas</a></li>
             <li class="dropend">
               <a class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" href="#">Centro de Gastos</a>
               <ul class="dropdown-menu dropdown-submenu">

@@ -179,11 +179,16 @@ def guardaFacturaRepuestos(request):
                     # valor iva fila[8]
                     
                     # CALCULO PORCENTAJE DESCUENTO
-                    totParcial = 0 
-                    print("pre: ", fila[3], "cant: " , fila[0])
+                    totParcial = 0.0
+                    
                     totParcial = float(fila[4]) * float(fila[0])          
-                    fila[5] = round((float(fila[5]) / totParcial) * 100) 
+<<<<<<< HEAD
+                    fila[5] = round((float(fila[5]) / totParcial) * 100, 2)
+                    print("pre: ", fila[4], "cant: " , fila[0], "desc: ", fila[5], "totParcial: ", totParcial)
+=======
+                    fila[5] = round((float(fila[5]) / totParcial) * 100,2) 
 
+>>>>>>> 387fac7 (importaciones-t)
                     #if not Periodicas:
                     CenGastos = "0" 
                     ##mineoctubre

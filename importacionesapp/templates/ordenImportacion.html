@@ -17,26 +17,23 @@
     <p class="section-label">1 · Parámetros</p>
     <div class="row g-3 align-items-end">
 
-      <div class="col-12 col-md-3">
-        <label class="form-label">División</label>
-        <select id="divisionSelect" onchange="fetchSubTipo()" required class="form-select">
-          <option selected>Escoja la División</option>
-          {% if nempresa %}
-            {% for nombremp in nempresa %}
-            <option value="{{ nombremp.co_div }}">{{ nombremp.co_nomext }}</option>
-            {% endfor %}
-          {% endif %}
-        </select>
-        <div class="invalid-feedback">No ha seleccionado una división</div>
-      </div>
+      
 
       <div class="col-12 col-md-3">
         <label class="form-label">Tipo de Compra</label>
-        <select id="subTipoSelect" class="form-select">
+        <select onchange="tipoImportacion()" id="imporTipoSelect" class="form-select">
           <option selected>Escoja tipo de Compra</option>
+          {% if ntcompra %}
+            {% for tcompra in ntcompra %}
+            <option value="{{ tcompra.to_tipo }}">{{ tcompra.to_descrip }}</option>
+            {% endfor %}
+          {% endif %}
         </select>
       </div>
-
+      <div class="col-12 col-md-3">
+        <label class="form-label">Búsqueda</label>
+        <input type="text" class="form-control" name="claveBuscar" id="claveBuscar" style="text-transform: uppercase;" >
+      </div>
       <div class="col-12 col-md-3">
         <label class="form-label">Solicitante</label>
         <select onchange="obtenerSeleccion()" id="selSolicita" class="form-select">

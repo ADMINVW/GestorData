@@ -42,9 +42,9 @@ class OrdenComprasService:
             cuentaProv = [dict(zip(column_names, row)) for row in rows]
         return cuentaProv
     
-    def get_cuentas_importaciones(self, db_alias):
+    def get_cuentas_importaciones(self, db_alias, clavebusqueda):
         return Cuenta.objects.using(db_alias).filter(
-            ct_descripcion__icontains = 'PEDIDOS'
+            ct_descripcion__icontains = clavebusqueda
         )
 
     def get_codigo_proveedor(self, db_alias, cia, ruc):
