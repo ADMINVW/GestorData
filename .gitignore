@@ -8,3 +8,4 @@ new_data.xml
 __pycache__/
 generated_models.py
 django_debug.log
+/GESTORDATA/ewsite/settings.py
