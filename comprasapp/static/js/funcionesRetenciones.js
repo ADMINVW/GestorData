@@ -8,17 +8,17 @@ $.ajaxSetup({
 //Eventos al cargar plantilla
 document.addEventListener("DOMContentLoaded", function (event) {
   // ── SCROLL TOP DESPUÉS DE RELOAD ──
-  if (new URLSearchParams(window.location.search).get('scrollTop')) {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    window.history.replaceState({}, '', window.location.pathname +
-      window.location.search.replace(/[?&]scrollTop=1/, '').replace(/^\?$/, ''));
-    // Mostrar mensaje de error si existe
-    const errorMsg = sessionStorage.getItem('errorMsg');
-    if (errorMsg) {
-      swal.fire("Error", errorMsg, "error");
-      sessionStorage.removeItem('errorMsg');
-    }
-  }
+  // if (new URLSearchParams(window.location.search).get('scrollTop')) {
+  //   window.scrollTo({ top: 0, behavior: 'smooth' });
+  //   window.history.replaceState({}, '', window.location.pathname +
+  //     window.location.search.replace(/[?&]scrollTop=1/, '').replace(/^\?$/, ''));
+  //   // Mostrar mensaje de error si existe
+  //   const errorMsg = sessionStorage.getItem('errorMsg');
+  //   if (errorMsg) {
+  //     swal.fire("Error", errorMsg, "error");
+  //     sessionStorage.removeItem('errorMsg');
+  //   }
+  // }
   //Formateo valores decimales
   baseIvaB.value = formateoDecimal(baseIvaB.value);
   baseIvaS.value = formateoDecimal(baseIvaS.value);
@@ -26,11 +26,12 @@ document.addEventListener("DOMContentLoaded", function (event) {
   baseFuenteB.value = formateoDecimal(baseFuenteB.value);
   baseFuenteS.value = formateoDecimal(baseFuenteS.value);
   baseFuente.value = formateoDecimal(baseFuente.value);
-  //Obtengo valores Generales
-  user.value = sessionStorage.getItem('username');
-  compania.value = sessionStorage.getItem("compania");
-  agencia.value = sessionStorage.getItem("agencia");
-  bodega.value = sessionStorage.getItem("bodega");
+
+  //Obtengo valores Generales --> Se quita y se trabaja con datos capturados en template enviados desde vista
+  //user.value = sessionStorage.getItem('username');
+  //compania.value = sessionStorage.getItem("compania");
+  //agencia.value = sessionStorage.getItem("agencia");
+  //bodega.value = sessionStorage.getItem("bodega");
 
   console.log(sessionStorage.getItem('username'))
   //TRATAMIENTO ORDEN PERIODICA, SE PONE AUTOMATICAMENTE CHECK EN ITEMS
@@ -87,6 +88,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
       }
     }
   }
+  sessionStorage.removeItem("form_enviado");
+  console.log("inicializa ", sessionStorage.getItem("form_enviado"))
 });
 
 //VARIABLE GLOBAL PARA DATOS PROVEEDOR, checks informacion proveedor
@@ -247,7 +250,7 @@ $("input[id='checkFS']").change(function (e) {
     if (existefteS == true) {
       $(this).prop("checked", false);
       alert(
-        "Ya existe un item seleccionado para FUENTE BIENES"
+        "Ya existe un item seleccionado para FUENTE SERVICIOS"
       );
       return;
     }
@@ -354,6 +357,7 @@ document.getElementById('cancelar-btn').addEventListener('click', function () {
 
 //ENVIO DE FORMULARIO
 document.getElementById("form-retencion").addEventListener("submit", function (event) {
+  console.log("inicia submit")
   //METODO PARA CANCELAR ENVIO EN CASO DE CAER EN UNA VALIDACION
   event.preventDefault();
 
@@ -479,11 +483,12 @@ document.getElementById("form-retencion").addEventListener("submit", function (e
   }
 
   //CONTROL TRANSACCION ENVIADA
-  if (sessionStorage.getItem("form_enviado")) {
-    swal.fire("Oops!", "Retencion de factura ya registrada!", "warning");
-    document.getElementById("guardar-btn").disabled = true;
-    return
-  }
+  // console.log("submit ", sessionStorage.getItem("form_enviado"))
+  // if (sessionStorage.getItem("form_enviado")) {
+  //   swal.fire("Oops!", "Retencion de factura ya registrada!", "warning");
+  //   document.getElementById("guardar-btn").disabled = true;
+  //   return
+  // }
 
   //CAPTURO DEMAS DATOS DE FOURMULARIO
   const formulario = document.querySelector("#form-retencion")
@@ -506,31 +511,30 @@ document.getElementById("form-retencion").addEventListener("submit", function (e
     body: JSON.stringify({ tabla: filas, forma: jsonData }),
 
   })
-
-    .then(response => {
+    .then(async response => {
+      const data = await response.json();   // <-- SOLO UNA VEZ
+      console.log("Respuesta:", data);
       if (!response.ok) {
-        // Antes: window.location.reload();
-        const url = new URL(window.location.href);
-        url.searchParams.set('scrollTop', '1');
-        sessionStorage.setItem('errorMsg', 'Oops!", "Ocurrio un error al guardar, comunique a sistemas');
-        window.location.href = url.toString();
-        throw new Error('Error en la respuesta del servidor');
+        throw new Error(data.detallerr)
       }
-      return response.json();
+      return data;
     })
     .then(data => {
-      if (data.redirect_url) {
-        // Redirige al usuario a la URL devuelta por el servidor
-        sessionStorage.setItem("form_enviado", "true");
-        //swal.fire("Oops!", "Retención generada", "success"); -->muestra pero no espera confirmacion, desaparce y va al resumen
-        window.location.href = data.redirect_url;
-      } else {
-        console.error('No se recibió URL de redirección');
+      console.log("data ", data)
+      if (data.status == 'success') {
+        sessionStorage.setItem("form_enviado", "true"); //se debe setear al cargar forma nuevamente
+        if (data.redirect_url) {
+          window.location.href = data.redirect_url; // Redirige al usuario a la URL devuelta por la vista
+        }
+        else {
+          throw new Error('No se recibió URL de redirección');
+        }
       }
     })
     .catch(error => {
-      console.error('Hubo un problema con la solicitud:', error);
-    });
+      console.error('Error en submit :', error);
+      swal.fire("Oops!", "" + error.message + "; De requetir detalle comunique a sistemas ", "error");
+    })
 });
 
 function sumarTotalRetencion() {

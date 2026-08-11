@@ -256,6 +256,7 @@
           <a class="btn btn-primary " role="button"   
           {% if ncodDiv == 'd' %} href="/comprasapp/templates/ordenCompra?company={{ company_key }}" {% endif %}
           {% if ncodDiv == 'r' %} href="/repuestosapp/templates/compraRepuestos?company={{ company_key }}" {% endif %}
+          {% if ncodDiv == 't' %}  href="/tallerapp/templates/ordenCompraT?company={{ company_key }}" {% endif %}
           id="cancelar-btn">Nueva Orden
           </a>
         {% endif %}

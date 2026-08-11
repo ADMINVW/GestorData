@@ -134,4 +134,5 @@ p.warning {
   font-size: 14px;
   font-weight: 400;
   width: 140px;
+  background-color: red;
 }

@@ -25,13 +25,13 @@
                     {% for detalle in ndetalleOrden %}
                     <tr>
                         <td style="text-align: left">
-                            {{detalle.tr_descri}}
+                            {{detalle.descri}}
                         </td>
                         <td>
                             {% if detalle.oc_iva_rp != None %} {{detalle.oc_iva_rp}} {%else%} - {% endif %}
                         </td>
                         <td style="text-align: right">
-                            {{detalle.tr_valor|floatformat:2}}
+                            {{detalle.valor|floatformat:2}}
                         </td>
                     </tr>
                     {% endfor %}

@@ -66,15 +66,17 @@ def consultarDato(request, ssql, parametros=None, db_alias=None):
         with connections[db_alias].cursor() as cur:
             cur.execute(ssql,parametros or [])
             dato = cur.fetchone()
-            if (dato != None):
+            if dato is None:
+                return 0
+            else:
                 if (len(dato)> 1):
                     #raise  MiError( "Retorno mas de un resultado")
                     return 0
                 else:
-                    return dato[0] #retorno el unico elemento que debe haber, debería controlar el retorno de mas elementos 
-            else:
-                return 0
-            #raise  MiError( "Sin resultados") 
+                    if (dato[0] == None): #retorna vacio devuelve 0
+                        return 0
+                    else:
+                        return dato[0] #retorno el unico elemento que debe haber, debería controlar el retorno de mas elementos 
     except Exception as e:
-        print("Error en consultarDato ", e)
+        print(f"Error en consultarDato ({ssql}) ", e)
         

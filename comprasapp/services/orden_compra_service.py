@@ -132,10 +132,16 @@ class OrdenComprasService:
             oc_detalle = OrdenCompraDetalle.objects.using(db_alias).create(**datos)
         return oc_detalle
     
-    def comprobar_existencia_retencion(self, db_alias, division, codigo_proveedor, numero_factura, agencia):
-        return Retencion.objects.using(db_alias).filter(
-            rt_division = division,
-            rt_codpro = codigo_proveedor,
-            rt_factura = numero_factura,
-            rt_agencia = agencia
-        ).exists()
+    def comprobar_existencia_retencion(self, db_alias, division, codigo_proveedor, numero_factura, agencia, numero):
+        if numero is None:
+            return Retencion.objects.using(db_alias).filter(
+                rt_division = division,
+                rt_codpro = codigo_proveedor,
+                rt_factura = numero_factura,
+                rt_agencia = agencia
+            ).exists()
+        else:
+            return Retencion.objects.using(db_alias).filter(
+                rt_agencia = agencia,
+                rt_numero = numero
+            ).exists()

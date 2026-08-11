@@ -577,9 +577,9 @@ async function enviarDatosFactura() {
                 console.error('No se recibió URL de redirección');
             }
         },
-        error: function (xhr, status, error) {
-            console.error('Ha ocurrido un error:', error);
-            document.getElementById('botonGuardar').disabled = true;
+        error: function (xhr) {
+            const respuesta = JSON.parse(xhr.responseText);
+            swal.fire("Oops!", "Ocurrio un error (" + respuesta.detallerr + "); De requetir detalle comunique a sistemas ", "error");
         }
     });
 }

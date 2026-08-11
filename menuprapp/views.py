@@ -16,6 +16,7 @@ import traceback
 def mimenu(request):
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
     user_data = request.session.get(f'user_data_{company_key}', {})
+    print("user_data ", user_data)
     usuario = company_context(request).get('db_user', '')
     context = {
         'company_key': company_key,
