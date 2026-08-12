@@ -408,36 +408,30 @@ function formatoFechaHora() {
 function validaFecha(fecha) {
     let fechaStr = fecha;
 
-    // Separar día, mes y año
-    let partes = fechaStr.split("/");
-    let dia = parseInt(partes[0], 10);
-    let mes = parseInt(partes[1], 10) - 1; // Los meses en JS van de 0 a 11
-    let anio = parseInt(partes[2], 10);
+        // Separar día, mes y año
+        let partes = fechaStr.split("/");
+        let dia = parseInt(partes[0], 10);
+        let mes = parseInt(partes[1], 10) - 1; // Los meses en JS van de 0 a 11
+        let anio = parseInt(partes[2], 10);
 
-    // Crear objeto Date
-    let fechaFactura = new Date(anio, mes, dia);
+        // Crear objeto Date
+        let fechaFactura = new Date(anio, mes, dia);
 
-    // Fecha actual (sin horas para evitar errores)
-    let hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
+        // Fecha actual (sin horas para evitar errores)
+        let hoy = new Date();
+        hoy.setHours(0,0,0,0);
 
-    // Calcular diferencia en milisegundos
-    let diferenciaMs = hoy - fechaFactura;
+        // Calcular diferencia en milisegundos
+        let diferenciaMs = hoy - fechaFactura;
 
-    // Convertir a días
-    let diferenciaDias = diferenciaMs / (1000 * 60 * 60 * 24);
+        // Convertir a días
+        let diferenciaDias = diferenciaMs / (1000 * 60 * 60 * 24);
 
-    //validacion 5 días
-    if (diferenciaDias <= 5 && diferenciaDias >= 0) {
-        //validacion mes anterior
-        mesActual = hoy.getMonth()
-        if (mes != mesActual) {
-            return false;
+        if (diferenciaDias <= 5 && diferenciaDias >= 0) {
+            return true;  // La fecha es válida
+        } else {
+            return false; // La fecha no es válida
         }
-        return true;  // La fecha es válida
-    } else {
-        return false; // La fecha no es válida
-    }
 };
 
 async function enviarDatosFactura() {
@@ -577,9 +571,9 @@ async function enviarDatosFactura() {
                 console.error('No se recibió URL de redirección');
             }
         },
-        error: function (xhr) {
-            const respuesta = JSON.parse(xhr.responseText);
-            swal.fire("Oops!", "Ocurrio un error (" + respuesta.detallerr + "); De requetir detalle comunique a sistemas ", "error");
+        error: function (xhr, status, error) {
+            console.error('Ha ocurrido un error:', error);
+            document.getElementById('botonGuardar').disabled = true;
         }
     });
 }
@@ -730,7 +724,7 @@ function actualizarPrecio(index) {
     var cantidad = cantidadInput.value;
     var precioTotal = factura[index].getElementsByTagName("precioTotalSinImpuesto")[0].textContent;
     var descuento = factura[index].getElementsByTagName("descuento")[0].textContent;
-    var nuevoPrecioUnitario = parseFloat(precioTotal) + parseFloat(descuento);
+    var nuevoPrecioUnitario  = parseFloat(precioTotal) + parseFloat(descuento);
     nuevoPrecioUnitario = nuevoPrecioUnitario / cantidad;
 
     cantidadInput.value = cantidad;
