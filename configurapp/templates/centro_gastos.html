@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Centro de Gastos{% endblock %}
+
+{% block cabcontenido %}
+<div class="app-page-title">Centro de Gastos</div>
+<div class="app-breadcrumb">Configuración &rsaquo; Centros de Gastos</div>
+{% endblock %}
+
+
+{% block contenido %}
+
+<link rel="stylesheet" href="{% static 'css/centro_gastos.css' %}?v=2">
+<link rel="stylesheet" href="{% static 'css/compo_nentes.css' %}?v=2">
+<link rel="stylesheet" href="{% static 'css/vista_arbol.css' %}?v=2">
+
+
+<!-- ─── FILTROS SUPERIORES ─── -->
+<div class="app-card mb-4">
+  <div class="app-card-body">
+    <div class="row g-4">
+
+     <!-- IZQUIERDA -->
+    <div class="col-md-4">
+
+        <p class="section-label"> · Nuevo nivel</p>
+
+        <div class="row g-2 align-items-end">
+
+            <div class="col-2">
+                <label class="form-label">Nivel</label>
+                <input type="text"
+                       id="nivelCodigo"
+                       class="form-control form-control-sm"
+                       readonly>
+            </div>
+
+            <div class="col-7">
+                <label class="form-label">Nombre del nivel</label>
+                <input type="text"
+                       id="nombreNivel"
+                       class="form-control form-control-sm"
+                       maxlength="30"
+                       oninput="this.value = this.value.toUpperCase(); limpiarErrorNivel(); validarGuardarNivel();">
+            </div>
+
+            <div class="col-3">
+                <button type="button"
+                        id="btnGuardarNivel"
+                        class="btn btn-primary btn-sm w-100"
+                        onclick="guardarNivel()"
+                        disabled>
+                    Añadir
+                </button>
+            </div>
+            
+            <div id="errorNombreNivel"
+                    class="cg-error-card mt-2"
+                    role="alert"
+                    aria-live="polite"
+                    style="display:none;">
+            </div>
+            
+            
+
+        </div>
+        
+
+    </div>
+    
+
+    <!-- DERECHA -->
+    <div class="col-md-8">
+
+        <p class="section-label"> · Niveles creados</p>
+
+        <div class="table-responsive">
+            <table class="table table-hover table-sm">
+                <thead>
+                    <tr>
+                        <th>Compañía</th>
+                        <th>Nivel</th>
+                        <th>Nombre</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaNivelesBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+<hr class="hr hr-blurry my-4">
+<div class="row g-4" 
+      >
+  <!-- PASOS VISUALES -->
+    <div class="cg-stepper mb-3">
+      <div class="cg-step" id="stepTipo">
+        <span class="cg-circle">1</span>
+        <span>Tipo</span>
+      </div>
+
+      <div class="cg-line" id="lineTipoConcepto"></div>
+
+      <div class="cg-step" id="stepConcepto">
+        <span class="cg-circle">2</span>
+        <span>Concepto</span>
+      </div>
+
+      <div class="cg-line" id="lineConceptoAgencia"></div>
+
+      <div class="cg-step" id="stepAgencia">
+        <span class="cg-circle">3</span>
+        <span>Agencia</span>
+      </div>
+
+      <div class="cg-line" id="lineAgenciaMarca"></div>
+
+      <div class="cg-step" id="stepMarca">
+        <span class="cg-circle">4</span>
+        <span>Marca</span>
+      </div>
+    </div>
+
+    <!-- FILA 1 -->
+    <div class="row g-2 align-items-end">
+
+      <div class="col-12 col-md-2">
+        <label class="form-label">Tipo a crear</label>
+        <select id="tipoCrear"
+                class="form-select form-select-sm"
+                onchange="cambiarTipoCrear(); actualizarPasosCentroGastos();">
+          <option value="">Seleccione</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-md-2" id="boxConcepto" style="display:none;">
+        <label class="form-label">Concepto</label>
+        <select id="selectConcepto"
+                class="form-select form-select-sm"
+                onchange="cargarDependientes('concepto'); actualizarCodigoGenerado(); actualizarPasosCentroGastos();">
+        </select>
+      </div>
+
+      <div class="col-12 col-md-2" id="boxAgencia" style="display:none;">
+        <label class="form-label">Agencia</label>
+        <select id="selectAgencia"
+                class="form-select form-select-sm"
+                onchange="cargarDependientes('agencia'); actualizarPasosCentroGastos();">
+        </select>
+      </div>
+
+      <div class="col-12 col-md-2" id="boxMarca" style="display:none;">
+        <label class="form-label">Marca</label>
+        <select id="selectMarca"
+                class="form-select form-select-sm"
+                onchange="cargarDependientes('marca'); actualizarCodigoGenerado(); validarGuardarJerarquia(); actualizarPasosCentroGastos();">
+        </select>
+      </div>
+
+      <div class="col-12 col-md-2" id="boxLinea" style="display:none;">
+        <label class="form-label">Línea negocio</label>
+       <select id="selectLinea"
+          class="form-select form-select-sm"
+          onchange="cargarDependientes('linea'); actualizarCodigoGenerado(); validarGuardarJerarquia(); actualizarPasosCentroGastos();">
+      </select>
+    </div>
+
+      <div id="contenedorNivelesExtra"
+     class="row g-2 align-items-end mt-2">
+     
+      </div>
+
+    </div>
+
+    <!-- FILA 2 -->
+    <div class="row g-2 align-items-end mt-2">
+
+      <div class="col-12 col-md-2">
+        <label class="form-label">Nombre nuevo</label>
+        <input type="text"
+               id="nombreNuevo"
+               class="form-control form-control-sm"
+               maxlength="30"
+               oninput="this.value=this.value.toUpperCase(); validarGuardarJerarquia();">
+               
+      </div>
+
+      <div class="col-12 col-md-1">
+     <label class="form-label">Código</label>
+     <input type="text"
+            id="codigoGenerado"
+            class="form-control form-control-sm"
+            readonly>
+      </div>
+
+     <div class="col-12 col-md-2">
+  <label class="form-label">Cuenta</label>
+
+  <div class="cg-cuenta-control">
+    <input type="text"
+           id="cuentaBaseFija"
+           class="form-control form-control-sm cg-cuenta-padre"
+           readonly>
+
+    <input type="text"
+           id="cuentaSufijo"
+           class="form-control form-control-sm cg-cuenta-codigo"
+           maxlength="8"
+           placeholder="00"
+           oninput="this.value=this.value.replace(/[^0-9]/g,''); actualizarCuentaDesdeSufijo();">
+  </div>
+
+  
+
+   <input type="hidden" id="cuentaGenerada">
+  </div>  
+
+     
+
+      <div class="col-12 col-md-2">
+        <label class="form-label">Buscar ruta</label>
+
+        <div class="cg-search-box">
+            <div class="cg-search-input-wrap">
+                <i class="fas fa-search cg-search-icon"></i>
+
+                <input type="text"
+                       id="buscarRutaCg"
+                       class="form-control form-control-sm cg-search-input"
+                       placeholder="Ej: 0301"
+                       maxlength="16"
+                       autocomplete="off"
+                       oninput="this.value=this.value.replace(/[^0-9]/g,''); buscarRutaCg();"
+                       onkeydown="navegarResultadosRuta(event);">
+            </div>
+
+             <div  id="listaResultadosRuta"
+                   class="cg-search-results"
+                   style="display:none;">
+             </div>
+        </div>
+    </div>
+
+      <div class="col-12 col-md-1 d-grid">
+        <button type="button"
+                id="btnGuardarJerarquia"
+                class="btn btn-primary btn-sm"
+                onclick="guardarJerarquia()"
+                disabled>
+          Guardar
+        </button>
+      </div>
+
+
+    </div>
+
+  </div>
+
+    <div class="col-2">
+       <div    id="errorNombreNuevo"
+                class="cg-error-card mt-2"
+                role="alert"
+                aria-live="polite"
+                style="display:none;">
+       </div>
+      </div>
+
+  
+ <hr class="hr hr-blurry my-4">
+  <div class="row g-4 ">
+
+    <div class="col-12">
+       <div class="d-flex justify-content-between align-items-center mb-2">
+         <p class="section-label mb-0"> · Vista árbol</p>
+
+         <div class="d-flex justify-content-end mb-2">
+
+            <button class="btn btn-outline-primary btn-sm me-2"
+                    onclick="expandirTodoArbol()">
+
+                <i class="fas fa-expand-alt"></i>
+                Expandir
+
+            </button>
+
+            <button class="btn btn-outline-secondary btn-sm"
+                    onclick="colapsarTodoArbol()">
+
+                <i class="fas fa-compress-alt"></i>
+                Colapsar
+
+            </button>
+        </div>
+      </div>
+
+        <div id="arbolCentroGastos" class="app-tree">
+
+            <span style="color:#777;">
+                Sin registros.
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+{% endblock %}
+
+{% block footer_scripts %}
+ {{block.super}}
+
+<script>
+const companyKey = "{{ company_key }}";
+</script>
+
+
+<script src="/static/js/utils.js"></script>
+<script src="/static/funcionesCentroGastos.js"></script>
+
+<script> inicializarAyudaPantalla(CODIGOS_AYUDA.CF2_CENTROGASTOS); </script>
+
+{% endblock %}
+  
+
+
+
+
+

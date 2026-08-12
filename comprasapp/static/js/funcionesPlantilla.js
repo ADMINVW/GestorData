@@ -1,4 +1,7 @@
 //GLOBALES
+
+"use strict";
+
 let grancontrib = "N"
 let rimpe = "N"
 let contribEsp = "N"
@@ -8,90 +11,78 @@ let nombreProveedor = ""
 let proceso = ""
 let user = sessionStorage.getItem('username');
 
-document.addEventListener("DOMContentLoaded", function (event) {
-    proceso = document.getElementById("proceso").value;
-    //Proceso UPDATE inicializo controles
-    if (proceso == 'U') {
-        //datos proveedor
-        let proveedor = document.getElementById("codProveedor").value;
-        consultarProveedor(proveedor)
+function inicializarPlantillaPeriodica() {
+
+    const campoProceso =
+        document.getElementById("proceso");
+
+    if (!campoProceso) {
+        console.warn(
+            "No se encontró el campo proceso."
+        );
+
+        return false;
     }
-    sessionStorage.removeItem("form_enviado");
-});
+
+    proceso = campoProceso.value;
+
+    if (proceso === "U") {
+
+        const campoProveedor =
+            document.getElementById("codProveedor");
+
+        if (
+            campoProveedor &&
+            campoProveedor.value
+        ) {
+            consultarProveedor(
+                campoProveedor.value
+            );
+        }
+    }
+
+    sessionStorage.removeItem(
+        "form_enviado"
+    );
+
+    return true;
+}
+
+inicializarPlantillaPeriodica();
 
 //funciones ejecutadas al cargar el DOM
-$(function () {
-    $("#nomProveedor").autocomplete({
-        source: "/comprasapp/cargarProveedores/",
+function inicializarAutocompleteProveedor() {
+
+    const $campoProveedor =
+        $("#nomProveedor");
+
+    if ($campoProveedor.length === 0) {
+        return false;
+    }
+
+    $campoProveedor.autocomplete({
+        source:
+            "/comprasapp/cargarProveedores/",
+
         minLength: 3,
+
         select: function (event, ui) {
-            $("#codProveedor").val(ui.item.codigo).trigger("change");
-            //Ejecuta change siempre que su definicion este con jquery ($("#ct_grupo y no dom (document.getElementById("codProveedor").addEventListener)
+
+            $("#codProveedor")
+                .val(ui.item.codigo)
+                .trigger("change");
         }
     });
-});
+
+    return true;
+}
+
+inicializarPlantillaPeriodica();
+inicializarAutocompleteProveedor();
+
 
 //Si usuario deja en blanco nombre proveedor se inicializa codigo y todo lo relacionado (checks iva fte, items retenciones)
-$("input[id='nomProveedor']").blur(function (e) {
-    if (this.value.trim() == '') {
-        $("#codProveedor").val('').trigger("change");
-        alert("No ha seleccionado proveedor!")
-    }
-    else {
-        // si modifica y se identifica diferencia con nombre original con existencia de codigo se setea nombre original 
-        if (this.value.trim() != nombreProveedor && $("input[id='codProveedor']").val() != '') {
-            this.value = nombreProveedor
-        }
-    }
-});
-
-async function validarExistencia(codigo) {
-
-    if (!codigo) return;
-
-    codigo = codigo.toUpperCase()
-
-    try {
-        let response = await fetch(`../consultarExistencia/?validador=codplantilla&codigo=${codigo}`);
-        let data = await response.json();
-        const inputCodigo = document.getElementById("codPlantilla");
-        //valido el ok del retorno
-        if (!response.ok) {
-            inputCodigo.value = "";
-            inputCodigo.focus();
-            alert("Error en respuesta - " + data.error + "; Comunique a sistemas")
-            return false;
-        }
-        else {
-            if (data.existe == 1) {
-                inputCodigo.value = "";
-                inputCodigo.focus();
-                alert("Codigo de plantilla ya existe!")
-                return false;
-            }
-        }
-    } catch (error) {
-        inputCodigo.value = "";
-        inputCodigo.focus();
-        alert("ValidarExistencia - " + error + "; Comunique a sistemas")
-    }
-};
-
-//Check Bienes (solo uno puede activarse)
-$("input[id='checkTipoB']").change(function (e) {
-    if ($(this).is(":checked")) {
-        $("input[id='checkTipoS']").prop("checked", false);
-        $("input[id='tipo']").val("B")
-    }
-});
-
-//Check Servicios (solo uno puede activarse)
-$("input[id='checkTipoS']").change(function (e) {
-    if ($(this).is(":checked")) {
-        $("input[id='checkTipoB']").prop("checked", false);
-        $("input[id='tipo']").val("S")
-    }
-});
+c
 
 //Check Fte, activa o desactiva demas controles  
 $("input[id='checkFte']").change(function (e) {

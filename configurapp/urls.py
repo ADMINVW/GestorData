@@ -1,0 +1,33 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('templates/usuarios/', views.usuarios, name='usuarios'),
+    path('accesos_usuario/', views.accesos_usuario, name='accesos_usuario'),
+    path('guardar_accesos/', views.guardar_accesos, name='guardar_accesos'),
+    path('templates/centroGastos/', views.centro_gastos, name='centro_gastos'),
+    path('guardar_nivel_centro_gastos/', views.guardar_nivel_centro_gastos, name='guardar_nivel_centro_gastos'),
+    path('listar_niveles_centro_gastos/', views.listar_niveles_centro_gastos, name='listar_niveles_centro_gastos'),
+    path('guardar_seccion_centro_gastos/', views.guardar_seccion_centro_gastos, name='guardar_seccion_centro_gastos'),
+    path('listar_secciones_centro_gastos/', views.listar_secciones_centro_gastos, name='listar_secciones_centro_gastos'),
+    path('guardar_jerarquia/', views.guardar_jerarquia, name='guardar_jerarquia'),
+    path('listar_jerarquia/', views.listar_jerarquia, name='listar_jerarquia'),
+    path ('siguiente_codigo/',  views.siguiente_codigo, name='siguiente_codigo'),
+    path("buscar_ruta_cg/", views.buscar_ruta_cg, name="buscar_ruta_cg"),
+    path("templates/bodegas/", views.bodegas, name="bodegas"),
+    path("listar_padres_bodega/", views.listar_padres_bodega, name="listar_padres_bodega"),
+    path("guardar_bodega/", views.guardar_bodega, name="guardar_bodega"),
+    path("listar_bodegas/", views.listar_bodegas, name="listar_bodegas"),
+    path("niveles_disponibles_cg/", views.niveles_disponibles_cg, name="niveles_disponibles_cg"),
+    path("templates/configuracion_menus/", views.configuracion_menus, name="configuracion_menus"),
+    path("listar_configuracion_menus/", views.listar_configuracion_menus, name="listar_configuracion_menus"),
+    path("niveles_disponibles_menu/", views.niveles_disponibles_menu, name="niveles_disponibles_menu"),
+    path("listar_padres_menu/", views.listar_padres_menu, name="listar_padres_menu"),
+    path("guardar_configuracion_menu/", views.guardar_configuracion_menu, name="guardar_configuracion_menu"),
+    path("eliminar_configuracion_menu/", views.eliminar_configuracion_menu, name="eliminar_configuracion_menu"),
+    path("templates/configuracion_ayudas/",views.configuracion_ayudas,name="configuracion_ayudas",),
+    path("listar_ayudas/",views.listar_ayudas,name="listar_ayudas",),
+    path("guardar_ayuda/",views.guardar_ayuda,name="guardar_ayuda",),
+    path("obtener_ayuda/",views.obtener_ayuda,name="obtener_ayuda",),
+    path("eliminar_ayuda/",views.eliminar_ayuda,name="eliminar_ayuda",),
+]

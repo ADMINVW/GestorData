@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block contenido %}
-<script src="/static/js/funcionesCompras.js"></script>
+
 
 <!-- ─── FILTROS SUPERIORES ─── -->
 <div class="app-card mb-4">
@@ -230,13 +230,46 @@
 {% endblock %}
 
 {% block footer_scripts %}
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const username = "{{ username|default:'Invitado' }}";
-    document.getElementById('userName').value = username;
-    if (username !== 'Invitado') {
-      sessionStorage.setItem('username', username);
-    }
-  });
-</script>
+
+    {{ block.super }}
+
+    <script src="/static/js/funcionesCompras.js"></script>
+
+    <script>
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                const username =
+                    "{{ username|default:'Invitado'|escapejs }}";
+
+                const campoUsuario =
+                    document.getElementById("userName");
+
+                if (campoUsuario) {
+                    campoUsuario.value = username;
+                }
+
+                if (username !== "Invitado") {
+                    sessionStorage.setItem(
+                        "username",
+                        username
+                    );
+                }
+
+            }
+        );
+    </script>
+
+    <script>
+      console.log("ENTRÓ A PLANTILLAS");
+
+      console.log(CODIGOS_AYUDA.CO2_PLANTILLASPERIOD);
+
+      console.log(typeof inicializarAyudaPantalla);
+        inicializarAyudaPantalla(
+            CODIGOS_AYUDA.CO2_ORDENCOMPRA
+        );
+    </script>
+
 {% endblock %}

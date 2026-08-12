@@ -21,6 +21,8 @@
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
   <!-- Estilos propios -->
 
+  <link rel="stylesheet" href="{% static 'css/compo_nentes.css' %}">
+
   <style>
     /* ─── DESIGN TOKENS ─── */
     :root {
@@ -400,6 +402,30 @@
   </style>
 </head>
 
+
+<div class="toast-container position-fixed top-0 end-0 p-3">
+  <div id="toastAcceso" class="toast text-bg-danger border-0" role="alert">
+    <div class="d-flex">
+      <div class="toast-body">
+        Acceso denegado
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto"
+              data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+function mostrarAccesoDenegado(event) {
+    event.preventDefault();
+
+    const toastElement = document.getElementById('toastAcceso');
+    const toast = new bootstrap.Toast(toastElement);
+
+    toast.show();
+}
+</script>
+
 <body class="{{ body_theme }}">
 
   <!-- NAVBAR -->
@@ -428,6 +454,8 @@
     </div>
   </footer>
 
+  {% include "modal_ayuda.html" %}
+
   <!-- JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -435,7 +463,9 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.datatables.net/2.3.2/js/dataTables.js"></script>
   <script src="https://cdn.datatables.net/2.3.2/js/dataTables.bootstrap5.js"></script>
-  <script src="/static/js/funciones.js" defer></script>
+  <script src="{% static 'js/funciones.js' %}"></script>
+  <script src="{% static 'js/ayudasData.js' %}"></script>
+  <script src="{% static 'js/ayudas.js' %}"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -464,8 +494,11 @@
     }
   </script>
 
-  {% block footer_scripts %}{% endblock %}
-</body>
+ 
+  {% block footer_scripts %}
 
-<div id="ventana_modal" class="modal fade" role="dialog"></div>
+  {% endblock %}
+
+  <div id="ventana_modal" class="modal fade" role="dialog"></div>
+</body>
 </html>

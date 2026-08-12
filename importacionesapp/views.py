@@ -11,9 +11,15 @@ from comprasapp.services import OrdenComprasService
 from comprasapp.serializers import(
     DivisionSerializer, TipoCreditoSerializer, SolicitanteSerializer, CuentaSerializer, OrdenCompraCabeceraSerializer
 )
+from core.permisos import validar_acceso
 
 @require_http_methods(["GET"])
 def ordenImportacion(request):
+    
+    # if not validar_acceso(request, 'SR'):
+    #  return render(request, 'core/acceso_denegado.html')
+
+
     company_key = request.GET.get('company') or request.session.get('company_key')
     db_alias = get_db_from_request(request)
     service = OrdenComprasService()

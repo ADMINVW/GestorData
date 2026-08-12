@@ -112,6 +112,17 @@
         </div>
     
 
-{% endblock %} {% block footer_scripts %}
+
+
+{% endblock %} 
+
+{% block footer_scripts %}
+   {{ block.super }}
 <script src="/static/js/funcionesConsulta.js" defer></script>
+
+<script>
+        inicializarAyudaPantalla(
+            CODIGOS_AYUDA.CO2_CONSULTA
+        );
+    </script>
 {% endblock %}

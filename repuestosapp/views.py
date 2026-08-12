@@ -16,7 +16,7 @@ from django.views.decorators.http import require_GET
 from django.db import connection, transaction
 from decimal import Decimal, ROUND_HALF_UP
 from core.context_processors import company_context
-
+from core.permisos import validar_acceso
 import os
 import xml.etree.ElementTree as ET
 
@@ -26,6 +26,8 @@ from comprasapp.views import *
 
 # Create your views here.
 def comprasRepuestos(request):
+   # if not validar_acceso(request, 'RE'):
+    #    return render(request, 'core/acceso_denegado.html')
 
     from core.models import Company
 

@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %}Bodegas{% endblock %}
+
+{% block cabcontenido %}
+<div class="app-page-title">Bodegas</div>
+<div class="app-breadcrumb">Configuración &rsaquo; Bodegas</div>
+{% endblock %}
+
+
+{% block contenido %}
+
+<link rel="stylesheet" href="{% static 'css/compo_nentes.css' %}?v=2">
+
+<div class="app-card mb-4">
+  <div class="app-card-body">
+    <div class="row g-4">
+
+    
+
+    <p class="section-label"> · Nueva Bodega</p>
+
+
+ <div class="col-12 col-md-2">
+    <label class="form-label">Crear bodega en</label>
+    <select id="nivelBodega"
+        class="form-select form-select-sm"
+        onchange="
+            limpiarErrorBodega();
+            cargarPadresBodega();
+            validarGuardarBodega();">
+    <option value="">Cargando niveles...</option>
+    </select>
+</div>
+
+<div class="col-12 col-md-3">
+    <label class="form-label">Seleccione registro</label>
+    <select id="padreBodega"
+            class="form-select form-select-sm"
+            onchange="generarCuentaBodega(); validarGuardarBodega();">
+        <option value="">Seleccione</option>
+    </select>
+</div>
+
+
+<div class="col-6 col-md-1">
+     <label class="form-label">Código</label>
+
+     <input type="text"
+         id="codigoBodega"
+         maxlength="2"
+         class="form-control form-control-sm"
+         oninput="this.value=this.value.toUpperCase(); limpiarErrorBodega(); validarGuardarBodega();">
+</div>
+ 
+
+<div class="col-12 col-md-3">
+    <label class="form-label">Nombre Bodega</label>
+    <input type="text"
+           id="nombreBodega"
+           maxlength="20"
+           class="form-control form-control-sm"
+           oninput="this.value=this.value.toUpperCase(); limpiarErrorBodega(); validarGuardarBodega();">
+</div>
+
+<div class="col-12 col-md-2">
+     <label class="form-label">Cuenta</label>
+     <input type="text"
+            id="cuentaBodega"
+            class="form-control form-control-sm"
+            readonly>
+
+</div>
+
+<div class="col-2 col-md-1 d-grid">
+    <button type="button"
+            id="btnGuardarBodega"
+            class="btn btn-primary btn-sm"
+            onclick="guardarBodega()"
+            disabled>
+        Guardar
+        </button>
+   </div>
+
+   <div class="col-3">
+    <div id="errorBodega"
+         class="cg-error-card mt-2"
+         role="alert"
+         aria-live="polite"
+         style="display:none;">
+    </div>
+</div>
+
+</div>
+
+
+
+
+
+<div class="row g-4">
+    <div class="col-12">
+
+        <p class="section-label"> · Bodegas creadas</p>
+
+        <div class="table-responsive">
+            <table class="table table-hover table-sm align-middle">
+                <thead>
+                    <tr>
+                        <th>Nivel</th>
+                        <th>Ubicación</th>
+                        <th>Identificador</th>
+                        <th>Cód. bodega</th>
+                        <th>Nombre bodega</th>
+                        <th>Padre</th>
+                        <th>Cuenta</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tablaBodegasBody">
+                    <tr>
+                        <td colspan="7"
+                            class="text-center text-muted">
+                            Cargando bodegas...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+ </div>
+</div>
+
+{% endblock %}
+
+{% block footer_scripts %}
+   {{block.super}}
+
+<script> const companyKey = "{{ company_key }}"; </script>
+
+<script src="/static/js/utils.js"></script>
+<script src="/static/funcionesBodegas.js"></script>
+
+<script> inicializarAyudaPantalla(CODIGOS_AYUDA.CF2_BODEGAS); </script>
+
+{% endblock %}
+
+
+
+

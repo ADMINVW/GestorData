@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Usuarios{% endblock %}
+
+{% block cabcontenido %}
+<div class="app-page-title">Usuarios</div>
+<div class="app-breadcrumb">Configuración &rsaquo; Usuarios</div>
+{% endblock %}
+
+{% block contenido %}
+
+<!-- ─── FILTROS SUPERIORES ─── -->
+<div class="app-card mb-4 " style="max-width:500px;">
+  <div class="app-card-body">
+    <div class="row g-8">
+
+
+    <!-- USUARIO ARRIBA -->
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8">
+        <p class="section-label"> · Usuarios</p>
+
+        <label class="form-label">Escoja un Usuario</label>
+        <select id="usuarioSeleccionado"
+                required
+                class="form-select"
+                onchange="cargarAccesosUsuario()">
+          <option value="">Seleccione un usuario</option>
+          {% for usuario in usuarios %}
+            <option value="{{ usuario.login }} - {{ usuario.nombre }}">
+              {{ usuario.login }} - {{ usuario.nombre }}
+            </option>
+          {% endfor %}
+        </select>
+
+        <div class="invalid-feedback">No ha seleccionado un usuario</div>
+      </div>
+    </div>
+
+    <hr class="hr hr-blurry my-4">
+
+    <!-- ACCESOS ABAJO -->
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <p class="section-label mb-0"> · Accesos</p>
+
+          
+        </div>
+
+        <div id="mensaje-guardado"
+             style="display:none; color:#6bb0f1; font-size:12px; margin-bottom:8px;">
+          ✓ Cambios guardados correctamente
+        </div>
+
+        <div class="table-responsive" id="tableAccesosUsuario">
+          <table class="table table-hover table-sm" id="listAccesosUsuario">
+            <thead class="border-bottom font-weight-bold">
+              <tr>
+                <label class="form-label">Permitir y denegar accesos</label>
+                <th style="text-align:left;">Sistema</th>
+                <th style="text-align:center;">Acceso</th>
+              </tr>
+            </thead>
+
+            <tbody id="listAccesosUsuario_body">
+              <tr>
+                <td colspan="2" style="text-align:center; color:#777;">
+                  Seleccione un usuario para ver sus accesos.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+            <button class="btn btn-primary btn-sm"
+                    type="button"
+                    id="guardar-btn">
+              Guardar
+            </button>
+
+            <a class="btn btn-danger btn-sm disabled"
+               id="cancelar-btn"
+               role="button"
+               href="/configurapp/templates/usuarios?company={{ company_key }}">
+              Cancelar
+            </a>
+          </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block footer_scripts %}
+ {{block.super}}
+
+<script> const companyKey = "{{ company_key }}"; </script>
+
+<script src="/static/funcionesUsuarios.js"></script>
+
+<script> inicializarAyudaPantalla(CODIGOS_AYUDA.CF2_USUARIOS); </script>
+
+<style>
+.btn-acceso{
+
+    min-width:175px;
+
+    padding:8px 18px;
+
+    border-radius:999px;
+
+    border:none;
+
+    font-size:11px;
+
+    font-weight:700;
+
+    transition:all .25s ease;
+
+}
+
+.btn-success.btn-acceso{
+
+    background:#d1fae5;
+
+    color:#065f46;
+
+}
+
+.btn-danger.btn-acceso{
+
+    background:#fee2e2;
+
+    color:#991b1b;
+
+}
+
+.btn-acceso:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:0 8px 20px rgba(0,0,0,.10);
+
+}
+</style>
+{% endblock %}
+
+
+
+

@@ -21,6 +21,8 @@ from decimal import Decimal, ROUND_HALF_UP
 import os
 import unicodedata
 
+from core.permisos import validar_acceso
+
 from globales.utils import *
 from globales.validators import VALIDACIONES
 
@@ -38,6 +40,10 @@ from .serializers import (
 @require_http_methods(["GET"])
 def ordenCompras(request):
 
+   # if not validar_acceso(request, 'OC'):
+    #    return render(request, 'core/acceso_denegado.html')
+
+     
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
     db_alias = get_db_from_request(request)
     service = OrdenComprasService()
@@ -1512,6 +1518,12 @@ def prueba(request):
     return render(request,'prueba.html')
 
 def cargarTmplConsultaOrdenes(request):
+
+    # if not validar_acceso(request, 'CP'):
+      #  return render(request, 'core/acceso_denegado.html')
+    
+    
+
     from core.models import Company
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
     try:

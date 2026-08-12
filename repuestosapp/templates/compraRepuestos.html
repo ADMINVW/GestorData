@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block contenido %}
-<script src="/static/js/funcionesRepuestos.js"></script>
+
 
 <!-- ─── PARAMETROS ─── -->
 <div class="app-card mb-4">
@@ -206,6 +206,9 @@
 {% endblock %}
 
 {% block footer_scripts %}
+  {{block.super}}
+<script src="/static/js/funcionesRepuestos.js"></script>
+
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const username = "{{ username|default:'Invitado' }}";
@@ -215,4 +218,10 @@
     }
   });
 </script>
+<script>
+  console.log("ENTRÓ A PLANTILLAS");
+        inicializarAyudaPantalla(
+            CODIGOS_AYUDA.RE2_ORDENCOMPRA
+        );
+    </script>
 {% endblock %}

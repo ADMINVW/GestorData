@@ -1,0 +1,125 @@
+<div
+    id="modalAyudaSistema"
+    class="cg-help-modal"
+    aria-hidden="true"
+>
+    <div
+        class="cg-help-modal__backdrop"
+        data-ayuda-cerrar
+    ></div>
+
+    <section 
+        class="cg-help-modal__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tituloModalAyuda"
+        aria-describedby="descripcionModalAyuda"
+        tabindex="-1"
+    >
+        <header class="cg-help-modal__header">
+
+            <div class="cg-help-modal__heading">
+                <span class="cg-help-modal__icon">
+                    <i class="fas fa-circle-question"></i>
+                </span>
+
+                <div>
+                    <span class="cg-help-modal__eyebrow">
+                        Ayuda del sistema
+                    </span>
+
+                    <h2
+                        id="tituloModalAyuda"
+                        class="cg-help-modal__title"
+                    >
+                        Información del  módulo
+                    </h2>
+                </div>
+            </div>
+
+            <button
+                type="button"
+                id="btnCerrarModalAyuda"
+                class="cg-help-modal__close" 
+                aria-label="Cerrar ayuda"
+            >
+                <i class="fas fa-times"></i>
+            </button>
+
+        </header>
+
+        <div class="cg-help-modal__body">
+
+            <section
+                id="seccionDescripcionAyuda"
+                class="cg-help-section"
+            >
+                <h3 class="cg-help-section__title">
+                    <i class="fas fa-circle-info"></i>
+                    Descripción
+                </h3>
+
+                <p
+                    id="descripcionModalAyuda"
+                    class="cg-help-section__text"
+                ></p>
+            </section>
+
+            <section
+                id="seccionObjetivoAyuda"
+                class="cg-help-section"
+            >
+                <h3 class="cg-help-section__title">
+                    <i class="fas fa-bullseye"></i>
+                    Objetivo
+                </h3>
+
+                <p
+                    id="objetivoModalAyuda"
+                    class="cg-help-section__text"
+                ></p>
+            </section>
+
+            <section
+                id="seccionProcesoAyuda"
+                class="cg-help-section"
+            >
+                <h3 class="cg-help-section__title">
+                    <i class="fas fa-list-check"></i>
+                    Proceso general 
+                </h3>
+
+                <ol
+                    id="procesoModalAyuda"
+                    class="cg-help-steps"
+                ></ol>
+            </section>
+
+            <section
+                id="seccionConsejosAyuda"
+                class="cg-help-section"
+            >
+                <h3 class="cg-help-section__title">
+                    <i class="fas fa-lightbulb"></i>
+                    Recomendaciones
+                </h3>
+
+                <ul
+                    id="consejosModalAyuda"
+                    class="cg-help-tips"
+                ></ul>
+            </section>
+
+        </div>
+
+        <footer class="cg-help-modal__footer">
+            <button
+                type="button"
+                id="btnAceptarModalAyuda"
+                class="btn btn-primary btn-sm"
+            >
+                Entendido
+            </button>
+        </footer>
+    </section>
+</div>

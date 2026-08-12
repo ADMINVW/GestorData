@@ -1,5 +1,34 @@
 from .models import Company
 from core.crypto import decrypt_credential
+from django.db import connections
+from core.db_context import get_db_from_request
+
+def accesos_context(request):
+    accesos_usuario = []
+
+    try:
+        db_alias = get_db_from_request(request)
+        login = getattr(request, "db_user", None)
+
+        if login:
+            with connections[db_alias].cursor() as cur:
+                cur.execute("""
+                    SELECT sistema
+                    FROM acceso
+                    WHERE login = ?
+                """, [login])
+
+                accesos_usuario = [
+                    str(row[0]).strip()
+                    for row in cur.fetchall()
+                ]
+
+    except Exception:
+        accesos_usuario = []
+
+    return {
+        "accesos_usuario": accesos_usuario
+    }
 
 def company_context(request):
     session_key = request.session.get('active_company_key')

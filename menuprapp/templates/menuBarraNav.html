@@ -1,5 +1,8 @@
+
 <nav class="navbar navbar-expand-lg app-navbar">
   <div class="container">
+
+    <!-- {{ accesos_usuario }} -->
 
     <!-- Brand -->
     <a class="navbar-brand" href="/mimenu?company={{ company_key }}">
@@ -25,40 +28,180 @@
 
     <div class="collapse navbar-collapse" id="mainNav">
       <ul class="navbar-nav ms-4 me-auto mb-2 mb-lg-0">
-
+      
+        
         <!-- Taller -->
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-            <i class="fas fa-tools me-1" style="font-size:12px; opacity:.7;"></i> Taller
+  <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+    <i class="fas fa-tools me-1" style="font-size:12px; opacity:.7;"></i> Taller
+  </a>
+
+  <ul class="dropdown-menu">
+
+    <li>
+      <a class="dropdown-item"
+         href="/tallerapp/templates/ordenesTrabajo?company={{ company_key }}"
+
+        >Orden de Trabajo
+      </a>
+    </li>
+
+    <li>
+      <a class="dropdown-item"
+         href="#"
+         >Tempario
+      </a>
+    </li>
+
+    <li><hr class="dropdown-divider my-1"></li>
+
+    <li>
+      <a class="dropdown-item"
+         href="#"
+
+       >Torre de Control
+      </a>
+    </li>
+
+    <li><hr class="dropdown-divider my-1"></li>
+
+    <li>
+      <a class="dropdown-item"
+         href="#"
+
+        >Configuración
+      </a>
+     </li>
+
+     <li>
+      <a class="dropdown-item"
+         href="#"
+        onclick="abrirAyudaContextual(); return false"
+        >Ayuda
+      </a>
+     </li>
+
+    <li>
+      <a class="dropdown-item"
+         href="#"
+      >Reportes
+      </a>
+    </li>
+ 
+  </ul>
+</li>
+        
+
+
+        
+<!-- Compras  -->
+ 
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+    <i class="fas fa-shopping-cart me-1" style="font-size:12px; opacity:.7;"></i> Compras
+  </a>
+
+  <ul class="dropdown-menu">
+
+    <li>
+      <a class="dropdown-item"
+         href="/comprasapp/templates/ordenCompra?company={{ company_key }}"
+
+        >Orden de Compra
+      </a>
+    </li>
+
+    <li>
+      <a class="dropdown-item"
+         href="/comprasapp/cargarTmplOrdenes?company={{ company_key }}"
+
+         >Consulta
+      </a>
+    </li>
+
+    <li>
+      <a class="dropdown-item"
+         href="/comprasapp/cargarTmplPlantillas?company={{ company_key }}"
+
+         >Plantillas Periódicas
+      </a>
+    </li>
+
+    <li class="dropend">
+      <a class="dropdown-item dropdown-toggle"
+         data-bs-toggle="dropdown"
+         href="#"
+
+         >Centro de Gastos
+      </a>
+      
+
+      <ul class="dropdown-menu dropdown-submenu">
+        <li>
+          <a class="dropdown-item"
+             href="/comprasapp/cargarTmplConsultaCentroGastos?company={{ company_key }}"
+
+             >Consulta
           </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#">Orden de Trabajo</a></li>
-            <li><a class="dropdown-item" href="#">Tempario</a></li>
-            <li><hr class="dropdown-divider my-1"></li>
-            <li><a class="dropdown-item" href="#">Torre de Control</a></li>
-          </ul>
         </li>
 
-        <!-- Compras -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-            <i class="fas fa-shopping-cart me-1" style="font-size:12px; opacity:.7;"></i> Compras
+        <li>
+          <a class="dropdown-item"
+             href="#"
+
+            >Asignación Proveedor
           </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="/comprasapp/templates/ordenCompra?company={{ company_key }}">Orden de Compra</a></li>
-            <li><a class="dropdown-item" href="/comprasapp/cargarTmplOrdenes?company={{ company_key }}">Consulta</a></li>
-            <li><a class="dropdown-item" href="/comprasapp/cargarTmplPlantillas?company={{ company_key }}">Plantillas Periódicas</a></li>
-            <li class="dropend">
-              <a class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" href="#">Centro de Gastos</a>
-              <ul class="dropdown-menu dropdown-submenu">
-                <li><a class="dropdown-item" href="/comprasapp/cargarTmplConsultaCentroGastos?company={{ company_key }}">Consulta</a></li>
-                <li><a class="dropdown-item" href="#">Asignación Proveedor</a></li>
-              </ul>
-            </li>
-            <li><hr class="dropdown-divider my-1"></li>
-            <li><a class="dropdown-item" href="#">Proveedores</a></li>
-          </ul>
         </li>
+      </ul>
+    </li>
+
+    <li><hr class="dropdown-divider my-1"></li>
+
+    <li>
+      <a class="dropdown-item"
+         href="#"
+
+         >Proveedores
+      </a>
+    </li>
+
+    <li><hr class="dropdown-divider my-1"></li>
+
+    <li>
+      <a class="dropdown-item"
+         href="#"
+
+         >Configuración
+      </a>
+    </li>
+
+    <li>
+      <a class="dropdown-item"
+         href="#"
+
+         onclick="abrirAyudaContextual(); return false"
+
+         >Ayuda
+      </a>
+    </li>
+
+    <li>
+      <a class="dropdown-item"
+         href="#"
+    >
+         Reportes
+      </a>
+    </li>
+
+
+
+
+  </ul>
+</li>
+
+
+
+       
 
         <!-- Repuestos -->
         <li class="nav-item dropdown">
@@ -66,24 +209,140 @@
             <i class="fas fa-cog me-1" style="font-size:12px; opacity:.7;"></i> Repuestos
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="/repuestosapp/templates/compraRepuestos?company={{ company_key }}">Orden de Compra</a></li>
-            <li><a class="dropdown-item" href="/repuestosapp/pruebas?company={{ company_key }}">Pruebas</a></li>
+
+            <li><a class="dropdown-item" 
+              href="/repuestosapp/templates/compraRepuestos?company={{ company_key }}"
+             
+            >Orden de Compra
+            </a></li>
+            <li><a class="dropdown-item" 
+              href="/repuestosapp/pruebas?company={{ company_key }}"
+
+            >Pruebas
+            </a></li>
             <li><hr class="dropdown-divider my-1"></li>
-            <li><a class="dropdown-item" href="#">Proveedores</a></li>
+            <li><a class="dropdown-item" 
+              href="#"
+
+              >Proveedores
+            </a></li>
+
+            <li><hr class="dropdown-divider my-1"></li>
+
+            <li><a class="dropdown-item" 
+              href="#"
+
+            >Configuración
+            </a></li>
+
+            <li><a class="dropdown-item" 
+              href="#"
+    
+              onclick="abrirAyudaContextual(); return false"
+
+            >Ayuda
+            </a></li>
+
+            <li><a class="dropdown-item" 
+              href="#"
+            >Reportes
+            </a></li>
+
           </ul>
         </li>
+        
 
+      
+        
         <!-- Importaciones -->
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+          <a class="nav-link dropdown-toggle" 
+          href="#" 
+         
+          data-bs-toggle="dropdown">
             <i class="fas fa-truck me-1" style="font-size:12px; opacity:.7;"></i> Importaciones
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="/importacionesapp/templates/ordenImportacion?company={{ company_key }}">Orden de Importación</a></li>
+            <li><a class="dropdown-item" 
+              href="/importacionesapp/templates/ordenImportacion?company={{ company_key }}"
+
+             >Orden de Importación
+            </a></li>
+
+            <li><hr class="dropdown-divider my-1"></li>
+
+            <li><a class="dropdown-item" 
+              href="#"
+
+              >Configuración
+            </a></li>
+
+            <li><a class="dropdown-item" 
+              href="#"
+
+              onclick="abrirAyudaContextual(); return false"
+
+              >Ayuda
+            </a></li>
+
+             <li><a class="dropdown-item" 
+              href="#"
+
+             >Reportes
+            </a></li>
+
+          </ul>
+        </li>
+       
+
+         
+
+
+       
+         <!-- Configuracion --> 
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+            <i class="fas fa-cogs me-1" style="font-size:12px; opacity:.7;"></i> Configuración
+          </a>
+
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="/configurapp/templates/usuarios/?company={{ company_key }}"
+             >Usuarios
+                 </a>
+                </li>
+
+                <li><a class="dropdown-item" 
+              href="/configurapp/templates/centroGastos/?company={{ company_key }}"
+              >Centro de Gastos
+            </a>
+           </li>
+
+            <li><a class="dropdown-item"
+              href="/configurapp/templates/bodegas?company={{ company_key}}"
+             >Bodega
+             </a>
+            </li>
+
+            <li><a class="dropdown-item"
+              href="/configurapp/templates/configuracion_menus/?company={{company_key}}"
+            >Configuración Menús
+            </a>  
+            </li>
+
+            <li><hr class="dropdown-divider my-1"></li>
+
+            <li><a class="dropdown-item"
+              href="#"
+              
+              
+                onclick="abrirAyudaContextual(); return false"
+                >Ayuda
+              </a></li>
+                
           </ul>
         </li>
 
-      </ul>
+      
 
       <!-- Right side: user info + logout -->
       <div class="d-flex align-items-center gap-3">

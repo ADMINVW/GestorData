@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block titulo %}Acceso denegado{% endblock %}
+
+{% block contenido %}
+<div class="app-card p-4 text-center">
+  <h4>Acceso denegado</h4>
+  <p>No tienes permiso para ingresar a este módulo.</p>
+  <a class="btn btn-primary" href="/mimenu/?company={{ company_key }}">Volver al menú</a>
+</div>
+{% endblock %}

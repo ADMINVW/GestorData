@@ -1,0 +1,180 @@
+
+
+/* Nodo Resaltado */
+
+.menu-highlight {
+    background: #fff3bf !important;
+    border: 2px solid #ffc107 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 0 22px rgba(255, 193, 7, .65) !important;
+    outline: 3px solid rgba(255, 193, 7, .20);
+    animation: menuPulse 2s ease-in-out infinite;
+}
+
+@keyframes menuPulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.015);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Estado vacío*/
+
+.menu-tree-empty {
+    padding: 14px;
+
+    border: 1px dashed #d7dce3;
+    border-radius: 8px;
+
+    background: #fafbfc;
+    color: #777;
+
+    font-size: 12px;
+    text-align: center;
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+    .menu-tree-node {
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+
+    .menu-code {
+        min-width: auto;
+    }
+
+    .menu-parent {
+        width: 100%;
+        margin-left: 38px;
+    }
+}
+
+/* Proceso Visual de Menús */
+
+.menu-stepper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.menu-step {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    color: #9aa3ad;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+
+    transition:
+        color .2s ease,
+        transform .2s ease;
+}
+
+.menu-step-circle {
+    width: 24px;
+    height: 24px;
+
+    display: grid;
+    place-items: center;
+
+    border: 1px solid #cfd6de;
+    border-radius: 50%;
+
+    background: #fff;
+    color: #9aa3ad;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    transition:
+        background-color .2s ease,
+        color .2s ease,
+        border-color .2s ease,
+        box-shadow .2s ease;
+}
+
+.menu-step-line {
+    position: relative;
+
+    height: 2px;
+    min-width: 45px;
+
+    background: #d7dce3;
+
+    transition: background-color .2s ease;
+}
+
+.menu-step-line::after {
+    content: "➜";
+
+    position: absolute;
+    right: -8px;
+    top: -10px;
+
+    color: #b2bac4;
+    font-size: 14px;
+
+    transition: color .2s ease;
+}
+
+.menu-step.active {
+    color: var(--accent);
+}
+
+.menu-step.active .menu-step-circle {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, .10);
+}
+
+.menu-step-line.active {
+    background: var(--accent);
+}
+
+.menu-step-line.active::after {
+    color: var(--accent);
+}
+
+.menu-step.completed .menu-step-circle {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+
+.menu-step.completed {
+    color: var(--accent);
+}
+
+.menu-step-line.completed {
+    background: var(--accent);
+}
+
+.menu-step-line.completed::after {
+    color: var(--accent);
+}
+
+@media (max-width: 768px) {
+    .menu-stepper {
+        padding-bottom: 8px;
+    }
+
+    .menu-step-line {
+        min-width: 32px;
+    }
+}

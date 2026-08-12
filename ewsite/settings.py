@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'repuestosapp',
     'importacionesapp',
     'core',
+    'configurapp',
 ]
 
 MIDDLEWARE = [
@@ -87,6 +88,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.company_context',
                 'core.context_processors.company_theme',
+                'core.context_processors.accesos_context',
             ],
         },
     },
@@ -106,7 +108,10 @@ DATABASES = {
     }
 }
 
-DATABASE_ROUTERS = ['core.routers.CompanyDBRouter']
+DATABASE_ROUTERS = [
+    "configurapp.routers.AyudaModuloRouter",
+    "core.routers.CompanyDBRouter",
+]
 
 _db_path = BASE_DIR / 'db.sqlite3'
 if os.path.exists(_db_path):

@@ -1,0 +1,53 @@
+"use strict";
+
+/* Identificadores de los módulos con ayuda */
+
+const CODIGOS_AYUDA = Object.freeze({
+
+    CO2_ORDENCOMPRA:
+        "CO2_ORDENCOMPRA",
+
+    CO2_CONSULTA:
+        "CO2_CONSULTA",
+
+    CO2_PLANTILLASPERIOD:
+        "CO2_PLANTILLASPERIOD",
+
+    CO3_CONSULTA:
+        "CO3_CONSULTA",
+
+    CO3_ASIGNACIONPROVEE:
+        "CO3_ASIGNACIONPROVEE",
+
+    CO2_PROVEEDORES:
+        "CO2_PROVEEDORES",
+
+    CO2_CONFIGURACION:
+        "CO2_CONFIGURACION",
+
+    CO2_REPORTES:
+        "CO2_REPORTES",
+    
+    RE2_ORDENCOMPRA:
+        "RE2_ORDENCOMPRA",
+
+    IM2_ORDENIMPORTACION:
+        "IM2_ORDENIMPORTACION",
+    
+    CF2_USUARIOS:
+      "CF2_USUARIOS",
+    
+    CF2_CENTROGASTOS:
+      "CF2_CENTROGASTOS",
+
+    CF2_BODEGAS:
+      "CF2_BODEGAS",
+
+    CF2_CONFIGMENUS:
+      "CF2_CONFIGMENUS",
+
+});
+
+
+
+

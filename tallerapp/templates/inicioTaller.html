@@ -1,22 +1,16 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>{% block title %} {% endblock %}</title>
-        <link type='text/css' href='{% static "css/menuMain.css" %}' rel='stylesheet'/>
-        
-    </head>
-    <body>
-        {% include "menuGeneral.html" %}
-        
-           
-        {% block content %}
-        <p> Inicio del Menu Taller</p> 
-        {% endblock %}
-        <p> <u1 style='color:blue;'>Mauricio Rosero</u1>
 
-        </p>
-    </body>
+{% block titulo %}Menu Taller{% endblock %}
+
+{% block contenido %}
+<div class="app-card p-4">
+  <h4>Inicio Taller</h4>
+  <p>Inicio del Menú Taller</p>
+</div>
+        {# {% include "menuGeneral.html" %} #}
+ {% endblock %}
+       
 </html>
 
 
