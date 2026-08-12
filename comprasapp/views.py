@@ -182,66 +182,72 @@ def guardaFacturaCompra(request):
         Bodega = datos.get("Bodega") if datos.get("Bodega") and datos.get("Bodega") != "null" else "01"
         Division = datos.get("Division") if datos.get("Division") and datos.get("Division") != "null" else "d"
         RucProveedor = datos.get("RucProveedor") if datos.get("RucProveedor") else ""
-        
-        with connections[db_alias].cursor() as cur:    
-            # Primero intentar con tipo OC, si no existe buscar cualquier tipo
-            print(f"Buscando secuencia: cia={Compania}, div={Division}, agencia={Agencia}")
-            cur.execute("SELECT sq_numero FROM ciatt008 WHERE sq_cia = '" + Compania + "' AND sq_div = '" + Division + "' AND sq_agencia = '" + Agencia + "' AND sq_tipo = '" + tipoDoc + "'")
-            secuencia = cur.fetchone() 
-            
-            if not secuencia:
-                return JsonResponse({'error': 'No se encontró secuencia para la compañía/división/agencia'}, status=400)
-            
-            secuenciaw = secuencia[0] + 1
+        try:
+            with transaction.atomic(using=db_alias):
+                with connections[db_alias].cursor() as cur:    
+                    # Primero intentar con tipo OC, si no existe buscar cualquier tipo
+                    print(f"Buscando secuencia: cia={Compania}, div={Division}, agencia={Agencia}")
+                    cur.execute("SELECT sq_numero FROM ciatt008 WHERE sq_cia = '" + Compania + "' AND sq_div = '" + Division + "' AND sq_agencia = '" + Agencia + "' AND sq_tipo = '" + tipoDoc + "'")
+                    secuencia = cur.fetchone() 
+                    
+                    if not secuencia:
+                        #return JsonResponse({'error': 'No se encontró secuencia para la compañía/división/agencia'}, status=400)
+                        raise MiError("No se encontró secuencia para la compañía/división/agencia'}")
 
-                        
-            cur.execute("UPDATE ciatt008 SET sq_numero = " + str(secuenciaw) + " WHERE sq_cia = '" + Compania + "' AND sq_div = '" + Division + "' AND sq_agencia = '" + Agencia + "' AND sq_tipo = '" + tipoDoc + "'")      
+                    secuenciaw = secuencia[0] + 1
 
-            print("paso 1 seq:",secuenciaw)    
-            # OBTENGO CODIGO DEL PROVEEDOR
-            cur.execute("SELECT pv_codigo FROM ciatt011 WHERE pv_cia = '" + Compania + "' AND pv_cedruc = '" + RucProveedor + "'")
+                                
+                    cur.execute("UPDATE ciatt008 SET sq_numero = " + str(secuenciaw) + " WHERE sq_cia = '" + Compania + "' AND sq_div = '" + Division + "' AND sq_agencia = '" + Agencia + "' AND sq_tipo = '" + tipoDoc + "'")      
+                    if cur.rowcount == 0:
+                        raise MiError("f'No se actualizó secuencia de ordenes de compra'}")
 
-            codigoprovedor = cur.fetchall() 
-            CodigoProveedor = None
-            if codigoprovedor:
-                for codigoproveedorw in codigoprovedor:  
-                    CodigoProveedor = codigoproveedorw[0]
-            
-            if not CodigoProveedor:
-                return JsonResponse({'error': 'No se encontró código de proveedor'}, status=400)
-            
-            #Plantillas = ",'" + Plantillas + "',"
-            print("paso 2 prov:",CodigoProveedor)
+                    print("paso 1 seq:",secuenciaw)    
+                    # OBTENGO CODIGO DEL PROVEEDOR 
+                    cur.execute("SELECT pv_codigo FROM ciatt011 WHERE pv_cia = '" + Compania + "' AND pv_cedruc = '" + RucProveedor + "'")
 
-            if Periodicas:
-                PlantillaSQL = "'" + Plantillas + "'"  # 'VALOR'
-            else:
-                PlantillaSQL = "null"  # NULL sin comillas para SQL
-            # GUARDO LA CABECERA DE LA COMPRA
+                    codigoprovedor = cur.fetchall() 
+                    CodigoProveedor = None
+                    if codigoprovedor:
+                        for codigoproveedorw in codigoprovedor:  
+                            CodigoProveedor = codigoproveedorw[0]
+                    
+                    if not CodigoProveedor:
+                        #return JsonResponse({'error': 'No se encontró código de proveedor'}, status=400)
+                        raise MiError("No se encontró código de proveedor")
 
-            print(f"TotalFactura: '{TotalFactura}'")
-            print(f"TotalDescuento: '{TotalDescuento}'")
-            print(f"PlazoPago: '{PlazoPago}'")
-            print(f"porcenIva: '{porcenIva}'")
+                    #Plantillas = ",'" + Plantillas + "',"
+                    print("paso 2 prov:",CodigoProveedor)
 
-            try:
-                
-                sql_insert = ("INSERT INTO ocxxt001 VALUES (" + 
-                    str(secuenciaw) + ",'" + Compania + "','" + Agencia + "','" + Division + 
-                    "','" + Usuario + "','" + FechaIngresoHora + "','" + Solicitante + 
-                    "','A','" + SubTipo + "','','','',''," + str(CodigoProveedor) + 
-                    ",'" + FechaIngreso + "','" + NumeroFactura + "','" + FechaEmision + 
-                    "'," + TotalFactura + "," + TotalFactura + "," + TotalDescuento + 
-                    "," + PlazoPago + "," + porcenIva + "," + porcenIva + 
-                    ",0,'','" + Bodega + "','" + DescripcionFactura + "',''," +  
-                    PlantillaSQL +                                                  
-                    ",0,0,'DO','SRS','',0,'','01','" + TipoCredito + 
-                    "','9999','" + SerieFactura + "','" + AutorizacionSri + 
-                    "','" + FechaEmision + "','','')")
+                    if Periodicas:
+                        PlantillaSQL = "'" + Plantillas + "'"  # 'VALOR'
+                    else:
+                        PlantillaSQL = "null"  # NULL sin comillas para SQL
+                    # GUARDO LA CABECERA DE LA COMPRA
 
-                print(f"SQL INSERT: {sql_insert}")
-                cur.execute(sql_insert)
-                Cantidad = 0
+                    print(f"TotalFactura: '{TotalFactura}'")
+                    print(f"TotalDescuento: '{TotalDescuento}'")
+                    print(f"PlazoPago: '{PlazoPago}'")
+                    print(f"porcenIva: '{porcenIva}'")
+                    
+                    sql_insert = ("INSERT INTO ocxxt001 VALUES (" + 
+                        str(secuenciaw) + ",'" + Compania + "','" + Agencia + "','" + Division + 
+                        "','" + Usuario + "','" + FechaIngresoHora + "','" + Solicitante + 
+                        "','A','" + SubTipo + "','','','',''," + str(CodigoProveedor) + 
+                        ",'" + FechaIngreso + "','" + NumeroFactura + "','" + FechaEmision + 
+                        "'," + TotalFactura + "," + TotalFactura + "," + TotalDescuento + 
+                        "," + PlazoPago + "," + porcenIva + "," + porcenIva + 
+                        ",0,'','" + Bodega + "','" + DescripcionFactura + "',''," +  
+                        PlantillaSQL +                                                  
+                        ",0,0,'DO','SRS','',0,'','01','" + TipoCredito + 
+                        "','9999','" + SerieFactura + "','" + AutorizacionSri + 
+                        "','" + FechaEmision + "','','')")
+
+                    print(f"SQL INSERT: {sql_insert}")
+                    cur.execute(sql_insert)
+                    if cur.rowcount == 0:
+                        raise MiError("f'No se pudo insertar cabecera de orden de compra {secuenciaw}'}")
+
+                    Cantidad = 0
 
                 print("paso 3 cabecera:",Usuario)
                 # GUARDO EL DETALLE DE LA COMPRA
@@ -255,45 +261,50 @@ def guardaFacturaCompra(request):
                     totParcial = 0 
                     print("pre: ", fila[3], "cant: " , fila[0])
                     totParcial = float(fila[3]) * float(fila[0])          
-                    fila[4] = (float(fila[4]) / totParcial) * 100
+                    fila[4] = round((float(fila[4]) / totParcial) * 100,2)
                     if not Periodicas:
                         CenGastos = fila[7]
 
-                    fila1 = limpiar_texto_informix(fila[1])
-                    fila2 = limpiar_texto_informix(fila[2])
-                    fila5 = limpiar_texto_informix(fila[5])
-                    CenGastos_str = limpiar_texto_informix(CenGastos)
+                        fila1 = limpiar_texto_informix(fila[1])
+                        fila2 = limpiar_texto_informix(fila[2])
+                        fila5 = limpiar_texto_informix(fila[5])
+                        CenGastos_str = limpiar_texto_informix(CenGastos)
 
-                    sql_detalle = ("INSERT INTO ocxxt002 VALUES('" + Compania + "','" + Division + 
-                        "','" + Agencia + "'," + str(secuenciaw) + "," + str(ordinal) + 
-                        ",'" + fila1 + "'," + str(fila[0]) + "," + str(fila[0]) + 
-                        ",'" + fila2 + "',''," + str(fila[3]) + ",''," + str(fila[4]) + 
-                        ",'" + fila5 + "','" + CenGastos_str + "'," + str(fila[8]) + "," + str(fila[9]) + ")")
+                        sql_detalle = ("INSERT INTO ocxxt002 VALUES('" + Compania + "','" + Division + 
+                            "','" + Agencia + "'," + str(secuenciaw) + "," + str(ordinal) + 
+                            ",'" + fila1 + "'," + str(fila[0]) + "," + str(fila[0]) + 
+                            ",'" + fila2 + "',''," + str(fila[3]) + ",''," + str(fila[4]) + 
+                            ",'" + fila5 + "','" + CenGastos_str + "'," + str(fila[8]) + "," + str(fila[9]) + ")")
 
-                    print(f"SQL DETALLE: {sql_detalle}")
-                    cur.execute(sql_detalle) 
+                        print(f"SQL DETALLE: {sql_detalle}")
+                        cur.execute(sql_detalle) 
+                        if cur.rowcount == 0:
+                            raise MiError("f'Error al registrar detalle {ordinal} de OC(d) {secuenciaw}' con código {fila1}}")
 
-                    ordinal = ordinal + 1
-                print("paso 4 detalle:",ordinal)
+                        ordinal = ordinal + 1
+                    print("paso 4 detalle:",ordinal)
 
-            except Exception as e:
-                print(f"Error al insertar detalle: {e}")
-                messages.error(request, f"Hubo un fallo: no se guardó la factura")
-                company_key = request.headers.get('X-Company-Key', '')
-                return JsonResponse(
-                    {'redirect_url': f'/comprasapp/templates/ordenCompra&company={company_key}'}
-                )
+                    #valida detalle de orden
+                    ssql = "SELECT COUNT(*) FROM ocxxt002 WHERE od_division = ? AND od_agencia = ? AND od_numero = ?"
+                    detalle = consultarDato(request,ssql,(Division,Agencia,secuenciaw),db_alias)    
+                    if detalle == 0:
+                        raise MiError("f'No se registró ningún detalle de la orden de compra {secuenciaw}'}")
+                         
+                    ordenCompra = obtenerOrdenCompra(request, db_alias, Agencia, Division, secuenciaw)   
+                    if ordenCompra is None:
+                        #return JsonResponse({'error': f'No se pudo recuperar la orden de compra {secuenciaw}'}, status=400)
+                        raise MiError("f'No se pudo recuperar la orden de compra {secuenciaw}'}")
+                    guardarCtaPagar(request, db_alias, ordenCompra)
 
-        ordenCompra = obtenerOrdenCompra(request, db_alias, Agencia, Division, secuenciaw)   
-        if ordenCompra is None:
-            return JsonResponse({'error': f'No se pudo recuperar la orden de compra {secuenciaw}'}, status=400)
-        guardarCtaPagar(request, db_alias, ordenCompra)
+        except Exception as e:
+            print(f"Error al guardaFacturaCompra: {e}")
+            return JsonResponse({'status': 'error','detallerr': str(e)}, status=400)
+            
 
         # Obtener company_key para incluir en la redirección
         company_key = request.headers.get('X-Company-Key', '')
-        return JsonResponse({'redirect_url': f'retencionCompra/{secuenciaw}/{Division}/?Agencia={Agencia}&company={company_key}'})
+        return JsonResponse({'status': 'success', 'redirect_url': f'retencionCompra/{secuenciaw}/{Division}/?Agencia={Agencia}&company={company_key}'},status=200) 
     else:
-            
         return JsonResponse({'status': 'fail', 'message': 'Método no permitido'}, status=405)
 
 
@@ -320,7 +331,7 @@ def existe_factura(request):
         result = cur.fetchone()
 
     existe = result[0] if result else 0  # Si no hay datos, devuelve 0
-
+    print("Existe " , existe)
     return JsonResponse({"existe": existe})
 
 ##MINE      
@@ -354,31 +365,25 @@ def guardarCtaPagar(request, db_alias=None, orden=None):
     fevctou = fevctoo
     origen = "T"
     iva = orden["oc_iva_rp"]
-
-    try:
-        with connections[db_alias].cursor() as cur:
-            ssql ="INSERT INTO cpxxt001 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)" 
-            cur.execute(ssql,(cia,division,agencia,codpro,numdoc,secuenc,cladoc,fechoa,usera,fecemi,fevctoo,vcapori,vcapact,vintori,vintact,moneda,tipcam,refere,None,None,caract,None,None,indant,fevctou,origen,iva,None,None))
-            print("cur.rowcount", cur.rowcount)
-            if cur.rowcount > 0:
-                # Actualiza saldos pagar por compania y proveedor
-                actualizarSaldos(request, db_alias, fecemi,fevctoo,vcapact,division,agencia,caract,codpro)
-                
-                # Se anula el proceso de actualizacion de cupos en proveedor, hay control pero no es efectivamente usado (procedimiento: actualizar_cupos)
-                #  Se anula el proceso de actualizacion de cupos por usuario, hay control pero no es efectivamente usado (procedimiento: actualiza_cupo_usuario)
-                
-                # Se actualiza estado de orden
-                ssql = "UPDATE ocxxt001 SET oc_estado = 'T' WHERE oc_compania ='e' AND oc_division = ? AND oc_agencia = ? AND  oc_numero = ?" 
-                cur.execute(ssql,(division,agencia,orden["oc_numero"]))
-
-    except Exception as e:
-        print("Error al guardar cta pagar: ", e)
-        messages.error(request, f"No se generó la cuenta por pagar, vuelva a ingresar los datos")
-        company_key = request.headers.get('X-Company-Key', '')
-        return JsonResponse({'redirect_url': f'/comprasapp/templates/ordenCompra&company={company_key}'})
-    finally:
-        cur.close() 
-   
+    with connections[db_alias].cursor() as cur:
+        ssql ="INSERT INTO cpxxt001 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)" 
+        cur.execute(ssql,(cia,division,agencia,codpro,numdoc,secuenc,cladoc,fechoa,usera,fecemi,fevctoo,vcapori,vcapact,vintori,vintact,moneda,tipcam,refere,None,None,caract,None,None,indant,fevctou,origen,iva,None,None))
+        print("cur.rowcount", cur.rowcount)
+        if cur.rowcount > 0:
+            # Actualiza saldos pagar por compania y proveedor
+            actualizarSaldos(request, db_alias, fecemi,fevctoo,vcapact,division,agencia,caract,codpro)
+            
+            # Se anula el proceso de actualizacion de cupos en proveedor, hay control pero no es efectivamente usado (procedimiento: actualizar_cupos)
+            #  Se anula el proceso de actualizacion de cupos por usuario, hay control pero no es efectivamente usado (procedimiento: actualiza_cupo_usuario)
+            
+            # Se actualiza estado de orden
+            ssql = "UPDATE ocxxt001 SET oc_estado = 'T' WHERE oc_compania ='e' AND oc_division = ? AND oc_agencia = ? AND  oc_numero = ? " 
+            cur.execute(ssql,(division,agencia,orden["oc_numero"]))
+            if cur.rowcount == 0:
+                raise Exception(f"Error al actualizar estado de orden de compra")
+        else:
+            raise Exception(f"Error al guardar registro de cuenta por pagar")
+    
 def obtenerIndiceVcto(fechaVencimiento):
     dias = date.today() - fechaVencimiento
     dias = int(str(dias.days))
@@ -474,9 +479,10 @@ def ingresarRetencion(request,id,codDiv):
     
     # Obtener company_key para el contexto
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     from core.models import Company
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
 
@@ -498,8 +504,7 @@ def ingresarRetencion(request,id,codDiv):
             #print ("datos" , datosFactura[0], " ", datosFactura[1])
             valorOriginal=datosFactura["valOriginal"]
             valorActual=datosFactura["valActual"]          
-            #valoresBase = calcularValoresBase(datosFactura["valOriginal"], datosFactura["iva"], valorBienes, valorServicios)
-            valoresBase = calcularvaloresBaseNew(request,codAge, codDiv, ocompra)
+            valoresBase = calcularvaloresBase(request,codAge, codDiv, ocompra)
             datosProveedor = obtenerDatosProveedor(request, codProv)
 
             #Traigo datos de plantilla en caso de orden periodica
@@ -519,7 +524,7 @@ def ingresarRetencion(request,id,codDiv):
                 cur.close
                 # si no tengo items de iva debería redireccionar a template resumen, Prueba
                 if (ivaPeriodica==0 and ftePeriodica==0):
-                    url = f'../../../verTransaccion/{ocompra}/?agencia={codAge}&division={codDiv}&proceso=I'
+                    url = f'../../../verTransaccion/{ocompra}/?agencia={codAge}&division={codDiv}&proceso=I&company={company_key}'
                     return redirect(url)
 
         with connections[db_alias].cursor() as cur:
@@ -565,13 +570,14 @@ def ingresarRetencion(request,id,codDiv):
             'company': company,           # Para el navbar
             'company_key': company_key,   # Para el navbar
         }
-
+        #print(" envío ", context)
         print(f"CONTEXTO compania={codcia}, agencia={codAge}")
         print(f"TEMPLATE PATH: {request.build_absolute_uri()}")
       
         return render(request,'retencionCompra.html', context)
 
 def guardarRetencion(request):
+    print("guardarRetencion")
     db_alias = get_db_from_request(request)
     company_key = (
         request.POST.get('company')
@@ -583,7 +589,7 @@ def guardarRetencion(request):
     
     if request.method == 'POST':
         try:
-            with transaction.atomic():
+            with transaction.atomic(using=db_alias):
                 data = json.loads(request.body)
                 #Obtengo datos recibidos
                 itemRetencion = data.get('tabla', [])
@@ -600,105 +606,197 @@ def guardarRetencion(request):
                 valfac= otrosDatos.get("nvalorOriginal")
                 ocompra = otrosDatos.get("ocompra")
                 valRet = otrosDatos.get("totRetencion")
-
-                retencion = service.comprobar_existencia_retencion(db_alias, division, codpro, factura, agencia)
-
+                #valida existencia de retencion de misma factura, mismo proveedor, division y agencia    
+                retencion = service.comprobar_existencia_retencion(db_alias, division, codpro, factura, agencia,None)
                 if retencion:
-                    print("Retencion ya existe")
-                    messages.error(request, f"Ya existe la retencion")
-                    return JsonResponse({'status': 'error', 'message': 'Ya existe la retención'}, status = 400)
-                
-                with connections[db_alias].cursor() as cur:
-                    #retencion unica secuencia con division "d"    
-                    numero=obtenerSecuencia(request, compania,"d",agencia,"RT","CP")
-                    for item in itemRetencion: 
-                        ssql = """
-                            INSERT INTO cpxxt007 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-                        """                            
-                        cur.execute(ssql,(compania,division,agencia,numero,codpro,nompro,item["porcentaje"],factura,valfac,item["base"],"DO",fhaper,"A",None,1.00, item["codigo"],None))
+                    raise MiError("Error al guardar retención: Ya existe una retención relacionada a la factura")
+                else:
+                    with connections[db_alias].cursor() as cur:
+                        #retencion: unica secuencia (division "d") por agencia
+                        numero=obtenerSecuencia(request, compania,"d",agencia,"RT","CP")
+                        #valida duplicidad de retencion por numero
+                        retencion = service.comprobar_existencia_retencion(db_alias, None, None, None, agencia,numero)
                         
-                    #Registro unico de secuencia de retencion, tiene como division: d
-                    actualizarSecuencia(db_alias, numero, compania, "d", agencia, "RT", "CP")
-                    
-                    #Ajuste sobre factura por el valor de la retencion
-                    datos ={
-                        "codDiv":division,
-                        "codAge":agencia,
-                        "codProv":codpro,
-                        "usuario":otrosDatos.get("user"),
-                        "valorRet":valRet,
-                        "valorCActual":valfac,
-                        "valorIActual":0,
-                        "numFactura":factura,
-                        "secFactura":"01",
-                        "tipFactura":"DO",
-                        "numRet": numero
-                    }
-                    guardarAjuste(request, "AC", datos)
-                
-                    generarDiario(request, agencia, numero, fhaper.date(), otrosDatos.get("user"))  
+                        if retencion:
+                            raise MiError(f"Error al guardar retención: Ya existe retención N° {numero} [revisar registro secuencia]")
+                        else:
+                             #valido saldo documento
+                            ssql = '''
+                                SELECT (dc_vcapact + dc_vintact) FROM cpxxt001 WHERE dc_division = ? AND dc_agencia = ? AND dc_codpro = ? AND
+                                dc_numdoc = ? AND dc_secuenc = '01' AND dc_cladoc = 'DO'
+                            '''
+                            valorActual = consultarDato(request,ssql,(division,agencia,codpro,factura),db_alias)
+                            if valorActual == 0:
+                                raise MiError("Error al guardar retención: Factura tiene saldo actual cero")
+                            elif valorActual < float(valRet):
+                                raise MiError("Error al guardar retención: Total retención es mayor que el saldo de la factura")
+                            
+                            print("itemRetencion", itemRetencion)
+                            for item in itemRetencion: 
+                                ssql = """
+                                    INSERT INTO cpxxt007 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                                """                            
+                                cur.execute(ssql,(compania,division,agencia,numero,codpro,nompro,item["porcentaje"],factura,valfac,item["base"],"DO",fhaper,"A",None,1.00, item["codigo"],None))
+                                if cur.rowcount==0:
+                                    raise MiError("Error al guardar retención: no insertó transaccion de retención")
+                                else:
+                                    #Registro unico de secuencia de retencion, tiene como division: d
+                                    actualizarSecuencia(db_alias, numero, compania, "d", agencia, "RT", "CP")
+                            
+                            #Ajuste sobre factura por el valor de la retencion
+                            datos ={
+                                "codDiv":division,
+                                "codAge":agencia,
+                                "codProv":codpro,
+                                "usuario":otrosDatos.get("user"),
+                                "valorRet":valRet,
+                                "valorCActual":valfac,
+                                "valorIActual":0,
+                                "numFactura":factura,
+                                "secFactura":"01",
+                                "tipFactura":"DO",
+                                "numRet": numero
+                            }
+                            
+                            guardarAjuste(request, "AC", datos)
+                        
+                            generarDiario(request, agencia, numero, fhaper.date(), otrosDatos.get("user"))  
 
-        except Exception as e:
-            # return JsonResponse({'error': str(e)}, status=400)
-            print(f"Error al guardar retencion : {e}")
-            raise 
-        return JsonResponse(
-            {'redirect_url': f'/comprasapp/templates/verTransaccion/{ocompra}/?agencia={agencia}&division={division}&proceso=I&company={company_key}'}
-        )
+                            return JsonResponse(
+                            {'status': 'success','redirect_url': f'/comprasapp/templates/verTransaccion/{ocompra}/?agencia={agencia}&division={division}&proceso=I&company={company_key}'},status=200
+                            )
+        except Exception as e:          
+            print (f"{e}")
+            return JsonResponse({'status': 'error', 'detallerr': str(e)}, status=400) 
     else:
-        return JsonResponse({'ERROR': 'Método no permitido'}, status=405)
+        return JsonResponse({'status': 'error', 'detallerr': 'Método no permitido'}, status=405)
 
-def calcularValoresBase(valorFactura, porIva, valorBienes, valorServicios):
-    valorFactura=float(valorFactura)
-    if porIva > 0:
-        baseIva = valorFactura-(valorFactura/(1+(porIva/100))) 
-        baseIvaS = valorServicios * (porIva/100) 
-        baseIvaB = valorBienes * (porIva/100)
-    else:
-        baseIva = 0
-        baseIvaS=0
-        baseIvaB=0
-    
-    baseFuente = valorFactura - baseIva
-    baseFuenteB = valorBienes 
-    baseFuenteS = valorServicios 
-    
-    valoresBase = {"baseIva": baseIva, "baseFuente": baseFuente, "baseIvaS":baseIvaS,"baseIvaB":baseIvaB,"baseFuenteS":baseFuenteS,"baseFuenteB":baseFuenteB}
-    return valoresBase
-
-#minejulio
-def calcularvaloresBaseNew(request, codAge, codDiv, numOrden):
+#Para valores de impuestos detallados en xml de retencion
+def calcularValoresBaseXml(codAge, codDiv, numOrden,request):
+    print("calcularValoresBaseXml")
     db_alias = get_db_from_request(request)
-    parametros=[codAge,codDiv,numOrden]
-    #No trabajo con valor guardado porque por tema decimales con valores totales hay diferencia en mas o menos decimales
     with connections[db_alias].cursor() as cur:
-        ssql = """
-            SELECT sum(od_canped*(od_preest-(od_preest*(od_descto /100)))) as od_total, od_poriva, od_observ 
-            FROM ocxxt002 WHERE od_agencia = ? AND od_division = ? AND od_numero = ? 
-            GROUP BY od_poriva, od_observ
-        """ 
+        parametros=[codAge,codDiv,numOrden]
+        if (codDiv == 'd' or codDiv == 'r'):
+           
+            ssql = """
+                SELECT sum(od_canped*(od_preest-(od_preest*(od_descto /100)))) AS total, sum(od_valiva) as totaliva , od_poriva as poriva
+                FROM ocxxt002 WHERE od_agencia = ? AND od_division = ? AND od_numero = ? 
+                GROUP BY poriva 
+            """ 
+        elif (codDiv == 't'):
+            ssql = "SELECT oc_tipo FROM ocxxt001 WHERE oc_agencia = ? AND oc_division  = ? AND oc_numero = ? "
+            tipo = consultarDato(request,ssql,parametros,db_alias)
+            if tipo == "T":
+                ssql = '''
+                    SELECT sum(tr_valor) AS total, (oc_valfac * (oc_iva_mo/100)) as totaliva, oc_iva_mo AS poriva
+                    FROM ocxxt001,tattt005 WHERE oc_agencia = ? AND oc_division  = ? AND oc_numero = ?  AND
+                    oc_numero = tr_ctrato AND tr_bodprn = oc_bodprn AND tr_numord = oc_ordtra 
+                    GROUP BY totaliva, oc_iva_mo 
+                '''
+            elif tipo == "R":
+                ssql = """
+                    SELECT sum(od_canped*(od_preest-(od_preest*(od_descto /100)))) AS total, sum(od_valiva) as totaliva , od_poriva as poriva
+                    FROM ocxxt002 WHERE od_agencia = ? AND od_division = ? AND od_numero = ? 
+                    GROUP BY poriva 
+                    """ 
+
         cur.execute(ssql,parametros)
         columnas = [col[0] for col in cur.description]  # Obtener nombres de columnas para convertir a diccionario y poder usar en vista con nombre de campo
         detalleOrden = [dict(zip(columnas, fila)) for fila in cur.fetchall()]
-        
+
+    cur.close
+    return detalleOrden 
+
+
+
+#minejulio
+#Para desglosar valores en template ingresoRetencion, resumen transaccion
+def calcularvaloresBase(request, codAge, codDiv, numOrden):
+    db_alias = get_db_from_request(request)
+    
+    #No trabajo con valor guardado porque por tema decimales con valores totales hay diferencia en mas o menos decimales
+    with connections[db_alias].cursor() as cur:
         baseIvaS = 0
         baseIvaB = 0
         baseFuenteS = 0
         baseFuenteB = 0
-        for detalle in detalleOrden:
-            if detalle["od_observ"].rstrip() == "SERVICIOS":
-                baseFuenteS += detalle["od_total"]
-                baseIvaS += float(detalle["od_total"]) * (detalle["od_poriva"]/100)
-                
-            if detalle["od_observ"].rstrip()  == "BIENES":
-                baseFuenteB += detalle["od_total"]
-                baseIvaB += float(detalle["od_total"]) * (detalle["od_poriva"]/100)    
+
+        if (codDiv =="d" or codDiv == "r"):
+            parametros=[codAge,codDiv,numOrden]
+
+            ssql = """
+                SELECT sum(od_canped*(od_preest-(od_preest*(od_descto /100)))) as od_total, od_poriva, od_observ 
+                FROM ocxxt002 WHERE od_agencia = ? AND od_division = ? AND od_numero = ? 
+                GROUP BY od_poriva, od_observ
+                UNION
+                SELECT sum(od_canped*(od_preest-(od_preest*(od_descto /100)))) as od_total, od_poriva, od_observ 
+                FROM ocxxt802 WHERE od_agencia = ? AND od_division = ? AND od_numero = ?
+                GROUP BY od_poriva, od_observ
+            """ 
+            cur.execute(ssql,parametros+parametros)
+            columnas = [col[0] for col in cur.description]  # Obtener nombres de columnas para convertir a diccionario y poder usar en vista con nombre de campo
+            detalleOrden = [dict(zip(columnas, fila)) for fila in cur.fetchall()]
+            
+            for detalle in detalleOrden:
+                if detalle["od_observ"].rstrip() == "SERVICIOS":
+                    baseFuenteS += detalle["od_total"]
+                    baseIvaS += float(detalle["od_total"]) * (detalle["od_poriva"]/100)
+                    
+                if detalle["od_observ"].rstrip()  == "BIENES":
+                    baseFuenteB += detalle["od_total"]
+                    baseIvaB += float(detalle["od_total"]) * (detalle["od_poriva"]/100)    
+
+        elif codDiv =="t":
+            ##Buscar tipo de orden, iva en cabecera, ordenTaller relacionada
+            parametros=[numOrden,codAge]
+            ssql = '''
+                SELECT oc_tipo, oc_iva_rp, oc_bodprn,  oc_ordtra FROM ocxxt001 WHERE oc_numero = ? AND oc_agencia = ? AND oc_division = 't' AND oc_estado = 'T'
+                UNION
+                SELECT oc_tipo, oc_iva_rp, oc_bodprn,  oc_ordtra FROM ocxxt801 WHERE oc_numero = ? AND oc_agencia = ? AND oc_division = 't' AND oc_estado = 'T'
+            '''
+            ordenCompra = consultarRegistros(ssql,parametros+parametros,db_alias)
+            print("ordenCompra ", ordenCompra)                    
+            tipoOC = ordenCompra[0]["oc_tipo"]
+            ivaOC = ordenCompra[0]["oc_iva_rp"]
+            bodOC = ordenCompra[0]["oc_bodprn"]
+            ordentallerOC = ordenCompra[0]["oc_ordtra"]
+
+            if tipoOC == "T":
+                parametros=[numOrden,ordentallerOC,bodOC]
+                ssql = '''
+                    SELECT SUM(tr_valor) AS total
+                    FROM (
+                        SELECT tr_valor FROM tattt005 WHERE tr_ctrato = ? AND tr_numord = ? AND tr_bodprn  = ?
+                        UNION ALL
+                        SELECT tr_valor FROM tattt805 WHERE tr_ctrato = ? AND tr_numord = ? AND tr_bodprn  = ?
+                        )  t;
+                    '''
+                baseFuenteS = consultarDato(request,ssql,parametros+parametros,db_alias)    
+                baseIvaS += float(baseFuenteS) * (ivaOC/100)
+
+                print("baseFuenteS ", baseFuenteS , " baseIvaS ", baseIvaS)
+            elif tipoOC == "R":
+                parametros=[numOrden,ordentallerOC,bodOC]
+                ssql = '''
+                    SELECT SUM(or_valort) AS total
+                    FROM (
+                    SELECT (or_valor*or_cantid) AS or_valort FROM tattt014 WHERE or_docrel = ? AND or_numord = ? AND or_bodprn  = ?
+                    UNION ALL
+                    SELECT (or_valor*or_cantid) AS or_valort FROM tattt814 WHERE or_docrel = ? AND or_numord = ? AND or_bodprn  = ?
+                        ) r;
+                    '''
+                baseFuenteB = consultarDato(request,ssql,parametros+parametros,db_alias)    
+                print("baseFuenteB ", baseFuenteB , " parametros ", parametros)
+                baseIvaB += float(baseFuenteB) * (ivaOC/100)                 
+        else:
+            print("Se debe parametrizar ") #vehiculos del tipo accesorios
 
         baseIva = baseIvaS + baseIvaB
         baseFuente = baseFuenteS + baseFuenteB
 
         valoresBase = {"baseIva": baseIva, "baseFuente": baseFuente, "baseIvaS":baseIvaS,"baseIvaB":baseIvaB,"baseFuenteS":baseFuenteS,"baseFuenteB":baseFuenteB}
-        
+        print("valoresBase ", valoresBase )
     cur.close()
     return valoresBase
 
@@ -785,9 +883,10 @@ def verTransaccionResumen(request, numOrden):
     
     # Obtener company_key para el contexto
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     from core.models import Company
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
     
@@ -834,7 +933,12 @@ def verTransaccionResumen(request, numOrden):
         periodica = 1
     descuento = datosOrden["oc_descto"]
     recargo = datosOrden["oc_recargo"]
-    user = datosOrden["oc_usring"]
+
+    if codDiv != "t":
+        user = datosOrden["oc_usring"]
+    else:
+        user = datosOrden["oc_usraprd"] ##para taller se muestra usuario de proceso
+
     ssql = "SELECT us_nombre FROM ciatt004 WHERE us_agencia = '" + codAge + "' AND us_div = '" + codDiv + "' AND us_login = '" + user + "'"
     nombreUser = consultarDato(request, ssql, db_alias=db_alias)
 
@@ -864,9 +968,8 @@ def verTransaccionResumen(request, numOrden):
     datosProveedor = obtenerDatosProveedor(request, codProveedor)
     
     datosFactura =  obtenerDatosFactura(db_alias, codcia, codDiv, codAge, codProveedor, str(factura).rstrip())
-            
-    #valoresBase =  calcularvaloresBase(datosFactura["valOriginal"], datosFactura["iva"], valBienes, valServicios)        
-    valoresBase = calcularvaloresBaseNew(request, codAge, codDiv, numOrden)
+                  
+    valoresBase = calcularvaloresBase(request, codAge, codDiv, numOrden)
             
     if datosFactura==None:
         print("Factura no existe!")
@@ -899,6 +1002,7 @@ def verTransaccionResumen(request, numOrden):
             'nverificada':verificada,
             'nnumDiarioOc': numDiarioOc,
             'nordenTaller' : datosOrden["oc_ordtra"],
+            'nproceso': proceso,
             'company': company,           # Para el navbar
             'company_key': company_key,   # Para el navbar
     } 
@@ -907,7 +1011,9 @@ def verTransaccionResumen(request, numOrden):
     if (numRet>0 and proceso == "I"):
         ssql = "SELECT rt_aut_sri FROM cpxxt007 WHERE rt_agencia = ? AND rt_numero = ? "
         rt_aut_sri = consultarDato(request, ssql, [codAge,numRet], db_alias=db_alias)
-        if (rt_aut_sri == None): 
+        print("para con rt_aut_sri : ", codAge , " ", numRet, " rt_aut_sri ", rt_aut_sri )
+        if (rt_aut_sri == None or rt_aut_sri == 0): 
+            print("sin autorización, pasa a generar")
             autorizacion = crearXmlRetencion(request, context)
             if autorizacion is None:
                 return JsonResponse({'error': 'No se encontró configuración de agencia para generar el XML'}, status=400)
@@ -945,25 +1051,6 @@ def obtenerOrdenCompra(request, db_alias=None, codAge=None, codDiv=None, numOrde
             print(f"Error: No se encontró la orden {numOrden} en la agencia {codAge}, desde obtenerOrdenCompra")
             return None
         datosOrden = dict(zip(columnas, orden)) 
-               
-        # #DETALLE --> se suprime 08-10-25 por calculo nuevo tipo de item e iva en detalle
-        # ssql = """
-        #     SELECT *  FROM ocxxt002 WHERE od_agencia = ? AND od_division = ? AND od_numero = ?
-        #     UNION 
-        #     SELECT *  FROM ocxxt802 WHERE od_agencia = ? AND od_division = ? AND od_numero = ?
-        # """    
-        # cur.execute(ssql,parametros+parametros)
-        # detalleOrden = cur.fetchall()
-        
-        # vBienes = 0
-        # vServicios = 0
-        # for detalle in detalleOrden:
-        #     valDetalle =  detalle[6] * (float(detalle[10]) -  (float(detalle[10]) * (detalle[12]/100)))
-        #     if str(detalle[13]).rstrip() == "BIENES" :
-        #         vBienes= vBienes + valDetalle
-        #     else:
-        #         vServicios= vServicios + valDetalle
-    #return datosOrden, vBienes, vServicios
     return datosOrden
 
 def obtenerDetalleOrdenCompraT(request,numOrden,codAge):
@@ -972,31 +1059,46 @@ def obtenerDetalleOrdenCompraT(request,numOrden,codAge):
     
     # Obtener company_key para el contexto
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     from core.models import Company
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
     
-    parametros = [numOrden,codAge]
+    parametros = [codAge,numOrden]
     with connections[db_alias].cursor() as cur:
-        ssql = """
-            SELECT tr_descri, tr_valor, oc_iva_rp FROM tattt005, ocxxt001 WHERE tr_ctrato  = oc_numero AND oc_division = 't'
-            AND oc_numero = ? AND oc_agencia = ? AND oc_ordtra = tr_numord
-            UNION
-            SELECT tr_descri, tr_valor, oc_iva_rp FROM tattt805, ocxxt801 WHERE tr_ctrato  = oc_numero AND oc_division = 't'
-            AND oc_numero = ? AND oc_agencia = ? AND oc_ordtra = tr_numord
-        """
-        cur.execute(ssql,parametros+parametros)
-        columnas = [col[0] for col in cur.description]  # Obtener nombres de columnas para convertir a diccionario y poder usar en vista con nombre de campo
-        detalleOrden = [dict(zip(columnas, fila)) for fila in cur.fetchall()]
-
         #iva --> si se da iva por item se debera corregir
-        ssql="SELECT oc_iva_rp FROM ocxxt001 WHERE oc_agencia = '" + codAge + "' AND oc_division = 't' AND oc_numero = " + str(numOrden) + " "\
-             " UNION "\
-             "SELECT oc_iva_rp FROM ocxxt801 WHERE oc_agencia = '" + codAge + "' AND oc_division = 't' AND oc_numero = " + str(numOrden) 
-        iva=consultarDato(request, ssql, db_alias=db_alias)
+        ssql="""
+            SELECT oc_tipo, oc_iva_rp FROM ocxxt001 WHERE oc_agencia = ? AND oc_division = 't' AND oc_numero = ?
+            UNION
+            SELECT oc_tipo, oc_iva_rp FROM ocxxt801 WHERE oc_agencia = ? AND oc_division = 't' AND oc_numero = ? 
+            """
+        cur.execute(ssql,(parametros+parametros))
+        columnas = [col[0] for col in cur.description]  # Obtener nombres de columnas para convertir a diccionario y poder usar en vista con nombre de campo
+        datosOrden = [dict(zip(columnas, fila)) for fila in cur.fetchall()]
+        tipo = datosOrden[0]["oc_tipo"]
+        iva = datosOrden[0]["oc_iva_rp"]
+        
+        if (tipo =="T"):
+            ssql = """SELECT tr_descri as descri, tr_valor as valor, oc_iva_rp FROM tattt005, ocxxt001 WHERE tr_ctrato  = oc_numero AND oc_division = 't'
+            AND oc_agencia = ? AND oc_numero = ? AND  oc_ordtra = tr_numord AND oc_tipo = 'T'
+            UNION
+            SELECT tr_descri as descri, tr_valor as valor, oc_iva_rp FROM tattt805, ocxxt801 WHERE tr_ctrato  = oc_numero AND oc_division = 't'
+            AND oc_agencia = ? AND oc_numero = ? AND oc_ordtra = tr_numord AND oc_tipo = 'T'
+                """
+        if (tipo =="R"):
+            ssql = """SELECT or_descri as descri, (or_cantid*or_valor) as valor, oc_iva_rp FROM tattt014,ocxxt001 WHERE or_docrel = oc_numero AND oc_division = 't'
+            AND oc_agencia = ? AND oc_numero = ? AND  oc_ordtra = or_numord AND oc_tipo = 'R'
+            UNION
+            SELECT or_descri as descri, (or_cantid*or_valor) as valor, oc_iva_rp FROM tattt814,ocxxt801 WHERE or_docrel = oc_numero AND oc_division = 't'
+            AND oc_agencia = ? AND oc_numero = ? AND oc_ordtra = or_numord AND oc_tipo = 'R'
+            """
 
+        cur.execute(ssql,(parametros+parametros))
+        columnas = [col[0] for col in cur.description]  # Obtener nombres de columnas para convertir a diccionario y poder usar en vista con nombre de campo
+        
+        detalleOrden = [dict(zip(columnas, fila)) for fila in cur.fetchall()]
         cur.close()
         
     if request.method == 'GET':
@@ -1017,9 +1119,10 @@ def obtenerDetalleOrdenCompraR(request,numOrden,codAge):
     
     # Obtener company_key para el contexto
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     from core.models import Company
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
     
@@ -1066,9 +1169,10 @@ def obtenerDetalleOrdenCompra(request,numOrden,codAge, codDiv, periodica, verifi
     
     # Obtener company_key para el contexto
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     from core.models import Company
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
     
@@ -1138,17 +1242,13 @@ def obtenerDetalleOrdenCompra(request,numOrden,codAge, codDiv, periodica, verifi
         }
         return render(request, 'detalleOrdenCompra.html',context)
 
-def actualizarSecuencia(db_alias, secuencia, compania,division, agencia,tipo,bodega ):
-    actualizo = False    
+#Siendo vista llamada por otra vista no se captura error, de manera que se propague a la vista que llama quien es la que captura
+def actualizarSecuencia(db_alias, secuencia, compania,division, agencia,tipo,bodega ):   
     with connections[db_alias].cursor() as cur:
-        registros = 0
-        ssql = "UPDATE ciatt008 SET sq_numero = " + str(secuencia) + " WHERE sq_cia = '" + compania + "' AND sq_div = '" + division + "' AND sq_agencia = '" + agencia + "'"\
-               " AND sq_tipo = '" + tipo + "' AND sq_bodega = '" + bodega +"'"
-        cur.execute(ssql)
-        registros= cur.rowcount
-        if registros is not None and registros > 0:
-            actualizo=True
-    return actualizo
+        ssql = "UPDATE ciatt008 SET sq_numero = ? WHERE sq_cia = ? AND sq_div = ?  AND sq_agencia = ? AND sq_tipo = ? AND sq_bodega = ?"
+        cur.execute(ssql,(str(secuencia),compania,division,agencia,tipo,bodega))
+        if cur.rowcount == 0:
+            raise MiError("Error al actualizar secuencia")
 
 def obtenerSecuencia(request, compania, division, agencia, tipo, bodega):  
     db_alias = get_db_from_request(request)
@@ -1195,10 +1295,13 @@ def generarDiario(request, agencia, nreten, fecha, usuario): #Estoy trabajando c
 
         ssql = "UPDATE cgrta052 " + ssqlaux +  " WHERE nu_compania = 'e' AND nu_tipo = 'DC'" 
         cur.execute(ssql)
+        if cur.rowcount ==0:
+            raise MiError(f"Error al generar Diario de {nreten}")
 
 class MiError(Exception):
     pass   
     
+#Registra ajuste de credito sobre factura por la retención generada
 def guardarAjuste(request, tipo, datos):
     db_alias = get_db_from_request(request)
     cia = "e"
@@ -1237,10 +1340,16 @@ def guardarAjuste(request, tipo, datos):
                     " WHERE dc_cia = '"+ cia +"' AND dc_division = '" + division+ "' AND dc_agencia = '"+ agencia +"' AND dc_codpro = " + str(codpro)+ " AND"\
                     " dc_numdoc = '" + docrel + "' AND dc_secuenc = '" + secrel + "' AND dc_cladoc = '" + clarel + "'"
                 cur.execute(ssql)
+                if cur.rowcount==0:
+                    raise MiError("Error al guardar ajuste: no actualizó transaccion de factura")
             else:
-                raise MiError("Error al guardar ajuste sobre factura")
-    
+                raise MiError("Error al guardar ajuste: no inserto transacción de ajuste")
+    else:
+        raise MiError("Error en guardar ajuste: no devolvió secuencia")
+
+#Crea archivo xml de retención generada en directorio segun empresa 
 def crearXmlRetencion(request, datos):
+    print("crearXmlRetencion")
     db_alias = get_db_from_request(request)
     with connections[db_alias].cursor() as cur:
         #Datos de Compania
@@ -1296,24 +1405,31 @@ def crearXmlRetencion(request, datos):
         aniofactura = fecfactura.year
         periodoFiscal = str(mesfactura)+"/"+str(aniofactura)
         valtotal = float(factura["valOriginal"])
-        iva = factura["iva"]
-        if (iva>0):
-            valtotalsinimp = valtotal / (1+(iva/100))
-        else:
-            valtotalsinimp= valtotal
-        valiva = valtotal-valtotalsinimp
-        match iva:
-            case  0:
-                codiva = 0
-            case 8:
-                codiva = 8
-            case 12:
-                codiva = 2
-            case 14:
-                codiva = 3
-            case 15:
-                codiva = 4 
-        
+       #Desglose de ivas
+        valtotalsinimp = 0
+        valiva = 0
+        print("antes de calcularValoresBaseXml ")
+        detalleItemsIva = calcularValoresBaseXml(datos["ncodAgencia"],datos["ncodDiv"], datos["nnumOrden"],request)
+        for detalle in detalleItemsIva:
+            match (detalle["poriva"]):
+                case 0:
+                    detalle["codSri"] = 0
+                case 5:
+                    detalle["codSri"] = 5
+                case 12:
+                    detalle["codSri"] = 2
+                case 13:
+                    detalle["codSri"] = 10
+                case 14:
+                    detalle["codSri"] = 3
+                case 15:
+                    detalle["codSri"] = 4
+
+            valtotalsinimp += detalle["total"]                
+            valiva += detalle["totaliva"]
+
+        print("despues de calcularValoresBaseXml ")
+
         ssqlOtro = "SELECT oc_serie, oc_cod_tip, oc_ide_cre FROM ocxxt001 WHERE oc_codpro = " + str(codprov) + " AND oc_division = '" + datos["ncodDiv"] + "' "\
             " AND oc_facpro = '" + datos["nfactura"] + "' AND oc_compania = 'e' AND oc_agencia = '" + datos["ncodAgencia"] + "'"\
             " UNION "\
@@ -1406,13 +1522,14 @@ def crearXmlRetencion(request, datos):
     ET.SubElement(docSustento,"importeTotal").text=str(f"{valtotal:.2f}")
 
     impuestosDocSustento = ET.SubElement(docSustento,"impuestosDocSustento")
-    #Hay que modificar si un día se ingresa facturas con items con y sin iva, de esta sección habria dos por el 0 y el >0
-    impuestoDocSustento=ET.SubElement(impuestosDocSustento,"impuestoDocSustento")
-    ET.SubElement(impuestoDocSustento,"codImpuestoDocSustento").text="2" #Constante codigo Impuesto Iva
-    ET.SubElement(impuestoDocSustento,"codigoPorcentaje").text=str(codiva)
-    ET.SubElement(impuestoDocSustento,"baseImponible").text=str( f"{valtotalsinimp:.2f}")
-    ET.SubElement(impuestoDocSustento,"tarifa").text=str(iva) #%iva
-    ET.SubElement(impuestoDocSustento,"valorImpuesto").text=str( f"{valiva:.2f}")
+    #Hay que modificar si un día se ingresa facturas con algun otro impuestos (ICE, OTROS)
+    for detalle in detalleItemsIva:
+        impuestoDocSustento=ET.SubElement(impuestosDocSustento,"impuestoDocSustento")
+        ET.SubElement(impuestoDocSustento,"codImpuestoDocSustento").text="2" #Constante codigo Impuesto Iva
+        ET.SubElement(impuestoDocSustento,"codigoPorcentaje").text=str(detalle['codSri'])
+        ET.SubElement(impuestoDocSustento,"baseImponible").text=str( f"{detalle['total']:.2f}")
+        ET.SubElement(impuestoDocSustento,"tarifa").text=str(detalle['poriva']) #%iva
+        ET.SubElement(impuestoDocSustento,"valorImpuesto").text=str( f"{detalle['totaliva']:.2f}")
 
     retenciones = ET.SubElement(docSustento,"retenciones")
     totret =0
@@ -1478,15 +1595,12 @@ def crearXmlRetencion(request, datos):
     
     #Desarrollo
     tree.write("new_data.xml",encoding='utf-8',xml_declaration=True)
-    
-    # with connection.cursor() as cur:
-    #     ssql="UPDATE cpxxt007 SET rt_aut_sri = '" + clave + "' WHERE rt_agencia = '" + datos["ncodAgencia"] + "' AND rt_numero = " + str(datos["nnumRetencion"])
-    #     print("clave", clave)
-    #     cur.execute(ssql)
-    #     cur.close
     print("XML CREADO!!", clave)
+
+
     return clave
 
+#Genera clave de autorizacion al crear retencion
 def generaclave(clave):
     claveinv=""
     largo = len(clave)
@@ -1517,6 +1631,7 @@ def prueba(request):
     
     return render(request,'prueba.html')
 
+#Carga template de consulta de ordenes de compra
 def cargarTmplConsultaOrdenes(request):
 
     # if not validar_acceso(request, 'CP'):
@@ -1526,12 +1641,14 @@ def cargarTmplConsultaOrdenes(request):
 
     from core.models import Company
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
     return render(request,'consultaOrdenes.html', {'company': company, 'company_key': company_key})
 
+#Carga combo de agencias (en template de consulta de ordenes)
 def cargarAgencias(request):
     db_alias = get_db_from_request(request)
     with connections[db_alias].cursor() as cur:
@@ -1541,6 +1658,7 @@ def cargarAgencias(request):
         cur.close
     return JsonResponse({'agencias':agencias}, safe=False)
 
+#Carga combo de divisiones (en template de consulta de ordenes)
 def cargarDivisiones(request):
     db_alias = get_db_from_request(request)
     with connections[db_alias].cursor() as cur:
@@ -1550,7 +1668,7 @@ def cargarDivisiones(request):
         cur.close
     return JsonResponse({'divisiones':divisiones})
     
-
+#Ejecuta la consulta de ordenes en base a los filtros dados desde template 
 def consultarOrdenesCompra(request):
     ssql_aux = "1 = 1"
     valfiltros =[]
@@ -1560,7 +1678,6 @@ def consultarOrdenesCompra(request):
         hoy = date.today().strftime("%d/%m/%Y")
         ssql_aux  += " AND DATE(oc_fecing) = ? "
         valfiltros.append(hoy)
-        print("consulta get ", ssql_aux, valfiltros)
     elif request.method == "POST":
         #Ejecuta un consulta con boton consulta que hace un post, obtenemos filtros
         
@@ -1603,7 +1720,6 @@ def consultarOrdenesCompra(request):
 
     else:
         return JsonResponse({'ERROR': 'Método no permitido'}, status=405)
-
     db_alias = get_db_from_request(request)
     with connections[db_alias].cursor() as cur:
         sql= f"""
@@ -1624,6 +1740,7 @@ def consultarOrdenesCompra(request):
     cur.close
     return JsonResponse(dataOrdenes, safe=False)
 
+#Carga para autocomplete de campo numero cuenta contable
 def cargarCuentasCtb(request):
     db_alias = get_db_from_request(request)
     cadena = request.GET.get('term','').strip()
@@ -1644,7 +1761,7 @@ def cargarCuentasCtb(request):
         })
     return JsonResponse(listCuentasCtbs, safe=False)
 
-
+#Carga autocomplete de campo proveedor
 def cargarProveedores(request):
     #la variable term viene su nombre por defecto, propia de la funcion autocomplete de js
     cadena = request.GET.get('term', '').strip()
@@ -1676,15 +1793,18 @@ def cargarProveedores(request):
         })
     return JsonResponse(listproveedores, safe=False)
 
+#Carga template para consultar y/o listar plantillas de ordenes de compra periodicas
 def cargarTmplConsultaPlantillas(request):
     from core.models import Company
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
     return render(request,'consultaPlantillasPeriodicas.html', {'company': company, 'company_key': company_key})
 
+#Ejecuta consulta de plantilla de orden periodica según filtro
 def consultarPlantillas(request):
     ssql_aux = "1 = 1"
     valfiltros =[]
@@ -1693,7 +1813,6 @@ def consultarPlantillas(request):
     elif request.method == "POST":
         filtro = json.loads(request.body)
         codPlantilla = filtro.get('codigo','').strip()
-        
         if codPlantilla:
             ssql_aux += " AND pc_codigo = ? "
             valfiltros.append(codPlantilla)
@@ -1714,6 +1833,7 @@ def consultarPlantillas(request):
 
     return JsonResponse(dataPlantillas, safe=False)
 
+#Carga para autocomplete de plantillas de ordenes periodicas
 def cargarConceptoPlantillas(request):
     #la variable term viene su nombre por defecto, propia de la funcion autocomplete de js
     cadena = request.GET.get('term', '').strip()
@@ -1723,6 +1843,7 @@ def cargarConceptoPlantillas(request):
         ssql = "SELECT pc_codigo, pc_concepto FROM ocxxt010 WHERE pc_concepto MATCHES ? ORDER BY pc_concepto"
         cur.execute(ssql,[f"{cadena}"])
         plantillas = cur.fetchall()
+        print(plantillas)
         cur.close
 
     listplantillas =[]
@@ -1734,11 +1855,13 @@ def cargarConceptoPlantillas(request):
         })
     return JsonResponse(listplantillas, safe=False)        
 
+#Carga template en blanco para crear plantilla periodica
 def crearPlantilla(request):
     from core.models import Company
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
     
@@ -1756,21 +1879,48 @@ def crearPlantilla(request):
     }
     return render(request,'plantillaPeriodica.html', context)
 
-def editarPlantilla(request, codigo):
+#Carga template con valores de plantilla de orden periodica a editar
+def editarPlantilla(request):
+    db_alias = get_db_from_request(request);
     from core.models import Company
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
     
     if request.method == "GET":
+        codigo = request.GET.get("codigo")
         parametros=["d", codigo]
+      
         ssql = "SELECT * FROM ocxxt010 WHERE pc_division = ? AND pc_codigo = ?"
-        plantilla = consultarRegistros(request, ssql,parametros)
-        datosProveedor = obtenerDatosProveedor(request, plantilla[0]["pc_codpro"])
+        plantilla = consultarRegistros(ssql,parametros,db_alias)
+        
+        datosProveedor = obtenerDatosProveedor(request,plantilla[0]["pc_codpro"])
 
         listsSelects = obtenerSelectPlantilla(request)
+
+        #Tiene Plantilla Contable?
+        #Inicializo variable en caso q no
+        plantillaCtb = None
+        grupo= None
+        ssql = "SELECT ct_codgrp, ct_grupo FROM cgrta035, ocxxt012 WHERE  pt_grupo = ct_codgrp AND pt_codplantilla = ? GROUP BY ct_codgrp, ct_grupo"
+        grupo = consultarRegistros(ssql,[plantilla[0]["pc_codigo"]],db_alias)
+        print(grupo)
+        #Edición
+        if grupo: 
+            #Datos del centro de gastos
+            ssql =  """
+                SELECT d.mc_codpro, a.ct_secgrp, a.ct_cuenta, b.ct_descripcion, c.pt_porcentaje 
+                FROM ocxxt012 a, cgrta001 b, OUTER cgrta035 c, OUTER ocxxt013 d
+                WHERE b.ct_compania = 'e' AND a.ct_cuenta = b.ct_cuenta AND a.ct_codgrp = ? 
+                AND c.pt_grupo = a.ct_codgrp AND c.pt_subgrupo = a.ct_secgrp AND c.pt_codplantilla = ?  
+                AND d.mc_codgrp = a.ct_codgrp AND a.ct_secgrp = d.mc_secgrp AND mc_codpro = ?
+            """ 
+            plantillaCtb = consultarRegistros(ssql,[grupo[0]["ct_codgrp"],plantilla[0]["pc_codigo"],plantilla[0]["pc_codpro"]],db_alias)
+        else:
+            grupo=([0])
 
         context ={
             'nproceso' : "U",
@@ -1782,46 +1932,50 @@ def editarPlantilla(request, codigo):
             'ntipoCreditos' : listsSelects["tipoCreditos"],
             'nitemsIva' : listsSelects["itemsIva"],
             'nitemsFte' : listsSelects["itemsFte"],
+            'ngrupo': grupo[0],
+            'nplantillaCtb': plantillaCtb,
             'company': company,
             'company_key': company_key,
             }
     
     return render(request,'plantillaPeriodica.html', context)
 
+#Carga combos en template de CRUD de plantilla periodica
 def obtenerSelectPlantilla(request):
     db_alias = get_db_from_request(request)
     #Obtiene registros para llenar los select del template plantillaPeriodica
     listsSelects={}
     #Solicitantes
     ssql ="SELECT so_codigo, so_nombres FROM ocxxt006 WHERE so_estado = 'A' ORDER BY so_nombres "
-    solicitantes = consultarRegistros(db_alias, ssql)
+    solicitantes = consultarRegistros(ssql,None,db_alias)
     listsSelects["solicitantes"] = solicitantes
     #Subtipos
     ssql = "SELECT to_tipo, to_descrip FROM ocxxt004 WHERE to_division = 'd' ORDER BY to_descrip "
-    subtipos = consultarRegistros(db_alias, ssql)
+    subtipos = consultarRegistros(ssql,None,db_alias)
     listsSelects["subtipos"]= subtipos
     #Tipo Comprobantes
     ssql =  """
         SELECT coat008.tip_codigo, tip_comprobante FROM coat008 
         WHERE tip_estado = 'A' AND tip_reg  = 'C' ORDER BY tip_comprobante
         """
-    tipoComprobantes = consultarRegistros(db_alias, ssql)
+    tipoComprobantes = consultarRegistros(ssql,None,db_alias)
     listsSelects["tipoComprobantes"]=tipoComprobantes
     #Tipo Identidad Credito
     ssql = "SELECT cre_codigo, cre_descrip FROM coat007 WHERE coat007.cre_codigo <> '00' ORDER BY cre_descrip"
-    tipoCreditos = consultarRegistros(db_alias, ssql)
+    tipoCreditos = consultarRegistros(ssql,None,db_alias)
     listsSelects["tipoCreditos"] = tipoCreditos
     #Items Iva
     ssql = "SELECT rt_secuencia, rt_descrip, rt_porcen, rt_subtipo FROM ocxxt003 WHERE rt_estado = 'A' AND rt_tipo = 'I'"
-    itemsIva = consultarRegistros(db_alias, ssql)
+    itemsIva = consultarRegistros(ssql,None,db_alias)
     listsSelects["itemsIva"]= itemsIva
     #Items Fuente
     ssql = "SELECT rt_secuencia, rt_descrip, rt_porcen, rt_subtipo FROM ocxxt003 WHERE rt_estado = 'A' AND rt_tipo = 'F'"
-    itemsFte = consultarRegistros(db_alias, ssql) 
+    itemsFte = consultarRegistros(ssql, None, db_alias) 
     listsSelects["itemsFte"] = itemsFte
 
     return listsSelects
 
+#Funcion para validar existencia de algun registro como código principal de registro
 def consultarExistencia(request):
     db_alias = get_db_from_request(request)
     #Desde frontend consulta existencia de registro (conteo registro), usado en validaciones en proceso de creación
@@ -1843,74 +1997,80 @@ def consultarExistencia(request):
     ssql = f"SELECT COUNT(*) AS existe FROM {tabla} WHERE {campo} = ? AND {ssql_aux}" 
     print(ssql)
     existe = consultarDato(request, ssql,[codigo], db_alias=db_alias)
+    print("existe :", existe)
     return JsonResponse({"existe": existe})
 
-
+#Funcion para consultar datos (específicos) desde template
 def consultarFromTemplate(request):
+    db_alias = get_db_from_request(request)
     #Desde frontend obtiene datos de un registro especifico mediante codigo y entidad devolviendo JSON
     entidad = request.GET.get("entidad")
     codigo =  request.GET.get("codigo")
 
-    registros, numstatus = consultarRegistrosTemplate(entidad,codigo)
+    registros, numstatus = consultarRegistrosTemplate(entidad,codigo,db_alias)
     if (registros):
         return JsonResponse(registros, safe=False, status=numstatus)
     else:
         return JsonResponse({"error": "No existe registro"}, status=numstatus)
 
-
+#Crea o actualiza registro de plantilla periodica (incluyendo su plantilla contable)
 def guardarPlantilla(request):
+    db_alias = get_db_from_request(request)
+    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
     if request.method == 'POST':
+        #Capturo datos
+        data = json.loads(request.body)
+        
+        #Datos de forma
+        forma=data.get('forma',[])
+        #Otros datos
+        otrosDatos = data.get('otrosDatos',[])
+
+        #Caso Plantillas sin retencion
+        if otrosDatos.get("iva") :
+            porcenIva = otrosDatos.get("porcenIva")
+            secuencia_iva = forma.get("selectIva")
+        else:
+            porcenIva = 0
+            secuencia_iva = 0
+
+        if otrosDatos.get("fuente") :
+            porcenFte = otrosDatos.get("porcenFte")
+            secuencia_renta = forma.get("selectFte")
+        else:
+            porcenFte = 0
+            secuencia_renta = 0
+
+        #Seteo diccionario de plantilla
+        plantilla = {
+            "division" : 'd',
+            "codigo": otrosDatos.get("codigo"), #"codigo": forma.get("ncodPlan"), #No se toma de la forma, por caso update disabled no retorna
+            "concepto": forma.get("nnomPlantilla").upper(),
+            "tipo": forma.get("ncodSub"),
+            "subtipo": forma.get("tipo"),
+            "codpro": otrosDatos.get("codProveedor"),
+            "atencion": '.',
+            "solicit": forma.get("ncodSolicita"),
+            "obser1": forma.get("descripcion").upper(),
+            "obser2": None,
+            "autimp": "9999",
+            "cod_tip": forma.get("selectComprob"),
+            "ide_cre": forma.get("selectCredito"),
+            "porc_ivaret": porcenIva,
+            "secuencia_iva": secuencia_iva,
+            "porc_rentaret": porcenFte,
+            "secuencia_renta": secuencia_renta,
+            "estado": 'A',
+            "user": otrosDatos.get("user"),
+            "fecalta": date.today().strftime("%d/%m/%Y")
+        }
+        grupo = otrosDatos.get("codGrupo")
+        proceso = forma.get("proceso")
+
+        #Detalle de %s para datos contables
+        itemsPorcen = data.get('filassubgrp',[])
         try:
-            with transaction.atomic():
-                #Capturo datos
-                data = json.loads(request.body)
-                #Datos de forma
-                forma=data.get('forma',[])
-                 #Otros datos
-                otrosDatos = data.get('otrosDatos',[])
-
-                 #Caso Plantillas sin retencion
-                if otrosDatos.get("iva") :
-                    porcenIva = otrosDatos.get("porcenIva")
-                    secuencia_iva = forma.get("selectIva")
-                else:
-                    porcenIva = 0
-                    secuencia_iva = 0
-
-                if otrosDatos.get("fuente") :
-                    porcenFte = otrosDatos.get("porcenFte")
-                    secuencia_renta = forma.get("selectFte")
-                else:
-                    porcenFte = 0
-                    secuencia_renta = 0
-
-                #Seteo diccionario de plantilla
-                plantilla = {
-                    "division" : 'd',
-                    "codigo": otrosDatos.get("codigo"), #"codigo": forma.get("ncodPlan"), #No se toma de la forma, por caso update disabled no retorna
-                    "concepto": forma.get("nnomPlantilla").upper(),
-                    "tipo": forma.get("ncodSub"),
-                    "subtipo": forma.get("tipo"),
-                    "codpro": otrosDatos.get("codProveedor"),
-                    "atencion": '.',
-                    "solicit": forma.get("ncodSolicita"),
-                    "obser1": forma.get("descripcion").upper(),
-                    "obser2": None,
-                    "autimp": "9999",
-                    "cod_tip": forma.get("selectComprob"),
-                    "ide_cre": forma.get("selectCredito"),
-                    "porc_ivaret": porcenIva,
-                    "secuencia_iva": secuencia_iva,
-                    "porc_rentaret": porcenFte,
-                    "secuencia_renta": secuencia_renta,
-                    "estado": 'A',
-                    "user": otrosDatos.get("user"),
-                    "fecalta": date.today().strftime("%d/%m/%Y")
-                }
-                
-                proceso = forma.get("proceso")
-                db_alias = get_db_from_request(request)
-
+            with transaction.atomic(using=db_alias):    
                 with connections[db_alias].cursor() as cur:
                     if proceso == 'C':
                         ssql = """
@@ -1934,68 +2094,47 @@ def guardarPlantilla(request):
                         cur.execute(ssql,parametros)
                         if cur.rowcount == 0:
                             raise Exception("En edicion de plantilla")
-            return JsonResponse({'status': 'success', 'redirect_url': f'../../../comprasapp/cargarTmplPlantillas/' },status=200)
+                        
+                    #Se verifica su existencia
+                    ssql = "SELECT COUNT(*) FROM cgrta035 WHERE pt_codplantilla = ?"
+                    existe = consultarDato(request, ssql,[plantilla["codigo"]],db_alias)
+                    if (existe>0):
+                        ssql = "DELETE FROM cgrta035 WHERE pt_codplantilla = ?"
+                        cur.execute(ssql,[plantilla["codigo"]])
+                        if cur.rowcount == 0:
+                            raise Exception("En borrar plantilla contable (cgrta035)")  
+                    
+                    #Inserto
+                    for item in itemsPorcen: 
+                        #Valido existencia de registro de activacion subgrupo 
+                        ssql = "SELECT COUNT(*) FROM ocxxt013 WHERE mc_codgrp = ? AND mc_secgrp = ? AND mc_codpro = ?"
+                        parametros=[grupo,item["subgrupo"],plantilla["codpro"]]
+                        existe = consultarDato(request,ssql,parametros,db_alias)
+                        #Si no existe inserto registro de asigancion centro de gastos a proveedor
+                        if (existe == 0):
+                            ssql = "SELECT ct_cuenta FROM ocxxt012 WHERE ct_codgrp = ? AND ct_secgrp = ?"
+                            cuentaCtb = consultarDato(request, ssql,[grupo,item["subgrupo"]],db_alias)
+                            #hacer pruebas
+                            if (cuentaCtb!=0):
+                                ssql = "INSERT INTO ocxxt013 VALUES (?,?,?)"
+                                cur.execute(ssql,[grupo,item["subgrupo"],plantilla["codpro"]])
+                                if cur.rowcount == 0:
+                                    raise Exception("En inserción activación subgrupo en proveedor (ocxxt013)")  
+                            else:
+                                raise Exception("No existe cuenta contable asigna al subgrupo:", item["subgrupo"])
+                        
+                        ssql = "INSERT INTO cgrta035 VALUES (?,?,?,?,?)"
+                        parametros=[plantilla["codigo"],plantilla["codpro"],grupo,item["subgrupo"],item["porcentaje"]]
+                        cur.execute(ssql,parametros)
+                        if cur.rowcount == 0:
+                            raise Exception("En inserción plantilla contable (cgrta035)")  
+                        
+            return JsonResponse({'status': 'success', 'redirect_url': f'../../../comprasapp/verPlantillaPeriodica/{plantilla["codigo"]}?company={company_key}' },status=200)
         except Exception as e:
-            return JsonResponse({'status': 'error', 'detallerr': str(e)}, status=400)
+            return JsonResponse({'status': 'error', 'detallerr': str(e)}, status=400) 
+            
     
-
-def cargarTmplPlantillaCtb(request, codigo):
-    from core.models import Company
-    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
-    try:
-        company = Company.objects.get(key=company_key)
-    except Company.DoesNotExist:
-        company = None
-    
-    db_alias = get_db_from_request(request)
-    if request.method =="GET":
-        parametros=["d", codigo]
-        #Datos de Plantilla
-        ssql = """
-            SELECT pc_codigo, pc_codpro, pc_concepto, pv_nombre FROM ocxxt010, ciatt011 
-            WHERE pc_codpro = pv_codigo AND pc_division = ? AND pc_codigo = ?
-        """
-        datosPlantilla = consultarRegistros(db_alias, ssql, parametros)
-        #Variable a enviar inicializo en caso de creación
-        plantillaCtb = {}
-        grupo={}
-        #Tiene Plantilla Contable?
-        ssql = "SELECT ct_codgrp, ct_grupo FROM cgrta035, ocxxt012 WHERE  pt_grupo = ct_codgrp AND pt_codplantilla = ? GROUP BY ct_codgrp, ct_grupo"
-        grupo = consultarRegistros(db_alias, ssql, [datosPlantilla[0]["pc_codigo"]])
-        #Edición
-        if grupo: 
-            #Datos del centro de gastos
-            ssql =  """
-                SELECT d.mc_codpro, a.ct_secgrp, a.ct_cuenta, b.ct_descripcion, c.pt_porcentaje 
-                FROM ocxxt012 a, cgrta001 b, OUTER cgrta035 c, OUTER ocxxt013 d
-                WHERE b.ct_compania = 'e' AND a.ct_cuenta = b.ct_cuenta AND a.ct_codgrp = ? 
-                AND c.pt_grupo = a.ct_codgrp AND c.pt_subgrupo = a.ct_secgrp AND c.pt_codplantilla = ?  
-                AND d.mc_codgrp = a.ct_codgrp AND a.ct_secgrp = d.mc_secgrp AND mc_codpro = ?
-            """ 
-            plantillaCtb = consultarRegistros(db_alias, ssql, [grupo[0]["ct_codgrp"],datosPlantilla[0]["pc_codigo"],datosPlantilla[0]["pc_codpro"]])
-            proceso = "U"
-            if plantillaCtb == None:
-                existe = False
-
-            context={
-            'nproceso': proceso,
-            'nplantillaCtb': plantillaCtb,
-            'ndatosPlantilla' : datosPlantilla[0],
-            'ngrupo': grupo[0],
-            'company': company,
-            'company_key': company_key,
-            }    
-        else:
-        #Creación
-            proceso = "C"
-            context={
-            'nproceso': proceso,
-            'ndatosPlantilla' : datosPlantilla[0],
-            'company': company,
-            'company_key': company_key,
-            }    
-        return render(request,'plantillaPeriodicaCtb.html', context)
-
+#Para cargar autocomplete de centro de gastos
 def cargarCentroGastos(request):
     db_alias = get_db_from_request(request)
     #Busqueda centro de gastos con autocomplete sea con nombre o codigo
@@ -2026,6 +2165,7 @@ def cargarCentroGastos(request):
         })
     return JsonResponse(listcgastos, safe=False)
 
+#Ejecuta consulta de subcentros de gastos según centro y proveedor
 def consultarSubcentrosGastos(request, codigo, codprov):
     db_alias = get_db_from_request(request)
 
@@ -2035,86 +2175,31 @@ def consultarSubcentrosGastos(request, codigo, codprov):
                 WHERE b.ct_compania = 'e' AND a.ct_cuenta = b.ct_cuenta AND a.ct_codgrp = ? 
                 AND c.mc_codgrp = a.ct_codgrp AND a.ct_secgrp = c.mc_secgrp AND mc_codpro = ?
         """
-        subgruposGastos = consultarRegistros(db_alias, ssql, [codigo, codprov])
+        subgruposGastos = consultarRegistros(ssql, [codigo, codprov],db_alias)
         dataSubgrupos = {'subgruposGastos': subgruposGastos}
     return JsonResponse(dataSubgrupos, safe=False)
-
-def guardarPlantillaCtb(request):
-    db_alias = get_db_from_request(request)
-    if request.method == "POST" :
-        try:
-            with transaction.atomic():
-                with connections[db_alias].cursor() as cur:
-                    #Capturo datos
-                    data = json.loads(request.body)
-                    #Detalle de %s
-                    itemsPorcen = data.get('filassubgrp',[])
-                    
-                    #Datos plantilla
-                    otrosDatos = data.get('otrosDatos',[])
-                    
-                    #seteo datos generales
-                    plantilla = {
-                        "codplantilla" : otrosDatos.get("codPlantilla"),
-                        "codproveedor" : otrosDatos.get("codProveedor"),
-                        "grupo" : otrosDatos.get("codGrupo")
-                    }
-
-                    #Creación o update se elimina existente
-                    ssql = "DELETE FROM cgrta035 WHERE pt_codplantilla = ?"
-                    cur.execute(ssql,[plantilla["codplantilla"]])
-                    if cur.rowcount == 0:
-                        raise Exception("En borrar plantilla contable (cgrta035)")  
-                    #Inserto
-                    for item in itemsPorcen: 
-                        #Valido existencia de registro de activacion subgrupo 
-                        ssql = "SELECT COUNT(*) FROM ocxxt013 WHERE mc_codgrp = ? AND mc_secgrp = ? AND mc_codpro = ?"
-                        parametros=[plantilla["grupo"],item["subgrupo"],plantilla["codproveedor"]]
-                        existe = consultarDato(request, ssql, parametros, db_alias=db_alias)
-                        
-                        if (existe == 0):
-                            
-                            ssql = "SELECT ct_cuenta FROM ocxxt012 WHERE ct_codgrp = ? AND ct_secgrp = ?"
-                            cuentaCtb = consultarDato(request, ssql, [plantilla["grupo"],item["subgrupo"]], db_alias=db_alias)
-                            if (cuentaCtb):
-                                ssql = "INSERT INTO ocxxt013 VALUES (?,?,?,?)"
-                                cur.execute(ssql,[plantilla["grupo"],item["subgrupo"],cuentaCtb,plantilla["codproveedor"]])
-                                if cur.rowcount == 0:
-                                    raise Exception("En inserción activación subgrupo en proveedor (ocxxt013)")  
-                            else:
-                                raise Exception("No existe cuenta contable asigna al subgrupo:", item["subgrupo"])
-                        
-                        ssql = "INSERT INTO cgrta035 VALUES (?,?,?,?,?)"
-                        parametros=[plantilla["codplantilla"],plantilla["codproveedor"],plantilla["grupo"],item["subgrupo"],item["porcentaje"]]
-                        print(parametros)
-                        cur.execute(ssql,parametros)
-                        if cur.rowcount == 0:
-                            raise Exception("En inserción plantilla contable (cgrta035)")     
-            return JsonResponse({'status': 'success', 'redirect_url': f'../../../comprasapp/cargarTmplPlantillas/' },status=200)
-        except Exception as e:
-            return JsonResponse({'status':'error', 'detallerr': str(e)}, status=400)
        
-
+#Elimina registro de plantilla periodica (incluyendo su plantilla contable)
 def eliminarPlantilla(request):
     db_alias = get_db_from_request(request)
+    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
     codigo = request.GET.get("codigo")
-    proceso =  request.GET.get("proceso")
-    
     if request.method == "POST":
         try:
-            with transaction.atomic():
-                with connections[db_alias].cursor() as cur:
-                    #Si solo elimina desde plantilla contable solo en cgrta035
-                    if proceso == "C":
-                        ssql = "DELETE FROM cgrta035 WHERE pt_codplantilla = ?"
-                        cur.execute(ssql,[codigo])
-                        if cur.rowcount == 0:
-                            raise Exception("En eliminacion de plantilla contable (cgrta035)")
-                    #Si elimina desde plantillas se borra tambien plantilla contable
-                    if proceso == "P":
+            with transaction.atomic(using=db_alias):
+                #Se valida existencia de ordenes sin procesar, de haber se envía como error, 01-03-25 se guarda dato de diario en campo de orden
+                ssql = """
+                 SELECT COUNT(*) + (SELECT COUNT(*) FROM ocxxt801 WHERE oc_clasif1 = ? AND oc_numdia IS NULL AND DATE(oc_fecing) >= '01/03/2025' ) 
+                 FROM ocxxt001 WHERE oc_clasif1 = ? AND oc_numdia IS NULL AND DATE(oc_fecing) >= '01/03/2025'
+                """ 
+                ordenes = consultarDato(request,ssql,[codigo,codigo],db_alias)
+                if ordenes > 0 :
+                    raise Exception("Existen ordenes de compra con la plantilla sin procesar!")
+                else:
+                    with connections[db_alias].cursor() as cur:
                         #Se verifica su existencia
                         ssql = "SELECT COUNT(*) FROM cgrta035 WHERE pt_codplantilla = ?"
-                        existe = consultarDato(request, ssql, [codigo], db_alias=db_alias)
+                        existe = consultarDato(request,ssql,[codigo],db_alias)
                         print("existe" , existe)
                         if (existe>0):
                             ssql = "DELETE FROM cgrta035 WHERE pt_codplantilla = ?"
@@ -2127,35 +2212,40 @@ def eliminarPlantilla(request):
                         if cur.rowcount == 0:
                             raise Exception("En eliminacion de plantilla (ocxxt010)")
 
-            return JsonResponse({'status': 'success', 'redirect_url': f'../../../comprasapp/cargarTmplPlantillas/' },status=200)    
+            return JsonResponse({'status': 'success', 'redirect_url': f'../../../comprasapp/cargarTmplPlantillas?company={company_key}' },status=200)    
         except Exception as e:
             print (e)
             return JsonResponse({'status':'error', 'detallerr': str(e)}, status=400)
-        
+             
+#Carga template para consultar y/o listar Centro de Gastos
 def cargarTmplConsultaCentroGastos(request):
     from core.models import Company
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
     return render(request,'consultaCentroGastos.html', {'company': company, 'company_key': company_key})
 
+#Ejecuta consulta de centro de gastos (no se definen filtros, se trabaja con caja de busqueda de la misma datatable)
 def consultarCentroGastos(request):
     db_alias = get_db_from_request(request)
     with connections[db_alias].cursor() as cur:
-        ssql = "SELECT ct_codgrp, ct_grupo FROM ocxxt012 GROUP BY ct_codgrp, ct_grupo"
+        ssql = "SELECT ct_codgrp, ct_grupo FROM ocxxt012 GROUP BY ct_codgrp, ct_grupo ORDER BY ct_grupo"
         cur.execute(ssql)
-        cgastos = consultarRegistros(db_alias, ssql)
+        cgastos = consultarRegistros(ssql,None,db_alias)
         dataGastos ={'cgastos':cgastos}
     
     return JsonResponse(dataGastos, safe=False)
 
+#Carga template de CRUD de centro de gastos
 def cargarTmplCentroGastos(request):
     from core.models import Company
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
     
@@ -2163,25 +2253,29 @@ def cargarTmplCentroGastos(request):
     context ={}
     if request.method == "GET":
         codigo = request.GET.get('codigo')
-        print (codigo)
+        proceso = request.GET.get('proceso')
+
+        print (codigo,"proceso :", proceso)
         if (codigo):
             #Nombre Grupo
             ssql = f"SELECT UNIQUE(ct_grupo) FROM ocxxt012 WHERE ct_codgrp = {codigo} GROUP BY ct_grupo"
-            nombreCentro = consultarDato(request, ssql, db_alias=db_alias)
+            nombreCentro = consultarDato(request,ssql, None, db_alias)
+            print(nombreCentro)
             #Subgrupos en caso de edición
             ssql = """
                 SELECT a.ct_secgrp, a.ct_cuenta, b.ct_descripcion FROM ocxxt012 a, cgrta001 b
                     WHERE b.ct_compania = 'e' AND a.ct_cuenta = b.ct_cuenta AND a.ct_codgrp = ? 
             """
-            subgruposGastos = consultarRegistros(request, db_alias, ssql, [codigo])
+            subgruposGastos = consultarRegistros(ssql, [codigo],db_alias)
             context={
-                'nproceso': 'U',
+                'nproceso': proceso,
                 'ncodigoCentro': codigo,
                 'nnombreCentro': nombreCentro,
                 'ndataSubgrupos': subgruposGastos,
                 'company': company,
                 'company_key': company_key,
             }
+            print(context)
         else:
             context={
                 'nproceso':'C',
@@ -2191,3 +2285,171 @@ def cargarTmplCentroGastos(request):
 
     return render(request,'centroGastos.html',context)
 
+#Carga template para solo consulta especifica de una plantilla periodica
+def verPlantillaPeriodica(request,codigo):
+    from core.models import Company
+    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
+    try:
+        company = Company.objects.get(key=key)
+    except Company.DoesNotExist:
+        company = None
+    
+    db_alias = get_db_from_request(request)
+    context={}
+    if request.method == "GET":
+        ssql = """
+            SELECT pc_codigo, pc_concepto, pc_codpro, pc_obser1, pv_nombre, so_nombres, pc_cod_tip, pc_secuencia_iva, pc_secuencia_renta,
+            to_descrip, pc_subtipo, pc_ide_cre, cre_descrip, pc_cod_tip, tip_comprobante
+            FROM ocxxt010, ciatt011, ocxxt006, ocxxt004, coat007 , coat008
+            WHERE pc_division = ? AND pc_codigo = ? AND  pc_codpro = pv_codigo AND pc_solicit = so_codigo
+            AND pc_tipo = to_tipo AND pc_division = to_division AND cre_codigo = pc_ide_cre AND coat008.tip_codigo = pc_cod_tip
+        """
+        print("CODIGO", codigo)
+        plantilla = consultarRegistros(ssql,['d',codigo],db_alias)
+        print(plantilla)
+
+        iva=[]
+        if (plantilla[0]["pc_secuencia_iva"] > 0 ):
+            ssql = "SELECT rt_tipo, rt_porcen, rt_descrip FROM ocxxt003 WHERE rt_secuencia = ?"
+            iva = consultarRegistros(ssql,[plantilla[0]["pc_secuencia_iva"]],db_alias)
+            
+            
+        fuente=[]
+        if (plantilla[0]["pc_secuencia_renta"] > 0 ):
+            ssql = "SELECT rt_tipo, rt_porcen, rt_descrip FROM ocxxt003 WHERE rt_secuencia = ?"
+            fuente = consultarRegistros(ssql,[plantilla[0]["pc_secuencia_renta"]],db_alias)
+            
+        #Contable
+        ssql = "SELECT ct_codgrp, ct_grupo FROM cgrta035, ocxxt012 WHERE  pt_grupo = ct_codgrp AND pt_codplantilla = ? AND pt_codproveedor = ? GROUP BY ct_codgrp, ct_grupo"
+        grupo = consultarRegistros(ssql,[plantilla[0]["pc_codigo"],plantilla[0]["pc_codpro"]],db_alias)
+        print(grupo)
+
+        plantillaCtb=[]    
+        if (grupo):
+            ssql = """
+            SELECT pt_subgrupo, ocxxt012.ct_cuenta AS cuenta, ct_descripcion, pt_porcentaje FROM cgrta035,ocxxt012,cgrta001  WHERE pt_codplantilla = ? AND pt_codproveedor = ? AND ct_codgrp = pt_grupo
+            AND ct_secgrp = pt_subgrupo AND ocxxt012.ct_cuenta = cgrta001.ct_cuenta AND ct_compania = 'e'  
+            """ 
+            plantillaCtb = consultarRegistros(ssql,[plantilla[0]["pc_codigo"],plantilla[0]["pc_codpro"]],db_alias)
+        
+        context ={
+            'nplantilla' : plantilla[0],
+            'niva' : iva,
+            'nfuente' : fuente,
+            'ngrupo': grupo[0],
+            'nplantillaCtb' : plantillaCtb,
+            'company': company,
+            'company_key': company_key
+        }
+
+    return render(request,'resumenPlantillaPeriodica.html',context)
+
+#Carga template para solo consulta especifica de un centro de gastos
+def verCentroGastos(request,codigo):
+    from core.models import Company
+    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
+    try:
+        company = Company.objects.get(key=key)
+    except Company.DoesNotExist:
+        company = None
+    
+    db_alias = get_db_from_request(request)
+    context={}
+
+    if request.method == "GET":
+        #Nombre Grupo
+        ssql = f"SELECT UNIQUE(ct_grupo) FROM ocxxt012 WHERE ct_codgrp = {codigo} GROUP BY ct_grupo"
+        nombreCentro = consultarDato(request,ssql,None,db_alias)
+        #Subgrupos en caso de edición
+        ssql = """
+            SELECT a.ct_secgrp, a.ct_cuenta, b.ct_descripcion FROM ocxxt012 a, cgrta001 b
+                WHERE b.ct_compania = 'e' AND a.ct_cuenta = b.ct_cuenta AND a.ct_codgrp = ? 
+        """
+        subgruposGastos = consultarRegistros(ssql,[codigo],db_alias)
+        context={
+            'ncodigoCentro': codigo,
+            'nnombreCentro': nombreCentro,
+            'ndataSubgrupos': subgruposGastos,
+            'company': company, 
+            'company_key': company_key
+        }
+        return render(request,'resumenCentroGastos.html',context)
+#Guarda registro de centro de gastos (para create o update)
+def guardarCentroGastos(request):
+    print("guardarCentroGastos")
+    db_alias = get_db_from_request(request)
+    company_key = request.GET.get('company') or request.session.get('active_company_key','')
+    if request.method == 'POST':
+        #Capturo datos
+        data = json.loads(request.body)
+
+        itemsSubgrupo = data.get('filassubgrp',[])
+        print(itemsSubgrupo)
+        codGrupo = data.get('codigo','')
+        nomGrupo = data.get('nombre','')
+        proceso = data.get('proceso','')
+        print(proceso," ", nomGrupo," ", codGrupo)
+        try:
+            with transaction.atomic(using=db_alias):    
+                with connections[db_alias].cursor() as cur:
+                    #No se mira proceso, create o update (se elimina y se vuelve a insertar)
+                    if (proceso == 'U'):
+                        ssql = "DELETE FROM ocxxt012 WHERE ct_codgrp = ?"
+                        cur.execute(ssql,[codGrupo])
+                        if cur.rowcount == 0:
+                            raise Exception("En eliminar centro de gastos (ocxxt012)")  
+                        
+                    for item in itemsSubgrupo:
+                        ssql = "INSERT INTO ocxxt012 VALUES (?,?,?,?)"
+                        parametros=[codGrupo,item["secgrp"],nomGrupo,item["cta"]]
+                        cur.execute(ssql,parametros)
+                        if cur.rowcount == 0:
+                            raise Exception("En inserción centro de gastos (ocxxt012)")  
+                        
+                    #Asignacion en proveedores, borro subgrupos en caso de haber sido eliminados
+                    ssql = "DELETE FROM ocxxt013 WHERE mc_codgrp = ? AND mc_secgrp NOT IN (SELECT ct_secgrp FROM ocxxt012 WHERE ct_codgrp = ?)"
+                    cur.execute(ssql,[codGrupo,codGrupo])
+
+            return JsonResponse({'status': 'success', 'redirect_url': f'../../../comprasapp/verCentroGastos/{codGrupo}?company={company_key}' },status=200)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'detallerr': str(e)}, status=400) 
+        
+
+def eliminarCentroGastos(request):
+    print("eliminarCentroGastos")
+    db_alias = get_db_from_request(request)
+    company_key=request.GET.get('company') or request.session.get('active_company_key','')
+    codigo = request.GET.get('codigo')
+    print("codigo ", codigo)
+    if request.method == 'POST':
+        try:
+            with connections[db_alias].cursor() as cur:
+                #Se debe validar que no exista el centro y subcentro en plantillas periodicas 
+                ssql = "SELECT COUNT(*) FROM cgrta035 WHERE pt_grupo = ? "
+                periodicas = consultarDato(request, ssql,[codigo],db_alias)
+                if (periodicas > 0):
+                     raise Exception("Centro de gastos asignados a plantillas periodicas, no se puede eliminar")
+                else:
+                    #Se elimina de asignacion de proveedores (puedan como que no, existan registros por eso no se valida si se ejecutó)
+                    ssql = "DELETE FROM ocxxt013 WHERE mc_codgrp = ?"
+                    cur.execute(ssql,[codigo])
+                    #Se elimina registro de centro de gastos
+                    ssql = "DELETE FROM ocxxt012 WHERE ct_codgrp = ?"
+                    cur.execute(ssql,[codigo])
+                    if cur.rowcount == 0:
+                          raise Exception("En eliminar centro de gastos (ocxxt012)")  
+                    
+            return JsonResponse({'status': 'success', 'redirect_url': f'../../../comprasapp/cargarTmplConsultaCentroGastos?company={company_key}' },status=200)    
+    
+        except Exception as e:
+            print (e)
+            return JsonResponse({'status':'error', 'detallerr': str(e)}, status=400)
+            
+                
+
+#Carga template para asignacion Centro Gastos
+def cargarTmplAsignacionCentro(request):
+
+    return render(request,'asignacionCentroGastos.html')

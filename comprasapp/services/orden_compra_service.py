@@ -42,9 +42,9 @@ class OrdenComprasService:
             cuentaProv = [dict(zip(column_names, row)) for row in rows]
         return cuentaProv
     
-    def get_cuentas_importaciones(self, db_alias):
+    def get_cuentas_importaciones(self, db_alias, clavebusqueda):
         return Cuenta.objects.using(db_alias).filter(
-            ct_descripcion__icontains = 'PEDIDOS'
+            ct_descripcion__icontains = clavebusqueda
         )
 
     def get_codigo_proveedor(self, db_alias, cia, ruc):
@@ -132,10 +132,16 @@ class OrdenComprasService:
             oc_detalle = OrdenCompraDetalle.objects.using(db_alias).create(**datos)
         return oc_detalle
     
-    def comprobar_existencia_retencion(self, db_alias, division, codigo_proveedor, numero_factura, agencia):
-        return Retencion.objects.using(db_alias).filter(
-            rt_division = division,
-            rt_codpro = codigo_proveedor,
-            rt_factura = numero_factura,
-            rt_agencia = agencia
-        ).exists()
+    def comprobar_existencia_retencion(self, db_alias, division, codigo_proveedor, numero_factura, agencia, numero):
+        if numero is None:
+            return Retencion.objects.using(db_alias).filter(
+                rt_division = division,
+                rt_codpro = codigo_proveedor,
+                rt_factura = numero_factura,
+                rt_agencia = agencia
+            ).exists()
+        else:
+            return Retencion.objects.using(db_alias).filter(
+                rt_agencia = agencia,
+                rt_numero = numero
+            ).exists()

@@ -1,4 +1,4 @@
-//Orden de Compra (Para consulta o resumen de ingreso)
+//js de template de consulta o resumen de ingreso de la orden de compra (resumenIngreso.html)
 document.addEventListener("DOMContentLoaded", function (event) {
     let retencion = document.getElementById("retencion").value;
     //Solo si existe retencion se totaliza grid
@@ -135,16 +135,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
         totalIva = (subtotalIvaG * (porivacab / 100)) + (subtotalIva5 * (5 / 100))
         total = subtotal + totalIva;
 
-        // document.getElementById("subtotalIva").textContent = "$ " + formateoDecimal(subtotalIvaG);
-        // document.getElementById("subtotalIva5").textContent = "$ " + formateoDecimal(subtotalIva5);
-        // document.getElementById("subtotalIva0").textContent = "$ " + formateoDecimal(subtotalIva0);
         document.getElementById("subtotal").textContent = "$ " + formateoDecimal(subtotal);
-
-        // document.getElementById("totaliva").textContent = "$ " + formateoDecimal(totalIva);
-        // document.getElementById("totaliva5").textContent = "$ " + formateoDecimal(totalIva5);
-        // document.getElementById("totaliva0").textContent = "$ " + formateoDecimal(totalIva0);
         document.getElementById("totaliva").textContent = "$ " + formateoDecimal(totalIva);
-
         document.getElementById("total").textContent = "$ " + formateoDecimal(total);
     });
 });

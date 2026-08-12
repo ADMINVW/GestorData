@@ -1,3 +1,4 @@
+//js de template para consultar y listar las plantillas periodicas (consultaPlantillasPeriodicas.html) 
 let dataTable;
 let dataTableIniciada = false;
 const opcionesDataTable = {
@@ -31,7 +32,6 @@ const listPlantillas = async () => {
     try {
         //Parametro
         const codigo = document.getElementById("codPlantilla").value;
-
         const parametro = {
             codigo: codigo.toUpperCase()
         };
@@ -43,7 +43,7 @@ const listPlantillas = async () => {
 
         let response;
         if (!filtro) {
-            response = await fetch("/comprasapp/consultarPlantillas/");
+            response = await fetch(`/comprasapp/consultarPlantillas?company=${ck}`);
         }
         else {
             response = await fetch("/comprasapp/consultarPlantillas/", {
@@ -51,6 +51,7 @@ const listPlantillas = async () => {
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    "X-Company-Key": ck,
                 },
                 body: JSON.stringify(parametro)
             });
@@ -64,12 +65,14 @@ const listPlantillas = async () => {
                     <td>${plantilla.pc_codigo}</td>
                     <td>${plantilla.pc_concepto}</td>
                     <td>${plantilla.pv_nombre}</td>
-                    <td><a href="/comprasapp/editarPlantilla/${plantilla.pc_codigo}" 
-               class='btn btn-sm btn-outline-primary' style='text-decoration: none;' >
+                    <td><a href="/comprasapp/verPlantillaPeriodica/${plantilla.pc_codigo}?company=${ck}" title = "Consultar"
+               class='btn btn-sm btn-primary' style='text-decoration: none;' >
             <i class='fa-solid fa-search'></i></a>  </td>
-            <td><a href="/comprasapp/cargarTmplPlantillaCtb/${plantilla.pc_codigo}" 
-               class='btn btn-sm btn-outline-primary' style='text-decoration: none;' >
-            <i class='fa-solid fa-percent'></i></a>  </td>
+
+                <td><a href="/comprasapp/editarPlantilla/?codigo=${plantilla.pc_codigo}&company=${ck}" title = "Editar"
+               class='btn btn-sm btn-success' style='text-decoration: none;' >
+            <i class='fa-solid fa-edit'></i></a>  </td>
+
                 </tr>
             `;
         });
@@ -81,12 +84,14 @@ const listPlantillas = async () => {
 }
 
 document.addEventListener("DOMContentLoaded", function (event) {
+    ck = sessionStorage.getItem('company_key');
+    console.log("DOMContentLoaded ck", ck)
     iniciarDataTable();
 });
 
 $(function () {
     $("#nomPlantilla").autocomplete({
-        source: "/comprasapp/cargarConceptoPlantillas/",
+        source: `/comprasapp/cargarConceptoPlantillas?company=${ck}`,
         minLength: 3,
         select: function (event, ui) {
             $("#codPlantilla").val(ui.item.codigo);

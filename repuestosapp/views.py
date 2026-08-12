@@ -32,9 +32,10 @@ def comprasRepuestos(request):
     from core.models import Company
 
     company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
     
     try:
-        company = Company.objects.get(key=company_key)
+        company = Company.objects.get(key=key)
     except Company.DoesNotExist:
         company = None
 
@@ -180,11 +181,11 @@ def guardaFacturaRepuestos(request):
                     # valor iva fila[8]
                     
                     # CALCULO PORCENTAJE DESCUENTO
-                    totParcial = 0 
-                    print("pre: ", fila[3], "cant: " , fila[0])
+                    totParcial = 0.0
+                    
                     totParcial = float(fila[4]) * float(fila[0])          
-                    fila[5] = round((float(fila[5]) / totParcial) * 100) 
-
+                    fila[5] = round((float(fila[5]) / totParcial) * 100, 2)
+                    print("pre: ", fila[4], "cant: " , fila[0], "desc: ", fila[5], "totParcial: ", totParcial)
                     #if not Periodicas:
                     CenGastos = "0" 
                     ##mineoctubre

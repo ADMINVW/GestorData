@@ -53,7 +53,7 @@
         <div class="row">
           <p class="col-3"><b>Agencia : </b>{{ncodAgencia}} - {{nnombreAgencia}}</p>
           <p class="col-3"><b>División : </b>{{ndivision}}</p>
-          <input type="hidden" id="codDivision" name="codProveedor" value={{ncodDiv}}>
+          <input type="hidden" id="codDivision" name="codProveedor" value= "{{ncodDiv}}"> 
           {% if ncodDiv == 't' and ntipo == 'T' or ncodDiv == 't' and ntipo == 'R' %} <p class="col-3"><b>Orden Taller: </b>{{nordenTaller}}</p> {% endif %}
           {% if ncodDiv == 'r' and ntipo == 'I' or ncodDiv == 'v' and ntipo == 'E' %} <p class="col-3"><b>Compra Local: </b>{{ndataFactura.compraLocal}}</p> {% endif %}
         </div>
@@ -250,13 +250,17 @@
     <div class="row">
 
       <div class="col-10"><b>Procesado por: </b>{{nnombreUser}} ( {{nuser}} )</div>
+      
       <div class="col-2 text-end">
-        <a class="btn btn-primary " role="button"   
-         href="{% url 'mimenu' %}?company={{ request.GET.company|default:'' }}"
-         id="cancelar-btn">Nueva Orden
-        </a>
+        {% if nproceso == 'I' %}
+          <a class="btn btn-primary " role="button"   
+          {% if ncodDiv == 'd' %} href="/comprasapp/templates/ordenCompra?company={{ company_key }}" {% endif %}
+          {% if ncodDiv == 'r' %} href="/repuestosapp/templates/compraRepuestos?company={{ company_key }}" {% endif %}
+          {% if ncodDiv == 't' %}  href="/tallerapp/templates/ordenCompraT?company={{ company_key }}" {% endif %}
+          id="cancelar-btn">Nueva Orden
+          </a>
+        {% endif %}
       </div>
-
 
 
     </div>

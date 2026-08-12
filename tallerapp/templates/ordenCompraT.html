@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+{% block titulo %}Orden de Compra{% endblock %}
+
+{% block cabcontenido %}
+<div class="app-page-title">Orden de Compra Taller</div>
+<div class="app-breadcrumb">Taller &rsaquo; Orden de Compra</div>
+{% endblock %}
+
+{% block contenido %}
+
+<form id="form-ocompraTaller" class="form-horizontal" method="post">
+  {% csrf_token %}
+  <div>
+      <input id="user"     name="user"     type="hidden" value="{{ username }}">
+      <input id="agencia"  name="agencia"   type="hidden" value="{{ agencia }}">
+  </div>
+  <!-- ─── DATOS  ORDEN COMPRA ─── -->
+  <div class="app-card mb-4">
+    <div class="app-card-body">
+      <p class="section-label">1 · Parámetros</p>
+      <div class="row g-3 ">
+        <div class="form-group col-12 col-md-4">
+          <label class="form-label col-md-4" for="numeroCompra">Numero Orden</label>
+          <div class="input-group">
+            <input type="number" class="form-control" id="numeroCompra" name="nnumeroCompra"  required   >
+            <button type="button" id="obtener-btn" class="btn btn-sm btn-success btnObtener " >Obtener datos</button>
+          </div>
+        </div>
+        <div class="form-group col-12 col-md-3">
+          <label class="form-label">Tipo de Compra</label>
+          <select id="subTipoSelect" class="form-select" name="nsubTipoSelect">
+            <option selected>Escoja tipo de Compra</option>
+            <option value="T">TRABAJOS </option>
+            <option value="R">REPUESTOS </option>
+          </select>
+        </div>
+        <div class="col-12 col-md-3">
+          <label for="selSolicita" class="form-label">Solicitante</label>
+          <select id="selSolicita" class="form-select" name="nselSolicita">
+            <option selected>Escoja solicitante</option>
+            {% if nsolicita %}
+              {% for solicita in nsolicita %}
+             <option value= "{% spaceless %}{{ solicita.so_codigo }}{% endspaceless %}">{{ solicita.so_nombres }}</option>
+              {% endfor %}
+            {% endif %}
+          </select>
+        </div>
+        <div class="col-12 col-md-2">
+          <label for="ordenTaller" class="form-label">Orden Taller</label>
+          <input type="number" class="form-control" id="ordenTaller" readonly name="nordenTaller">
+      </div>  
+      </div>
+      <div class="row g-3 ">
+        <div class="col-6">
+          <label class="form-label">Cliente</label>
+          <input type="text" class="form-control" id="clienteOrden" readonly>
+        </div>
+        <div class="col-6">
+          <label class="form-label">Asesor</label>
+          <input type="text" class="form-control" id="asesorOrden" readonly>
+        </div>
+      </div>
+      <div class="row g-3 mb-3">
+        <div class="col-12 col-md-8">
+        <label class="form-label">Proveedor</label>
+        <input type="text" class="form-control" id="nombreProveedor" readonly >
+        </div>
+        <div class="col-12 col-md-3">
+          <label class="form-label">Cédula / RUC</label>
+          <input type="text" class="form-control" id="rucProveedor" readonly>
+        </div>
+        <div class="col-6 col-md-1">
+          <label class="form-label">Código</label>
+          <input type="text" class="form-control" id="codigoProveedor" readonly name="ncodigoProveedor">
+        </div>
+      </div>
+    </div>
+  </div>
+   <!-- ─── DATOS  FACTURA ─── -->
+  <div class="app-card mb-4">
+    <div class="app-card-body">
+      <p class="section-label">2 · Factura</p>
+      <!-- Fila 1: Identificación de la factura onchange="leerArchivoXML()" -->
+      <div class="row g-3 mb-3">
+        <div class="col-12 col-md-4">
+          <label class="form-label">XML Factura</label>
+          <input type="file" class="form-control" id="inputGroupFileFactura"
+                 accept=".xml" disabled>
+        </div>
+        <div class="col-6 col-md-1">
+          <label class="form-label">Serie</label>
+          <input type="text" class="form-control" id="serieFactura" readonly name="nserieFactura">
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="form-label">N° Factura</label>
+          <input type="text" class="form-control" id="numeroFactura" required name="nnumeroFactura">
+        </div>
+        <div class="col-12 col-md-5">
+          <label class="form-label">Autorización SRI</label>
+          <input type="text" class="form-control" id="autorizacionSri" readonly name="nautorizacionSri">
+        </div>
+      </div>
+      <!-- Fila 3: Datos de la compra -->
+      <div class="row g-3">
+        <div class="col-12 col-md-4">
+            <label class="form-label">Descripción</label>
+            <input type="text" class="form-control" id="descripcionFactura" required style="text-transform: uppercase;" name="ndescripcionFactura">
+        </div>
+        <div class="col-12 col-md-3">
+          <label class="form-label">Tipo Crédito</label>
+          <select id="tipoCreditoSelect" class="form-select" name="ntipoCreditoSelect">
+            <option selected>Escoja tipo de crédito</option>
+            {% if ntcredito %}
+              {% for credito in ntcredito %}
+              <option value="{{ credito.cre_codigo }}">{{ credito.cre_codigo }} {{ credito.cre_descrip }}</option>
+              {% endfor %}
+            {% endif %}
+          </select>
+        </div>
+        <div class="col-12 col-md-1">
+          <label class="form-label">Recargo</label>
+          <input type="number" class="form-control" id="porcenRecargo" required max="100" min ="0" name="nporcenRecargo">
+        </div>
+        <div class="col-6 col-md-1">
+          <label class="form-label">Plazo Pago</label>
+          <input type="number" class="form-control" id="plazoPago"  required max="100" min ="1" name="nplazoPago">
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="form-label">Fecha Factura</label>
+          <input type="text" class="form-control" id="fechaEmision" readonly name="nfechaEmision">
+        </div>
+      </div>  
+    </div>
+  </div>
+
+ <!-- DETALLE DE FACTURA-->
+  <div class="app-card mb-4">
+    <div class="app-card-body">
+      <p class="section-label">3 · Detalle Factura</p>
+      <div class="table-responsive">
+        <table id="tablaDetalle" class="table table-hover mb-0">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Cantidad</th>
+                <th>Item</th>
+                <th>Descripción</th>
+                <th>Total</th>
+                <th>Editar</th>
+                <th>Eliminar</th>
+            </tr>
+            </thead>
+          <tbody id="bodytablaDetalle" ></tbody>
+        </table>
+      </div>
+      <table id="tablaIva" class="table" hidden></table>
+    </div>
+  </div>
+
+  <!-- ─── TOTALES ─── -->
+  <div class="row justify-content-end mb-4">
+    <div class="col-12 col-md-5">
+       <div class="app-card">
+        <div class="app-card-header">
+          <h5>Resumen</h5>
+        </div>
+        <div class="app-card-body">
+          <div>
+              <input id="ivaFactura"     name="nivaFactura"  type="hidden" value="">
+          </div>
+          <table id="tablaSumaBase" class="table table-sm mb-2">
+            <thead><tr></tr></thead>
+            <tbody id="bodytablaSumaBase"></tbody>
+          </table>
+
+          <div class="d-flex justify-content-between align-items-center py-2"
+              style="border-bottom: 1px solid var(--border);">
+            <span style="font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:.08em; color:var(--muted);">
+              Subtotal sin impuestos
+            </span>
+            <input type="text" class="form-control text-end fw-500"
+                  id="subtotalSinImpuestos" readonly
+                  style="width:140px; border:0; background:transparent; font-size:14px;">
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center py-2"
+             style="border-bottom: 1px solid var(--border);">
+          <span style="font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:.08em; color:var(--muted);">
+            Descuento
+          </span>
+          <input type="text" class="form-control text-end"
+                 id="totalDescuento" readonly
+                 style="width:140px; border:0; background:transparent; font-size:14px;">
+          </div>
+
+          <table id="tablaSumaIva" class="table table-sm my-2">
+            <thead> <tr></tr></thead>
+            <tbody id="bodytablaSumaIva"></tbody>
+          </table>
+
+          <div class="d-flex justify-content-between align-items-center py-2"
+             style="border-bottom: 2px solid var(--accent);">
+          <span style="font-size:medium; font-weight:bold; text-transform:uppercase; letter-spacing:.08em; color:var(--accent);">
+            Valor Total
+          </span>
+          <input type="text" class="form-control text-end fw-bold"
+                 id="importeTotal" readonly name="nimporteTotal"
+                 style="width:140px; border:0; background:transparent; font-size:large; color:var(--accent);">
+          </div>
+        </div>
+       </div>
+    </div>
+  </div>
+
+  <!-- ─── ACCIONES ─── -->
+  <div class="d-flex gap-3 mb-5">
+    <button class="btn btn-primary" type="submit" id="guardar-btn" disabled>
+      <i class="fas fa-save me-2"></i> Guardar Factura
+    </button>
+  </div>
+</form>
+
+{% endblock %}
+{% block footer_scripts %}
+  <script src="/static/js/funcionesordenCompraT.js" defer></script>
+{% endblock %}

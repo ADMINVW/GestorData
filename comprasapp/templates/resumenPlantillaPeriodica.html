@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block titulo %} Plantilla Periodica {% endblock %}
+{% block contenido %}
+<div class="col-12">
+  <div class="card">
+    <div class="card-header">
+            <h5>PLANTILLA PERIODICA</h5>
+        </div>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">
+        <h5 class="card-title text-center"">DETALLE FACTURA</h5>
+         <div class="row" style="margin-bottom: 1%;">
+                <div class="col-2"><b>Nombre: </b></div> <div class="col-4">{{nplantilla.pc_concepto}}</div>
+                <div class="col-2"><b> Código:</b></div> <div class="col-4"><h5>{{nplantilla.pc_codigo}}</h5></div>
+            </div>
+            
+            <div class="row" style="margin-bottom: 1%;">
+                <div class="col-2"><b>Tipo: </b></div><div class="col-4">{{nplantilla.to_descrip}}</div><div class="col-2"><b>Subtipo: </b></div><div class="col-4">
+                  {%if nplantilla.pc_subtipo == 'B' %} BIENES {% endif %} {% if nplantilla.pc_subtipo == 'S' %} SERVICIOS {% endif %}
+                </div>
+            </div>
+
+            <div class="row" style="margin-bottom: 1%;">
+                <div class="col-2"><b>Proveedor: </b></div><div class="col-6">{{nplantilla.pv_nombre}}</div><div class="col-2"><b>Código Proveedor: </b></div>{{nplantilla.pc_codpro}}
+            </div>
+            <div class="row" style="margin-bottom: 1%;">
+                <div class="col-2"><b>Solicitante: </b></div><div class="col-10">{{nplantilla.so_nombres}}</div>
+            </div>
+            <div class="row" style="margin-bottom: 1%;">
+                <div class="col-2"><b>Descripción: </b></div><div class="col-10">{{nplantilla.pc_obser1}}</div>
+            </div>
+            <div class="row" style="margin-bottom: 1%;">
+                <div class="col-2"><b>Tipo Comprobante: </b></div><div class="col-10">{{nplantilla.pc_cod_tip}} - {{nplantilla.tip_comprobante}}</div>
+            </div>
+            <div class="row" style="margin-bottom: 1%;">
+                <div class="col-2"><b>Tipo Credito: </b></div><div class="col-10">{{nplantilla.pc_ide_cre}} - {{nplantilla.cre_descrip}}</div>
+            </div>
+            <div class="row" style="margin-bottom: 1%;">
+                <div class="col-2"><b>% Retencion Iva: </b></div><div class="col-4">{% if niva %}{% for iva in niva %} {{iva.rt_porcen}} - {{iva.rt_descrip}}{% endfor %} {% else %} N/A {% endif %}</div>
+                <div class="col-2"><b>% Retencion Fuente: </b></div><div class="col-4">{% if nfuente %}{% for fuente in nfuente %} {{fuente.rt_porcen}} - {{fuente.rt_descrip}} {% endfor%} {% else %} N/A {% endif %}</div>
+            </div>  
+      </li>
+      {% if ngrupo %}
+      <li class="list-group-item">
+         <h5 class="card-title text-center"">DETALLE CONTABLE</h5>
+         <div class="row" style="margin-bottom: 1%;">
+                <div class="col-2"><b>Centro de Gastos: </b></div> <div class="col-6"> {{ngrupo.ct_grupo}}</div><div class="col-2"><b> Código:</b></div>{{ngrupo.ct_codgrp}}
+            </div>
+            <br>
+            <div class="table-responsive" id="tableCentroG">
+                          <table class="table table-hover  table-sm" id="listCentroG">
+                            <thead class="border-bottom font-weight-bold">
+                              <tr>
+                                <th style="text-align: center">
+                                  SubGrupo
+                                </th>
+                                <th style="text-align: center">
+                                  Cuenta
+                                </th>
+                                <th style="text-align: center">
+                                  Descripción
+                                </th>
+                                <th style="text-align: right;">
+                                  % Asignado
+                                </th>
+                              </tr>
+                            </thead>
+                           {% for subgrupo in nplantillaCtb %}
+                            <tbody id="listCentroG_body">
+                              <tr>
+                                <td>
+                                  <p > {{subgrupo.pt_subgrupo}}</p>
+                                </td>
+                                <td >
+                                  <p >{{subgrupo.cuenta}}</p>
+                                </td>
+                                <td >
+                                  <p>{{subgrupo.ct_descripcion}}</p>
+                                </td>
+                                <td style="text-align: right;">
+                                  <p>{{subgrupo.pt_porcentaje}}</p>
+                                </td>
+                              </tr>
+                              {% endfor %}
+                            </tbody>
+                            <tfoot>
+                               <tr>
+                                <td style="text-align: right;" colspan="3"><b>Total Asignado</b></td>
+                                <td style="text-align: right; white-space: nowrap; overflow-x: auto"><b>
+                                    <input type="text" id="sumporcentaje" readonly  value="100%"                                 
+                                    style="border: 0;text-align: right"  />
+                                </b></td>
+                              </tr>
+                            </tfoot>
+                          </table>
+                        </div>
+      </li>
+      {% else %}
+    <div class="alert alert-warning alert-dismissible">
+      NOTA: Plantilla no tiene detalle contable
+    </div>
+      {% endif %}
+    </ul>
+    <div class="card-footer">
+        <a class="btn btn-success"  role="button" href="/comprasapp/editarPlantilla/?codigo={{nplantilla.pc_codigo}}&company={{ company_key }}" id="editar-btn">Editar</a>
+      <a class="btn btn-danger" role="button" href="{% url 'cargarTmplPlantillas' %}?company={{ company_key }}" id="cancelar-btn">Cancelar</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

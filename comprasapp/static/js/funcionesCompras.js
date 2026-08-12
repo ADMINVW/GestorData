@@ -85,9 +85,22 @@ function leerArchivoXML() {
             FechaIngresoHora.value = formatoFechaHora();
 
             if (validaFecha(FechaEmision.value) === false) {
-                alert("Pasoron 5 días de la fecha de la factura, ya no se la puede ingresar.");
+                alert("Factura no puede ser ingresada: Fecha de emisión del mes anterior o de mas de 5 días");
                 document.getElementById('botonGuardar').disabled = true;
-              }
+            }
+
+            //mine (Validacion RUC compania activa con ruc de comparador de xml)
+            var ck = sessionStorage.getItem('company_key');
+
+            identificacionComprador = xmlDoc.querySelector('infoFactura identificacionComprador');
+            if (ck.substring(0, 9) == 'ecuawagen' && identificacionComprador.textContent != '1791765842001') {
+                alert("Factura no corresponde a la compania ")
+                document.getElementById('botonGuardar').disabled = true;
+            }
+            if (ck.substring(0, 10) == 'germanmoto' && identificacionComprador.textContent != '1792121795001') {
+                alert("Factura no corresponde a la compania")
+                document.getElementById('botonGuardar').disabled = true;
+            }
 
 
             //Detalle factura
@@ -393,32 +406,38 @@ function formatoFechaHora() {
 };
 
 function validaFecha(fecha) {
-        let fechaStr = fecha;  
+    let fechaStr = fecha;
 
-        // Separar día, mes y año
-        let partes = fechaStr.split("/");
-        let dia = parseInt(partes[0], 10);
-        let mes = parseInt(partes[1], 10) - 1; // Los meses en JS van de 0 a 11
-        let anio = parseInt(partes[2], 10);
+    // Separar día, mes y año
+    let partes = fechaStr.split("/");
+    let dia = parseInt(partes[0], 10);
+    let mes = parseInt(partes[1], 10) - 1; // Los meses en JS van de 0 a 11
+    let anio = parseInt(partes[2], 10);
 
-        // Crear objeto Date
-        let fechaFactura = new Date(anio, mes, dia);
+    // Crear objeto Date
+    let fechaFactura = new Date(anio, mes, dia);
 
-        // Fecha actual (sin horas para evitar errores)
-        let hoy = new Date();
-        hoy.setHours(0,0,0,0);
+    // Fecha actual (sin horas para evitar errores)
+    let hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
 
-        // Calcular diferencia en milisegundos
-        let diferenciaMs = hoy - fechaFactura;
+    // Calcular diferencia en milisegundos
+    let diferenciaMs = hoy - fechaFactura;
 
-        // Convertir a días
-        let diferenciaDias = diferenciaMs / (1000 * 60 * 60 * 24);
+    // Convertir a días
+    let diferenciaDias = diferenciaMs / (1000 * 60 * 60 * 24);
 
-        if (diferenciaDias <= 5 && diferenciaDias >= 0) {
-            return true;  // La fecha es válida
-        } else {
-            return false; // La fecha no es válida
+    //validacion 5 días
+    if (diferenciaDias <= 5 && diferenciaDias >= 0) {
+        //validacion mes anterior
+        mesActual = hoy.getMonth()
+        if (mes != mesActual) {
+            return false;
         }
+        return true;  // La fecha es válida
+    } else {
+        return false; // La fecha no es válida
+    }
 };
 
 async function enviarDatosFactura() {
@@ -558,9 +577,9 @@ async function enviarDatosFactura() {
                 console.error('No se recibió URL de redirección');
             }
         },
-        error: function (xhr, status, error) {
-            console.error('Ha ocurrido un error:', error);
-            document.getElementById('botonGuardar').disabled = true;
+        error: function (xhr) {
+            const respuesta = JSON.parse(xhr.responseText);
+            swal.fire("Oops!", "Ocurrio un error (" + respuesta.detallerr + "); De requetir detalle comunique a sistemas ", "error");
         }
     });
 }
@@ -711,7 +730,7 @@ function actualizarPrecio(index) {
     var cantidad = cantidadInput.value;
     var precioTotal = factura[index].getElementsByTagName("precioTotalSinImpuesto")[0].textContent;
     var descuento = factura[index].getElementsByTagName("descuento")[0].textContent;
-    var nuevoPrecioUnitario  = parseFloat(precioTotal) + parseFloat(descuento);
+    var nuevoPrecioUnitario = parseFloat(precioTotal) + parseFloat(descuento);
     nuevoPrecioUnitario = nuevoPrecioUnitario / cantidad;
 
     cantidadInput.value = cantidad;

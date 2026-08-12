@@ -32,7 +32,7 @@ SESSION_CREDENTIALS_KEY = os.getenv('SESSION_CREDENTIALS_KEY')
 FERNET = Fernet(SESSION_CREDENTIALS_KEY.encode())
 
 # SECURITY WARNING: don't run with debug turned on in production!
-#DEBUG = False
+DEBUG = True
 #ALLOWED_HOSTS = ['192.168.1.14', 'localhost', '127.0.0.1']
 #CSRF_TRUSTED_ORIGINS = [
 #    'https://192.168.1.14',

@@ -18,8 +18,8 @@
       <form id="form-retencion" class="form-horizontal" method="post">
         <div>
           <input id="user"     name="user"     type="hidden" value="{{ db_user }}">
-          <input id="compania" name="compania" type="hidden" value="{{ ncompania }}">
-          <input id="agencia"  name="agencia"  type="hidden" value="{{ nagencia }}">
+          <input id="compania" name="compania"  type="hidden" value="{{ ncompania }}">
+          <input id="agencia"  name="agencia"   type="hidden" value="{{ nagencia }}">
           <input id="bodega"   name="bodega"   type="hidden" value="{{ nbodega }}">
           <input id="division" name="division" type="hidden" value="{{ ndivision }}">
         </div>
@@ -470,7 +470,7 @@
           </div>
           <div class="card-footer">
             <button class="btn btn-primary" type="submit" id="guardar-btn">Guardar</button>
-            <a class="btn btn-danger" role="button" data-url="../../../verTransaccion/{{norden}}" href="../../../verTransaccion/{{norden}}?company={{ company_key }}"
+            <a class="btn btn-danger" role="button" data-url="../../../verTransaccion/{{norden}}"  
               id="cancelar-btn">Cancelar</a>
           </div>
         </div>
