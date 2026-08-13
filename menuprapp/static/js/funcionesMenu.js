@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
     //recorro todos los items de menu
     $(".dropdown-item").each(function () {
         let id = this.id;
+        console.log("id analisis", id)
         //si la opción del menu no es parte de conjunto de accesos, lo deshabilita
         if (!idsHabilitados.includes(id)) {
             $(this)

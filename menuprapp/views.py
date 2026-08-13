@@ -21,7 +21,7 @@ def mimenu(request):
     context = {
         'company_key': company_key,
         'company':     company_context(request).get('company', ''),        # ← para el navbar
-        'username':     usuario,
+        'username':     "mine",
         'nombre_user': company_context(request).get('db_user_name', ''),
         'compania':    user_data.get('compania', ''),
         'agencia':     user_data.get('agencia', ''),
