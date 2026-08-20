@@ -5,15 +5,27 @@
 /* ─── TEMAS DE EMPRESA ─── */
 
 .theme-default .navbar-brand,
-.theme-default .nav-link { color: #6c757d !important; }
+.theme-default .nav-link {
+  color: #6c757d !important;
+}
 
-.theme-ecuawagen .app-navbar  { border-bottom-color: #0057b8; }
+.theme-ecuawagen .app-navbar {
+  border-bottom-color: #0057b8;
+}
+
 .theme-ecuawagen .navbar-brand,
-.theme-ecuawagen .nav-link    { color: #0057b8 !important; }
+.theme-ecuawagen .nav-link {
+  color: #0057b8 !important;
+}
 
-.theme-germanmoto .app-navbar  { border-bottom-color: #c0112c; }
+.theme-germanmoto .app-navbar {
+  border-bottom-color: #c0112c;
+}
+
 .theme-germanmoto .navbar-brand,
-.theme-germanmoto .nav-link    { color: #c0112c !important; }
+.theme-germanmoto .nav-link {
+  color: #c0112c !important;
+}
 
 
 /* ═══════════════════════════════════════════════
@@ -87,7 +99,7 @@ p.warning {
 .schema-faq-section {
   border: 1px solid #dadce0 !important;
   border-radius: 6px;
-  box-shadow: 0 0 10px rgba(0,0,0,.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, .1);
   margin-top: 30px;
   padding-bottom: 30px;
 }
@@ -122,27 +134,4 @@ p.warning {
   font-size: 14px;
   font-weight: 400;
   width: 140px;
-}
-
-
-/* ═══════════════════════════════════════════════
-   SUBMENÚS DROPDOWN
-   ═══════════════════════════════════════════════ */
-
-.dropdown-menu li { position: relative; }
-
-.dropdown-menu .dropdown-submenu {
-  display: none;
-  position: absolute;
-  left: 100%;
-  top: -7px;
-}
-
-.dropdown-menu .dropdown-submenu-left {
-  right: 100%;
-  left: auto;
-}
-
-.dropdown-menu > li:hover > .dropdown-submenu {
-  display: block;
 }

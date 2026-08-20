@@ -1,7 +1,6 @@
 //js para template de CRUD de plantilla periodica (plantillaPeriodica.html)
 //GLOBALES
 
-"use strict";
 
 let grancontrib = "N"
 let rimpe = "N"

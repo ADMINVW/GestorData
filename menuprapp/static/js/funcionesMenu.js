@@ -10,15 +10,12 @@ function cerrarSesion() {
 
 
 document.addEventListener("DOMContentLoaded", function (event) {
-    console.log(" DOMContentLoaded -IDS " + $("#accesos").text())
     //capturo id de acceso de usuario
     const accesosUsuario = JSON.parse($("#accesos").text());
-    //capturo solo datos con llave del diccionario
-    const idsHabilitados = accesosUsuario.map(item => item.pf_codmenu);
+    const idsHabilitados = accesosUsuario
     //recorro todos los items de menu
     $(".dropdown-item").each(function () {
         let id = this.id;
-        console.log("id analisis", id)
         //si la opción del menu no es parte de conjunto de accesos, lo deshabilita
         if (!idsHabilitados.includes(id)) {
             $(this)
