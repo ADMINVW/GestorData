@@ -1,0 +1,224 @@
+[
+  {
+    "codigo_menu": "CO3_ASIGNACIONPROVEE",
+    "modulo": "Compras",
+    "titulo": "Compras - Asignación de Proveedor",
+    "descripcion": "Este módulo permite relacionar proveedores con los centros de gastos correspondientes, de acuerdo con la configuración del proceso de compras.",
+    "objetivo": "Mantener correctamente configurada la asociación entre proveedores y centros de gastos para facilitar su utilización en operaciones posteriores.",
+    "proceso": [
+      "Seleccione el proveedor que desea configurar.",
+      "Busque o seleccione el centro de gastos correspondiente.",
+      "Revise la información de ambos registros.",
+      "Realice la asignación.",
+      "Guarde los cambios para completar la configuración."
+    ],
+    "consejos": [
+      "Confirme que el proveedor seleccionado sea el correcto antes de guardar.",
+      "Evite crear asignaciones duplicadas.",
+      "Revise las asociaciones existentes antes de registrar una nueva.",
+      "Compruebe que tanto el proveedor como el centro de gastos se encuentren activos."
+    ],
+    "activo": true
+  },
+  {
+    "codigo_menu": "CO3_CONSULTA",
+    "modulo": "Compras",
+    "titulo": "Compras - Centro de Gastos - Consulta",
+    "descripcion": "Este módulo permite consultar la información relacionada con los centros de gastos utilizados en los procesos de compra.",
+    "objetivo": "Localizar y revisar los centros de gastos disponibles para identificar correctamente la asignación correspondiente a una operación.",
+    "proceso": [
+      "Ingrese los criterios de búsqueda disponibles.",
+      "Ejecute la consulta.",
+      "Revise los centros de gastos encontrados.",
+      "Seleccione el registro requerido para consultar su información.",
+      "Limpie los filtros cuando necesite realizar una nueva búsqueda."
+    ],
+    "consejos": [
+      "Compruebe el código y la descripción antes de seleccionar un centro de gastos.",
+      "Utilice filtros específicos para encontrar el registro con mayor rapidez.",
+      "Verifique que el centro de gastos se encuentre activo cuando la pantalla muestre su estado."
+    ],
+    "activo": true
+  },
+  {
+    "codigo_menu": "CO2_CONSULTA",
+    "modulo": "Compras",
+    "titulo": "Compras - Consulta",
+    "descripcion": "Este módulo permite consultar las órdenes de compra registradas y revisar su información principal.",
+    "objetivo": "Localizar órdenes de compra existentes mediante los criterios de búsqueda disponibles y acceder a su información para revisión o seguimiento.",
+    "proceso": [
+      "Ingrese o seleccione los criterios de búsqueda disponibles.",
+      "Ejecute la consulta para obtener las órdenes que coincidan con los filtros establecidos.",
+      "Revise los resultados presentados por el sistema.",
+      "Seleccione una orden para consultar su información detallada cuando la pantalla lo permita.",
+      "Modifique o limpie los filtros para realizar una nueva búsqueda."
+    ],
+    "consejos": [
+      "Utilice criterios específicos para reducir la cantidad de resultados.",
+      "Compruebe las fechas y el proveedor antes de seleccionar una orden.",
+      "Limpie los filtros anteriores cuando vaya a realizar una consulta diferente."
+    ],
+    "activo": true
+  },
+  {
+    "codigo_menu": "CO2_ORDENCOMPRA",
+    "modulo": "Compras",
+    "titulo": "Compras - Orden de Compras",
+    "descripcion": "Este módulo permite registrar y administrar órdenes de compra dirigidas a los proveedores de la empresa.",
+    "objetivo": "Crear una orden de compra con la información necesaria para solicitar productos o servicios, controlar sus valores y mantener un registro formal de la operación.",
+    "proceso": [
+      "Seleccione el proveedor al que se emitirá la orden de compra.",
+      "Ingrese la información general solicitada por el formulario.",
+      "Agregue los productos o servicios que formarán parte de la orden.",
+      "Revise las cantidades, los precios, los impuestos y los valores totales.",
+      "Compruebe que la información ingresada sea correcta.",
+      "Guarde la orden de compra para completar el registro."
+    ],
+    "consejos": [
+      "Verifique que el proveedor seleccionado corresponda a la compra que se está realizando",
+      "Revise cuidadosamente las cantidades y los precios antes de guardar la orden.",
+      "Evite registrar dos veces la misma orden de compra.",
+      "Complete todos los campos obligatorios indicados por el sistema."
+    ],
+    "activo": true
+  },
+  {
+    "codigo_menu": "CO2_PLANTILLASPERIOD",
+    "modulo": "Compras",
+    "titulo": "Compras - Plantillas Periodicas",
+    "descripcion": "Este módulo permite administrar plantillas utilizadas para compras que se realizan de manera repetitiva o periódica.",
+    "objetivo": "Reducir el ingreso manual de información mediante la reutilización de configuraciones previamente definidas para operaciones frecuentes.",
+    "proceso": [
+      "Revise las plantillas periódicas existentes.",
+      "Seleccione una plantilla cuando necesite consultar o utilizar su información.",
+      "Cree una nueva plantilla cuando la operación periódica todavía no se encuentre registrada.",
+      "Ingrese los datos generales, productos, servicios o condiciones requeridas.",
+      "Defina la periodicidad o los parámetros disponibles en la pantalla.",
+      "Guarde la plantilla para utilizarla posteriormente."
+    ],
+    "consejos": [
+      "Utilice nombres que permitan identificar fácilmente la finalidad de cada plantilla.",
+      "Revise la información de la plantilla antes de utilizarla en una nueva operación.",
+      "Actualice la plantilla cuando cambien los productos, proveedores, precios o condiciones",
+      "Evite crear varias plantillas para el mismo proceso cuando una existente pueda ser actualizada.."
+    ],
+    "activo": true
+  },
+  {
+    "codigo_menu": "CF2_CENTROGASTOS",
+    "modulo": "Configuracion",
+    "titulo": "Configuración - Centro de Gastos",
+    "descripcion": "Esta seccion permite crear y ver  el flujo de negocio de la empresa.",
+    "objetivo": "Revisar y añadir campos al flujo del negocio , segun los requerimientos de la empresa.",
+    "proceso": [
+      "Crear en orden los niveles del negocio y verifica el nivel creado.",
+      "Crear los campos dentro de los niveles de la linea de negocio, siguiendo los pasos correspondientes.",
+      "Verifica el campo creado en la vista del árbol.",
+      "Observar los campos creados en la vista del arbol siguiendo la ruta del negocio."
+    ],
+    "consejos": [
+      "Verificar  la información para la creación de niveles y campos.",
+      "No saltar pasos , recuerda cada nivel tiene una secuencia con otro nivel.",
+      "No uses codigos al azar para los campos, usa los recomendados por la empresa."
+    ],
+    "activo": true
+  },
+  {
+    "codigo_menu": "CF2_BODEGAS",
+    "modulo": "Configuración",
+    "titulo": "Configuración - Bodegas",
+    "descripcion": "Esta seccion permite crear y ver las bodegas correspondientes a las lineas de negocio.",
+    "objetivo": "Revisar y añadir bodegas a las lineas de negocio correspondientes.",
+    "proceso": [
+      "Escoger en que campo se va a crear la bodega.",
+      "Colocar el nombre de la bodega , el codigo para proceder a guardar.",
+      "Verificar la creación de la bodega en la vista de la tabla."
+    ],
+    "consejos": [
+      "Selecciona el campo correcto para no tener ningun error.",
+      "Antes de guardar verifica los nombres y codigos de bodegas.",
+      "No te saltar pasos para evitar errores."
+    ],
+    "activo": true
+  },
+  {
+    "codigo_menu": "CF2_CONFIGMENUS",
+    "modulo": "Configuración",
+    "titulo": "Configuración - Configuración de Menús",
+    "descripcion": "Esta seccion permite ver , crear y elimiar menús.",
+    "objetivo": "Revisar , crear y elimnar menús que requiera la empresa.",
+    "proceso": [
+      "Crear los menús principales con su respectivo nombre y codigo.",
+      "Visualizar los menús principales en la vista de árbol.",
+      "Para crear y/o elimar submenús solo debes dar click en cualquier menú en la vista.",
+      "Al crear solo debes poner el nombre del menú y automaticamente se crea el codigo."
+    ],
+    "consejos": [
+      "Verificar el nombre y código de los menús principales.",
+      "En caso de eliminar un menú , tomar en cuenta la advertencia.",
+      "No usar códgios al azar."
+    ],
+    "activo": true
+  },
+  {
+    "codigo_menu": "CF2_USUARIOS",
+    "modulo": "Configuración",
+    "titulo": "Configuración - Usuarios",
+    "descripcion": "Esta seccion permite  denegar y conceder permisos a los usuarios referentes a los menús y submenús.",
+    "objetivo": "Revisar usuarios  y delegar permisos para sus funciones y requerimientos en la empresa.",
+    "proceso": [
+      "Seleccione el usuario.",
+      "Revise los permisos que tiene el usuario.",
+      "Modicar los permisos mediante un click.",
+      "Presione guardar para modificar los permisos"
+    ],
+    "consejos": [
+      "Verifique los permisos otorgados.",
+      "Verifique los cambios realizados.",
+      "Siga los pasos recomendados."
+    ],
+    "activo": true
+  },
+  {
+    "codigo_menu": "IM2_ORDENIMPORTACION",
+    "modulo": "Importaciones",
+    "titulo": "Importaciones - Orden de Importación",
+    "descripcion": "Esta sección permite acceder a los reportes disponibles para analizar la información registrada en el módulo de Compras.",
+    "objetivo": "Consultar información consolidada de compras mediante reportes y filtros que faciliten su análisis y seguimiento.",
+    "proceso": [
+      "Seleccione el reporte a generar.",
+      "Ingrese los criterios o rangos de consulta requeridos.",
+      "Ejecute la generación del reporte.",
+      "Revise la información obtenida.",
+      "Exporte o imprima el reporte cuando la opción se encuentre disponible."
+    ],
+    "consejos": [
+      "Verifique el rango de fechas antes de generar el reporte.",
+      "Utilice filtros específicos para evitar resultados innecesariamente extensos.",
+      "Compruebe que el reporte corresponda a la compañía y al período requeridos.",
+      "Revise la información en pantalla antes de exportarla."
+    ],
+    "activo": true
+  },
+  {
+    "codigo_menu": "RE2_ORDENCOMPRA",
+    "modulo": "Repuestos",
+    "titulo": "Repuestos - Orden de Compra",
+    "descripcion": "Esta sección permite acceder a los reportes disponibles para analizar la información registrada en el módulo de Compras.",
+    "objetivo": "Consultar información consolidada de compras mediante reportes y filtros que faciliten su análisis y seguimiento.",
+    "proceso": [
+      "Seleccione el reporte que desea generar.",
+      "Ingrese los criterios o rangos de consulta requeridos.",
+      "Ejecute la generación del reporte.",
+      "Revise la información obtenida.",
+      "Exporte o imprima el reporte cuando la opción se encuentre disponible."
+    ],
+    "consejos": [
+      "Verifique el rango de fechas antes de generar el reporte.",
+      "Utilice filtros específicos para evitar resultados innecesariamente extensos.",
+      "Compruebe que el reporte corresponda a la compañía y al período requeridos.",
+      "Revise la información en pantalla antes de exportarla."
+    ],
+    "activo": true
+  }
+]
