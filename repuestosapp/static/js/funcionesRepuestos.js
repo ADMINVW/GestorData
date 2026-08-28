@@ -8,88 +8,98 @@ $.ajaxSetup({
 });
 
 function leerArchivoXML() {
-    //mine
-    sessionStorage.removeItem("form_enviado");
-    // console.log("fomr", sessionStorage.removeItem("form_enviado"))
-    // 
-    var inputElement = document.getElementById('inputGroupFileFactura');
+    //mine0826: se capturo un retorno para el manejo de validaciones y disabled de boton guardar en caso de
+    return new Promise((resolve) => {
+        var inputElement = document.getElementById('inputGroupFileFactura');
 
-    if (inputElement.files.length > 0) {
-        var archivo = inputElement.files[0];
-        var lector = new FileReader();
-        lector.onload = function (e) {
-            var contenidoXML = e.target.result;
+        if (inputElement.files.length > 0) {
+            var archivo = inputElement.files[0];
+            var lector = new FileReader();
+            lector.onload = function (e) {
+                var contenidoXML = e.target.result;
 
-            var elementoTemporal = document.createElement("textarea");
-            elementoTemporal.innerHTML = contenidoXML;
-            var textoDecodificado = elementoTemporal.value;
-            //var Periodicas = document.getElementById("PeriodicasSwitchCheck");
-            var NombreProveedor = document.getElementById("nombreProveedor");
-            var RucProveedor = document.getElementById("rucProveedor");
-            var FechaEmision = document.getElementById("fechaEmision");
-            var CodigoPorcentaje = document.getElementById("codigoPorcentaje");
-            var SubTotalSinImpuestos = document.getElementById("subtotalSinImpuestos");
-            var Descuento = document.getElementById("totalDescuento");
-            var TotalFactura = document.getElementById("importeTotal");
-            var FechaIngresoHora = document.getElementById("fechaIngresoHora");
-            var SerieFactura = document.getElementById("serieFactura");
-            var NumeroFactura = document.getElementById("numeroFactura");
-            var AutorizacionSri = document.getElementById("autorizacionSri");
+                var elementoTemporal = document.createElement("textarea");
+                elementoTemporal.innerHTML = contenidoXML;
+                var textoDecodificado = elementoTemporal.value;
+                //var Periodicas = document.getElementById("PeriodicasSwitchCheck");
+                var NombreProveedor = document.getElementById("nombreProveedor");
+                var RucProveedor = document.getElementById("rucProveedor");
+                var FechaEmision = document.getElementById("fechaEmision");
+                var CodigoPorcentaje = document.getElementById("codigoPorcentaje");
+                var SubTotalSinImpuestos = document.getElementById("subtotalSinImpuestos");
+                var Descuento = document.getElementById("totalDescuento");
+                var TotalFactura = document.getElementById("importeTotal");
+                var FechaIngresoHora = document.getElementById("fechaIngresoHora");
+                var SerieFactura = document.getElementById("serieFactura");
+                var NumeroFactura = document.getElementById("numeroFactura");
+                var AutorizacionSri = document.getElementById("autorizacionSri");
 
 
-            var textoSinCDATA = textoDecodificado.replace(/<!\[CDATA\[|\]\]>/g, '');
+                var textoSinCDATA = textoDecodificado.replace(/<!\[CDATA\[|\]\]>/g, '');
 
-            var textoSinDeclaracion = textoSinCDATA.replace(/<\?xml\s.*?\?>/, '').replace(/<comprobante>\s*<\?xml.*?\?>/s, '<comprobante>');
+                var textoSinDeclaracion = textoSinCDATA.replace(/<\?xml\s.*?\?>/, '').replace(/<comprobante>\s*<\?xml.*?\?>/s, '<comprobante>');
 
-            var parser = new DOMParser();
-            var xmlDoc = parser.parseFromString(textoSinDeclaracion, 'text/xml');
+                var parser = new DOMParser();
+                var xmlDoc = parser.parseFromString(textoSinDeclaracion, 'text/xml');
 
-            //var PeriodicasisChecked = Periodicas.checked;
+                //var PeriodicasisChecked = Periodicas.checked;
 
-            var nombreElemento = xmlDoc.querySelector('factura > infoTributaria > razonSocial');
-            NombreProveedor.value = nombreElemento.textContent;
+                var nombreElemento = xmlDoc.querySelector('factura > infoTributaria > razonSocial');
+                NombreProveedor.value = nombreElemento.textContent;
 
-            nombreElemento = xmlDoc.querySelector('infoTributaria ruc');
-            RucProveedor.value = nombreElemento.textContent;
+                nombreElemento = xmlDoc.querySelector('infoTributaria ruc');
+                RucProveedor.value = nombreElemento.textContent;
 
-            nombreElemento = xmlDoc.querySelector('infoFactura fechaEmision');
-            FechaEmision.value = nombreElemento.textContent;
+                nombreElemento = xmlDoc.querySelector('infoFactura fechaEmision');
+                FechaEmision.value = nombreElemento.textContent;
 
-            nombreElemento = xmlDoc.querySelector('infoFactura > totalConImpuestos > totalImpuesto > codigoPorcentaje');
-            CodigoPorcentaje.value = nombreElemento.textContent;
+                nombreElemento = xmlDoc.querySelector('infoFactura > totalConImpuestos > totalImpuesto > codigoPorcentaje');
+                CodigoPorcentaje.value = nombreElemento.textContent;
 
-            nombreElemento = xmlDoc.querySelector('infoFactura totalDescuento');
-            Descuento.value = nombreElemento.textContent;
+                nombreElemento = xmlDoc.querySelector('infoFactura totalDescuento');
+                Descuento.value = nombreElemento.textContent;
 
 
-            nombreElemento = xmlDoc.querySelector('infoFactura totalSinImpuestos');
-            SubTotalSinImpuestos.value = nombreElemento.textContent;
+                nombreElemento = xmlDoc.querySelector('infoFactura totalSinImpuestos');
+                SubTotalSinImpuestos.value = nombreElemento.textContent;
 
-            nombreElemento = xmlDoc.querySelector('infoFactura importeTotal');
-            TotalFactura.value = nombreElemento.textContent;
+                nombreElemento = xmlDoc.querySelector('infoFactura importeTotal');
+                TotalFactura.value = nombreElemento.textContent;
 
-            nombreElemento = xmlDoc.querySelector('infoTributaria estab');
-            SerieFactura.value = nombreElemento.textContent;
+                nombreElemento = xmlDoc.querySelector('infoTributaria estab');
+                SerieFactura.value = nombreElemento.textContent;
 
-            nombreElemento = xmlDoc.querySelector('infoTributaria ptoEmi');
-            SerieFactura.value = SerieFactura.value + nombreElemento.textContent;
+                nombreElemento = xmlDoc.querySelector('infoTributaria ptoEmi');
+                SerieFactura.value = SerieFactura.value + nombreElemento.textContent;
 
-            nombreElemento = xmlDoc.querySelector('infoTributaria secuencial');
-            NumeroFactura.value = nombreElemento.textContent;
+                nombreElemento = xmlDoc.querySelector('infoTributaria secuencial');
+                NumeroFactura.value = nombreElemento.textContent;
 
-            nombreElemento = xmlDoc.querySelector('infoTributaria claveAcceso');
-            AutorizacionSri.value = nombreElemento.textContent;
+                nombreElemento = xmlDoc.querySelector('infoTributaria claveAcceso');
+                AutorizacionSri.value = nombreElemento.textContent;
 
-            FechaIngresoHora.value = formatoFechaHora();
+                FechaIngresoHora.value = formatoFechaHora();
+                //--MINE0826: se inuficó funciones validaFecha y validaEmpresa para todas las app de ingreso de facturas
+                if (validaFecha(FechaEmision.value) === false) {
+                    alert("Factura no puede ser ingresada: Fecha de emisión del mes anterior o de mas de 5 días");
+                    resolve(false);
+                    return;
+                }
 
-            //Detalle factura
-            var tablaSumaIva = "" //"<tr><th>PorcentajeIva</th><th>ValorIva</th></tr>"
-            var tablaSumaBase = "" //"<tr><th>PorcentajeIva</th><th>ValorBase</th></tr>"
-            var sumasPorTarifa = {}; // Aquí acumulamos
-            var tablaTarifa = "<tr><th>BaseImponible</th><th>PorcentajeIva</th><th>ValorIva</th></tr>"; //almacena iva po item
-            var tabla = "<tr><th scope='col'>#</th><th scope='col'>Cantidad</th><th scope='col'>Item</th><th scope='col'>Cod. local</th><th scope='col'>Descripción</th><th scope='col'>Precio U.</th><th scope='col'>Descuento</h><th scope='col'>Total</th></tr>";
-            factura = xmlDoc.getElementsByTagName("detalle");
-            fetchCuentaProv().then(opcionesHTML => {
+                identificacionComprador = xmlDoc.querySelector('infoFactura identificacionComprador');
+                if (validaEmpresa(identificacionComprador) === false) {
+                    alert("Factura no corresponde a la compania ")
+                    resolve(false);
+                    return;
+                }
+                //---
+                //Detalle factura
+                var tablaSumaIva = "" //"<tr><th>PorcentajeIva</th><th>ValorIva</th></tr>"
+                var tablaSumaBase = "" //"<tr><th>PorcentajeIva</th><th>ValorBase</th></tr>"
+                var sumasPorTarifa = {}; // Aquí acumulamos
+                var tablaTarifa = "<tr><th>BaseImponible</th><th>PorcentajeIva</th><th>ValorIva</th></tr>"; //almacena iva po item
+                var tabla = "<tr><th scope='col'>#</th><th scope='col'>Cantidad</th><th scope='col'>Item</th><th scope='col'>Cod. local</th><th scope='col'>Descripción</th><th scope='col'>Precio U.</th><th scope='col'>Descuento</h><th scope='col'>Total</th></tr>";
+                factura = xmlDoc.getElementsByTagName("detalle");
                 //fetchPlantillaProv(); 
                 for (var i = 0; i < factura.length; i++) {
                     var cantidad = factura[i].getElementsByTagName("cantidad")[0].textContent;
@@ -182,60 +192,9 @@ function leerArchivoXML() {
                 // Mostrar la tabla en el HTML
                 document.getElementById("tablaSumaBase").innerHTML = tablaSumaBase;
                 document.getElementById("tablaSumaIva").innerHTML = tablaSumaIva;
-
-            }).catch(error => {
-                console.error('Error al obtener las opciones del proveedor:', error);
-            })
-        }
-        lector.readAsText(archivo);
-    }
-}
-
-function fetchCuentaProv() {
-    return new Promise((resolve, reject) => {
-        var tabla = document.getElementById("tablaDetalle");
-        var selectElement = document.getElementById("rucProveedor");
-        var rucprov = selectElement.value;
-        var ck = sessionStorage.getItem('company_key') || '';
-
-        if (rucprov) {
-            $.ajax({
-                url: '/comprasapp/cuentaProv/',
-                method: 'GET',
-                headers: {
-                    'X-Company-Key': ck
-                },
-                data: {
-                    'rucprov': rucprov
-                },
-                success: function (data) {
-                    //var nuevoSelect = document.getElementById("selectCuentaProv");
-                    var opcionesHTML = '';
-                    //var celda = document.createElement('td');
-                    if (data.ncuentaprov && data.ncuentaprov.length > 0) {
-                        data.ncuentaprov.forEach(function (item) {
-                            var option = document.createElement("option");
-                            option.value = item.mc_secgrp; // Usa el campo adecuado para el valor
-                            option.text = item.ct_cuenta + "  " + item.ct_descripcion; // Usa el campo adecuado para el texto
-                            opcionesHTML += "<option value='" + option.value + "'>" + option.text + "</option>";
-                        });
-                        resolve(opcionesHTML);
-                    } else {
-                        resolve("<option value=''>No hay datos disponibles</option>");
-                        //var option = document.createElement("option");
-                        //option.value = '';
-                        //option.text = 'No hay datos disponibles';
-                        //nuevoSelect.appendChild(option);
-                    }
-                },
-                error: function (xhr, status, error) {
-                    console.error('Ha ocurrido un error:', error);
-                    reject(error)
-                }
-            });
-        } else {
-            console.warn('Por favor, seleccione una cuenta.');
-            resolve("<option value=''>Por favor, seleccione una cuenta.</option>");
+                resolve(true);
+            }
+            lector.readAsText(archivo);
         }
     });
 }
@@ -395,8 +354,10 @@ async function enviarDatosFactura() {
                 console.error('No se recibió URL de redirección');
             }
         },
-        error: function (xhr, status, error) {
-            console.error('Ha ocurrido un error:', error);
+        //mine:0826 captura de errores
+        error: function (xhr) {
+            const respuesta = JSON.parse(xhr.responseText);
+            swal.fire("Oops!", "Ocurrio un error (" + respuesta.detallerr + "); De requetir detalle comunique a sistemas ", "error");
         }
     });
 }
@@ -440,10 +401,8 @@ async function validaDatosFactura() {
     const factorventa = document.getElementById('factorVenta');
     const factura = document.getElementById('numeroFactura');
 
-    // Validación de campo de texto
+    // Mine0826:Validación de campo de texto, mensaje de vacio se puso en misma funcion
     if (validaCodigo() == false) {
-        alert('El Código Local no puede estar vacio');
-        //selsolicita.focus();
         return false;
     }
 
@@ -477,9 +436,10 @@ async function validaDatosFactura() {
         return false;
     }
 
-    //const result = await validaExisteFactura();
+    //mine0826: estaba comentado y puesta constante como false en linea de mas abajo que se comentó
+    const result = await validaExisteFactura();
 
-    const result = false;
+    //const result = false;
 
     if (result) {
         // Ejecuta el código cuando la factura existe
@@ -498,7 +458,7 @@ function actualizarPrecio(index) {
     var cantidad = cantidadInput.value;
     var precioTotal = factura[index].getElementsByTagName("precioTotalSinImpuesto")[0].textContent;
     var descuento = factura[index].getElementsByTagName("descuento")[0].textContent;
-    var nuevoPrecioUnitario  = parseFloat(precioTotal) + parseFloat(descuento);
+    var nuevoPrecioUnitario = parseFloat(precioTotal) + parseFloat(descuento);
     nuevoPrecioUnitario = nuevoPrecioUnitario / cantidad;
 
     cantidadInput.value = cantidad;
@@ -543,20 +503,41 @@ function obtenerSeleccion() {
 
 }
 
+//mine0826: se reusa, además de validar vacio, se valida duplicidad de codigo local
 function validaCodigo() {
-    var tabla = document.getElementById("tablaDetalle");
-
-    // Obtén todas las filas de la tabla
-    var filas = tabla.getElementsByTagName("tr");
-
-    // Recorre cada fila (comenzando desde 1 si la primera fila es el encabezado)
-    for (var i = 0; i < filas.length - 1; i++) {
-        // CREAR AQUI OPCION DE BIENES/SERVICIOS
-        const textCodigo = document.getElementById(`validationItemLocal_${i}`);
-        if (textCodigo.value == "") {
+    const codlocales = [];
+    // Obtén conjunto de inputs de codigos locales
+    const inputs = document.querySelectorAll("input[id^='validationItemLocal_']");
+    for (var i = 0; i < inputs.length; i++) {
+        var codLinea = inputs[i].value.trim();
+        if (codLinea == "") {
+            alert('Código Local no puede estar vacio');
             return false
-        } else {
-            return true
+        }
+        else {
+            if (i === 0) {
+                codlocales.push(codLinea)
+            }
+            else {
+
+                for (var j = 0; j < codlocales.length; j++) {
+                    var codExistente = codlocales[j]
+                    if (codExistente === codLinea) {
+                        alert("Código Local repetido: " + codExistente)
+                        return false;
+                    }
+                }
+                codlocales.push(codLinea)
+            }
         }
     }
+    return true;
 }
+
+//mine0826:se quita de template evento change en inputGroupFileFactura, para manejo de validaciones, segun respuesta habilito o no el boton guardar
+document.getElementById("inputGroupFileFactura").addEventListener("change", async function () {
+    console.log("change xml")
+    const ok = await leerArchivoXML();
+    document.getElementById('botonGuardar').disabled = !ok;
+})
+

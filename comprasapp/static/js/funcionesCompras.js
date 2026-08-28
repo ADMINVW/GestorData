@@ -8,208 +8,202 @@ $.ajaxSetup({
 });
 
 function leerArchivoXML() {
-    //mine
-    sessionStorage.removeItem("form_enviado");
-    console.log("form", sessionStorage.removeItem("form_enviado"))
-    // 
-    var inputElement = document.getElementById('inputGroupFileFactura');
+    return new Promise((resolve) => {
+        var inputElement = document.getElementById('inputGroupFileFactura');
 
-    if (inputElement.files.length > 0) {
-        var archivo = inputElement.files[0];
-        var lector = new FileReader();
-        lector.onload = function (e) {
-            var contenidoXML = e.target.result;
+        if (inputElement.files.length > 0) {
+            var archivo = inputElement.files[0];
+            var lector = new FileReader();
+            lector.onload = function (e) {
+                var contenidoXML = e.target.result;
 
-            var elementoTemporal = document.createElement("textarea");
-            elementoTemporal.innerHTML = contenidoXML;
-            var textoDecodificado = elementoTemporal.value;
-            var Periodicas = document.getElementById("PeriodicasSwitchCheck");
-            var NombreProveedor = document.getElementById("nombreProveedor");
-            var RucProveedor = document.getElementById("rucProveedor");
-            var FechaEmision = document.getElementById("fechaEmision");
-            var CodigoPorcentaje = document.getElementById("codigoPorcentaje");
-            var SubTotalSinImpuestos = document.getElementById("subtotalSinImpuestos");
-            var Descuento = document.getElementById("totalDescuento");
-            var TotalFactura = document.getElementById("importeTotal");
-            var FechaIngresoHora = document.getElementById("fechaIngresoHora");
-            var SerieFactura = document.getElementById("serieFactura");
-            var NumeroFactura = document.getElementById("numeroFactura");
-            var AutorizacionSri = document.getElementById("autorizacionSri");
+                var elementoTemporal = document.createElement("textarea");
+                elementoTemporal.innerHTML = contenidoXML;
+                var textoDecodificado = elementoTemporal.value;
+                var Periodicas = document.getElementById("PeriodicasSwitchCheck");
+                var NombreProveedor = document.getElementById("nombreProveedor");
+                var RucProveedor = document.getElementById("rucProveedor");
+                var FechaEmision = document.getElementById("fechaEmision");
+                var CodigoPorcentaje = document.getElementById("codigoPorcentaje");
+                var SubTotalSinImpuestos = document.getElementById("subtotalSinImpuestos");
+                var Descuento = document.getElementById("totalDescuento");
+                var TotalFactura = document.getElementById("importeTotal");
+                var FechaIngresoHora = document.getElementById("fechaIngresoHora");
+                var SerieFactura = document.getElementById("serieFactura");
+                var NumeroFactura = document.getElementById("numeroFactura");
+                var AutorizacionSri = document.getElementById("autorizacionSri");
 
 
-            var textoSinCDATA = textoDecodificado.replace(/<!\[CDATA\[|\]\]>/g, '');
+                var textoSinCDATA = textoDecodificado.replace(/<!\[CDATA\[|\]\]>/g, '');
 
-            var textoSinDeclaracion = textoSinCDATA.replace(/<\?xml\s.*?\?>/, '').replace(/<comprobante>\s*<\?xml.*?\?>/s, '<comprobante>');
+                var textoSinDeclaracion = textoSinCDATA.replace(/<\?xml\s.*?\?>/, '').replace(/<comprobante>\s*<\?xml.*?\?>/s, '<comprobante>');
 
 
 
-            var parser = new DOMParser();
-            var xmlDoc = parser.parseFromString(textoSinDeclaracion, 'text/xml');
+                var parser = new DOMParser();
+                var xmlDoc = parser.parseFromString(textoSinDeclaracion, 'text/xml');
 
-            var PeriodicasisChecked = Periodicas.checked;
+                var PeriodicasisChecked = Periodicas.checked;
 
-            var nombreElemento = xmlDoc.querySelector('factura > infoTributaria > razonSocial');
-            NombreProveedor.value = nombreElemento.textContent;
+                var nombreElemento = xmlDoc.querySelector('factura > infoTributaria > razonSocial');
+                NombreProveedor.value = nombreElemento.textContent;
 
-            nombreElemento = xmlDoc.querySelector('infoTributaria ruc');
-            RucProveedor.value = nombreElemento.textContent;
+                nombreElemento = xmlDoc.querySelector('infoTributaria ruc');
+                RucProveedor.value = nombreElemento.textContent;
 
-            nombreElemento = xmlDoc.querySelector('infoFactura fechaEmision');
-            FechaEmision.value = nombreElemento.textContent;
+                nombreElemento = xmlDoc.querySelector('infoFactura fechaEmision');
+                FechaEmision.value = nombreElemento.textContent;
 
-            nombreElemento = xmlDoc.querySelector('infoFactura > totalConImpuestos > totalImpuesto > codigoPorcentaje');
-            CodigoPorcentaje.value = nombreElemento.textContent;
+                nombreElemento = xmlDoc.querySelector('infoFactura > totalConImpuestos > totalImpuesto > codigoPorcentaje');
+                CodigoPorcentaje.value = nombreElemento.textContent;
 
-            nombreElemento = xmlDoc.querySelector('infoFactura totalDescuento');
-            Descuento.value = nombreElemento.textContent;
-
-
-            nombreElemento = xmlDoc.querySelector('infoFactura totalSinImpuestos');
-            SubTotalSinImpuestos.value = nombreElemento.textContent;
-
-            nombreElemento = xmlDoc.querySelector('infoFactura importeTotal');
-            TotalFactura.value = nombreElemento.textContent;
-
-            nombreElemento = xmlDoc.querySelector('infoTributaria estab');
-            SerieFactura.value = nombreElemento.textContent;
-
-            nombreElemento = xmlDoc.querySelector('infoTributaria ptoEmi');
-            SerieFactura.value = SerieFactura.value + nombreElemento.textContent;
-
-            nombreElemento = xmlDoc.querySelector('infoTributaria secuencial');
-            NumeroFactura.value = nombreElemento.textContent;
-
-            nombreElemento = xmlDoc.querySelector('infoTributaria claveAcceso');
-            AutorizacionSri.value = nombreElemento.textContent;
-
-            FechaIngresoHora.value = formatoFechaHora();
-
-            if (validaFecha(FechaEmision.value) === false) {
-                alert("Factura no puede ser ingresada: Fecha de emisión del mes anterior o de mas de 5 días");
-                document.getElementById('botonGuardar').disabled = true;
-            }
-
-            //mine (Validacion RUC compania activa con ruc de comparador de xml)
-            var ck = sessionStorage.getItem('company_key');
-
-            identificacionComprador = xmlDoc.querySelector('infoFactura identificacionComprador');
-            if (ck.substring(0, 9) == 'ecuawagen' && identificacionComprador.textContent != '1791765842001') {
-                alert("Factura no corresponde a la compania ")
-                document.getElementById('botonGuardar').disabled = true;
-            }
-            if (ck.substring(0, 10) == 'germanmoto' && identificacionComprador.textContent != '1792121795001') {
-                alert("Factura no corresponde a la compania")
-                document.getElementById('botonGuardar').disabled = true;
-            }
+                nombreElemento = xmlDoc.querySelector('infoFactura totalDescuento');
+                Descuento.value = nombreElemento.textContent;
 
 
-            //Detalle factura
+                nombreElemento = xmlDoc.querySelector('infoFactura totalSinImpuestos');
+                SubTotalSinImpuestos.value = nombreElemento.textContent;
 
-            var tablaSumaIva = "" //"<tr><th>PorcentajeIva</th><th>ValorIva</th></tr>"
-            var tablaSumaBase = "" //"<tr><th>PorcentajeIva</th><th>ValorBase</th></tr>"
-            var sumasPorTarifa = {}; // Aquí acumulamos
-            var tablaTarifa = "<tr><th>BaseImponible</th><th>PorcentajeIva</th><th>ValorIva</th></tr>"; //almacena iva po item
-            var tabla = "<tr><th scope='col'>#</th><th scope='col'>Cantidad</th><th scope='col'>Item</th><th scope='col'>Descripción</th><th scope='col'>Precio U.</th><th scope='col'>Descuento</h><th scope='col'>Total</th><th scope='col'>Centro Gastos</th><th scope='col'><a href='#' onclick='clickBien()'>Bien</a> /<a href='#' onclick='clickServicio()'>Servicio</a></th></tr>";
-            factura = xmlDoc.getElementsByTagName("detalle");
-            fetchCuentaProv().then(opcionesHTML => {
-                fetchPlantillaProv();
-                for (var i = 0; i < factura.length; i++) {
-                    var cantidad = factura[i].getElementsByTagName("cantidad")[0].textContent;
-                    var precioUnitario = factura[i].getElementsByTagName("precioUnitario")[0].textContent;
-                    tabla += "<tr>";
-                    tablaTarifa += "<tr>";
-                    tabla += "<th scope='col'>";
-                    tabla += i + 1;
-                    tabla += "</th>";
-                    tabla += "<th scope='col' id='cantidadc-" + i + "'>";
-                    tabla += "<input type='number' min = 1 id='cantidad-" + i + "' value = " + cantidad + " oninput='actualizarPrecio(" + i + ")' style='width: 80px' >";
-                    tabla += "</th>";
-                    tabla += "<th scope='col'>";
-                    tabla += factura[i].getElementsByTagName("codigoPrincipal")[0].textContent;
-                    tabla += "</th>";
-                    tabla += "<th scope='col'>";
-                    tabla += factura[i].getElementsByTagName("descripcion")[0].textContent;
-                    tabla += "</th>";
-                    tabla += "<th scope='col' id='precioUnitario-" + i + "'>" + precioUnitario + "</th>";
-                    tabla += "<th scope='col'>";
-                    tabla += factura[i].getElementsByTagName("descuento")[0].textContent;
-                    tabla += "</th>";
-                    tabla += "<th scope='col' id='total_${i}'>";
-                    tabla += factura[i].getElementsByTagName("precioTotalSinImpuesto")[0].textContent;
-                    tabla += "</th>";
+                nombreElemento = xmlDoc.querySelector('infoFactura importeTotal');
+                TotalFactura.value = nombreElemento.textContent;
 
-                    tarifa = factura[i].getElementsByTagName("tarifa")[0].textContent;
-                    valor = parseFloat(factura[i].getElementsByTagName("valor")[0].textContent);
-                    base = parseFloat(factura[i].getElementsByTagName("baseImponible")[0].textContent);
-                    if (!sumasPorTarifa[tarifa]) {
-                        sumasPorTarifa[tarifa] = { valor: 0, base: 0 };
-                    }
-                    sumasPorTarifa[tarifa].valor += valor;
-                    sumasPorTarifa[tarifa].base += base;
+                nombreElemento = xmlDoc.querySelector('infoTributaria estab');
+                SerieFactura.value = nombreElemento.textContent;
 
-                    // Llenamos el porcentaje del Iva y su valor
-                    tablaTarifa += "<th>" + base.toFixed(2) + "</th>";
-                    tablaTarifa += "<th>" + tarifa + "</th>";
-                    tablaTarifa += "<th>" + valor.toFixed(2) + "</th>";
+                nombreElemento = xmlDoc.querySelector('infoTributaria ptoEmi');
+                SerieFactura.value = SerieFactura.value + nombreElemento.textContent;
 
+                nombreElemento = xmlDoc.querySelector('infoTributaria secuencial');
+                NumeroFactura.value = nombreElemento.textContent;
 
-                    if (PeriodicasisChecked == false) {
-                        tabla += "<th scope='col'>";
-                        tabla += "<select class='form-select' aria-label='Default select example'>"
-                        tabla += "<option selected>Selecion C. G.</option>"
-                        tabla += opcionesHTML;
-                        tabla += "</select>"
-                        tabla += "</th>";
-                    } else {
-                        tabla += "<th scope='col'>";
-                        tabla += "<select class='form-select' aria-label='Default select example'>"
-                        tabla += "</select>"
-                        tabla += "</th>";
-                    }
-                    // CREAR AQUI OPCION DE BIENES/SERVICIOS
-                    tabla += "</th>";
-                    tabla += "<th scope='col'>";
-                    tabla += "<div class='btn-group' role='group' aria-label='Basic radio toggle button group'>";
-                    tabla += "<input type='radio' class='btn-check' name='btnradio" + i + "' id='btnradioBien" + i + "' value='BIENES' checked autocomplete='off' >";
-                    tabla += "<label class='btn btn-outline-primary' for='btnradioBien" + i + "'>Bien  </label>";
+                nombreElemento = xmlDoc.querySelector('infoTributaria claveAcceso');
+                AutorizacionSri.value = nombreElemento.textContent;
 
-                    tabla += "<input type='radio' class='btn-check' name='btnradio" + i + "' id='btnradioServicio" + i + "' value='SERVICIOS' autocomplete='off' >";
-                    tabla += "<label class='btn btn-outline-primary' for='btnradioServicio" + i + "'>Serv</label>";
-
-                    tabla += "</div>";
-                    tabla += "</th>";
-                    tabla += "</tr>";
-                    tablaTarifa += "</tr>";
-
+                FechaIngresoHora.value = formatoFechaHora();
+                //--MINE08-26
+                if (validaFecha(FechaEmision.value) === false) {
+                    alert("Factura no puede ser ingresada: Fecha de emisión del mes anterior o de mas de 5 días");
+                    resolve(false);
+                    return;
                 }
 
-                document.getElementById("tablaDetalle").innerHTML = tabla;
-                document.getElementById("tablaIva").innerHTML = tablaTarifa;
-                for (var t in sumasPorTarifa) {
-                    // Sumamamos los valores de base e Iva por tarifa y los agrupo, para mostrar en la factura
-                    tablaSumaBase += "<tr>";
-                    tablaSumaBase += "<th scope='col' class='columna-impuesto' >SUBTOTAL  " + parseInt(t) + "%</th>";
-                    tablaSumaBase += "<th scope='col' class='columna-valor'>" + sumasPorTarifa[t].base.toFixed(2) + "</th>";
-                    tablaSumaBase += "</tr>";
-
-                    tablaSumaIva += "<tr>";
-                    tablaSumaIva += "<th scope='col' class='columna-impuesto'>IVA " + parseInt(t) + "%</th>";
-                    tablaSumaIva += "<th scope='col' class='columna-valor'>" + sumasPorTarifa[t].valor.toFixed(2) + "</th>";
-                    tablaSumaIva += "</tr>";
+                identificacionComprador = xmlDoc.querySelector('infoFactura identificacionComprador');
+                if (validaEmpresa(identificacionComprador) === false) {
+                    alert("Factura no corresponde a la compania ")
+                    resolve(false);
+                    return;
                 }
+                //--
 
-                // Mostrar la tabla en el HTML
-                document.getElementById("tablaSumaBase").innerHTML = tablaSumaBase;
-                document.getElementById("tablaSumaIva").innerHTML = tablaSumaIva;
+                //Detalle factura
 
-            }).catch(error => {
-                console.error('Error al obtener las opciones del proveedor:', error);
-            });
+                var tablaSumaIva = "" //"<tr><th>PorcentajeIva</th><th>ValorIva</th></tr>"
+                var tablaSumaBase = "" //"<tr><th>PorcentajeIva</th><th>ValorBase</th></tr>"
+                var sumasPorTarifa = {}; // Aquí acumulamos
+                var tablaTarifa = "<tr><th>BaseImponible</th><th>PorcentajeIva</th><th>ValorIva</th></tr>"; //almacena iva po item
+                var tabla = "<tr><th scope='col'>#</th><th scope='col'>Cantidad</th><th scope='col'>Item</th><th scope='col'>Descripción</th><th scope='col'>Precio U.</th><th scope='col'>Descuento</h><th scope='col'>Total</th><th scope='col'>Centro Gastos</th><th scope='col'><a href='#' onclick='clickBien()'>Bien</a> /<a href='#' onclick='clickServicio()'>Servicio</a></th></tr>";
+                factura = xmlDoc.getElementsByTagName("detalle");
+                fetchCuentaProv().then(opcionesHTML => {
+                    fetchPlantillaProv();
+                    for (var i = 0; i < factura.length; i++) {
+                        var cantidad = factura[i].getElementsByTagName("cantidad")[0].textContent;
+                        var precioUnitario = factura[i].getElementsByTagName("precioUnitario")[0].textContent;
+                        tabla += "<tr>";
+                        tablaTarifa += "<tr>";
+                        tabla += "<th scope='col'>";
+                        tabla += i + 1;
+                        tabla += "</th>";
+                        tabla += "<th scope='col' id='cantidadc-" + i + "'>";
+                        tabla += "<input type='number' min = 1 id='cantidad-" + i + "' value = " + cantidad + " oninput='actualizarPrecio(" + i + ")' style='width: 80px' >";
+                        tabla += "</th>";
+                        tabla += "<th scope='col'>";
+                        tabla += factura[i].getElementsByTagName("codigoPrincipal")[0].textContent;
+                        tabla += "</th>";
+                        tabla += "<th scope='col'>";
+                        tabla += factura[i].getElementsByTagName("descripcion")[0].textContent;
+                        tabla += "</th>";
+                        tabla += "<th scope='col' id='precioUnitario-" + i + "'>" + precioUnitario + "</th>";
+                        tabla += "<th scope='col'>";
+                        tabla += factura[i].getElementsByTagName("descuento")[0].textContent;
+                        tabla += "</th>";
+                        tabla += "<th scope='col' id='total_${i}'>";
+                        tabla += factura[i].getElementsByTagName("precioTotalSinImpuesto")[0].textContent;
+                        tabla += "</th>";
 
+                        tarifa = factura[i].getElementsByTagName("tarifa")[0].textContent;
+                        valor = parseFloat(factura[i].getElementsByTagName("valor")[0].textContent);
+                        base = parseFloat(factura[i].getElementsByTagName("baseImponible")[0].textContent);
+                        if (!sumasPorTarifa[tarifa]) {
+                            sumasPorTarifa[tarifa] = { valor: 0, base: 0 };
+                        }
+                        sumasPorTarifa[tarifa].valor += valor;
+                        sumasPorTarifa[tarifa].base += base;
+
+                        // Llenamos el porcentaje del Iva y su valor
+                        tablaTarifa += "<th>" + base.toFixed(2) + "</th>";
+                        tablaTarifa += "<th>" + tarifa + "</th>";
+                        tablaTarifa += "<th>" + valor.toFixed(2) + "</th>";
+
+
+                        if (PeriodicasisChecked == false) {
+                            tabla += "<th scope='col'>";
+                            tabla += "<select class='form-select' aria-label='Default select example'>"
+                            tabla += "<option selected>Selecion C. G.</option>"
+                            tabla += opcionesHTML;
+                            tabla += "</select>"
+                            tabla += "</th>";
+                        } else {
+                            tabla += "<th scope='col'>";
+                            tabla += "<select class='form-select' aria-label='Default select example'>"
+                            tabla += "</select>"
+                            tabla += "</th>";
+                        }
+                        // CREAR AQUI OPCION DE BIENES/SERVICIOS
+                        tabla += "</th>";
+                        tabla += "<th scope='col'>";
+                        tabla += "<div class='btn-group' role='group' aria-label='Basic radio toggle button group'>";
+                        tabla += "<input type='radio' class='btn-check' name='btnradio" + i + "' id='btnradioBien" + i + "' value='BIENES' checked autocomplete='off' >";
+                        tabla += "<label class='btn btn-outline-primary' for='btnradioBien" + i + "'>Bien  </label>";
+
+                        tabla += "<input type='radio' class='btn-check' name='btnradio" + i + "' id='btnradioServicio" + i + "' value='SERVICIOS' autocomplete='off' >";
+                        tabla += "<label class='btn btn-outline-primary' for='btnradioServicio" + i + "'>Serv</label>";
+
+                        tabla += "</div>";
+                        tabla += "</th>";
+                        tabla += "</tr>";
+                        tablaTarifa += "</tr>";
+
+                    }
+
+                    document.getElementById("tablaDetalle").innerHTML = tabla;
+                    document.getElementById("tablaIva").innerHTML = tablaTarifa;
+                    for (var t in sumasPorTarifa) {
+                        // Sumamamos los valores de base e Iva por tarifa y los agrupo, para mostrar en la factura
+                        tablaSumaBase += "<tr>";
+                        tablaSumaBase += "<th scope='col' class='columna-impuesto' >SUBTOTAL  " + parseInt(t) + "%</th>";
+                        tablaSumaBase += "<th scope='col' class='columna-valor'>" + sumasPorTarifa[t].base.toFixed(2) + "</th>";
+                        tablaSumaBase += "</tr>";
+
+                        tablaSumaIva += "<tr>";
+                        tablaSumaIva += "<th scope='col' class='columna-impuesto'>IVA " + parseInt(t) + "%</th>";
+                        tablaSumaIva += "<th scope='col' class='columna-valor'>" + sumasPorTarifa[t].valor.toFixed(2) + "</th>";
+                        tablaSumaIva += "</tr>";
+                    }
+
+                    // Mostrar la tabla en el HTML
+                    document.getElementById("tablaSumaBase").innerHTML = tablaSumaBase;
+                    document.getElementById("tablaSumaIva").innerHTML = tablaSumaIva;
+
+                }).catch(error => {
+                    alert('Error al obtener las opciones del proveedor');
+                    resolve(false);
+                    return;
+                });
+                resolve(true);
+            }
+            lector.readAsText(archivo);
         }
-
-        lector.readAsText(archivo);
-    }
+    });
 }
 
 
@@ -405,40 +399,6 @@ function formatoFechaHora() {
     return dateInput
 };
 
-function validaFecha(fecha) {
-    let fechaStr = fecha;
-
-    // Separar día, mes y año
-    let partes = fechaStr.split("/");
-    let dia = parseInt(partes[0], 10);
-    let mes = parseInt(partes[1], 10) - 1; // Los meses en JS van de 0 a 11
-    let anio = parseInt(partes[2], 10);
-
-    // Crear objeto Date
-    let fechaFactura = new Date(anio, mes, dia);
-
-    // Fecha actual (sin horas para evitar errores)
-    let hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
-
-    // Calcular diferencia en milisegundos
-    let diferenciaMs = hoy - fechaFactura;
-
-    // Convertir a días
-    let diferenciaDias = diferenciaMs / (1000 * 60 * 60 * 24);
-
-    //validacion 5 días(incluye mes anterior)
-    if (diferenciaDias <= 5 && diferenciaDias >= 0) {
-        //validacion mes anterior
-        mesActual = hoy.getMonth()
-        if (mes != mesActual) {
-            return false;
-        }
-        return true;  // La fecha es válida
-    } else {
-        return false; // La fecha no es válida
-    }
-};
 
 async function enviarDatosFactura() {
     //if (validaDatosFactura() === false) {
@@ -738,4 +698,10 @@ function actualizarPrecio(index) {
 
 }
 
-
+//evento change de nombre de archivo xml, para manejo de validaciones, segun respuesta habilito o no el boton guardar
+document.getElementById("inputGroupFileFactura").addEventListener("change", async function () {
+    console.log("change xml")
+    const ok = await leerArchivoXML();
+    console.log("change xml:", ok)
+    document.getElementById('botonGuardar').disabled = !ok;
+})

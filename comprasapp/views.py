@@ -90,7 +90,8 @@ def cuentaProv(request):
     
     cuentas_proveedor = service.get_cuentas_proveedor(db_alias=db_alias, cia='e', ruc=ruc)
     if not cuentas_proveedor:
-        return JsonResponse({'error': 'No se encontraron cuentas para el proveedor con RUC proporcionado'}, status=404)
+        #mine0826: borre ", status=404"  daba error y no daba este mensaje alertando el caso
+        return JsonResponse({'error': 'No se encontraron cuentas para el proveedor con RUC proporcionado'})
     #cuentas_data = CentroGastosSerializer(cuentas_proveedor, many=True).data
     return JsonResponse({'ncuentaprov': cuentas_proveedor})
     
@@ -249,52 +250,52 @@ def guardaFacturaCompra(request):
 
                     Cantidad = 0
 
-                print("paso 3 cabecera:",Usuario)
-                # GUARDO EL DETALLE DE LA COMPRA
-                for fila in datos_tabla:
-                    CenGastos = ''
-                    # precio total sin impuestos fila[5]
-                    # precio unitario fila[3]
-                    # descuento fila[4]
-                    # cantidad fila[0]
-                    # CALCULO PORCENTAJE DESCUENTO
-                    totParcial = 0 
-                    print("pre: ", fila[3], "cant: " , fila[0])
-                    totParcial = float(fila[3]) * float(fila[0])          
-                    fila[4] = round((float(fila[4]) / totParcial) * 100,2)
-                    if not Periodicas:
-                        CenGastos = fila[7]
+                    print("paso 3 cabecera:",Usuario)
+                    # GUARDO EL DETALLE DE LA COMPRA
+                    for fila in datos_tabla:
+                        CenGastos = ''
+                        # precio total sin impuestos fila[5]
+                        # precio unitario fila[3]
+                        # descuento fila[4]
+                        # cantidad fila[0]
+                        # CALCULO PORCENTAJE DESCUENTO
+                        totParcial = 0 
+                        print("pre: ", fila[3], "cant: " , fila[0])
+                        totParcial = float(fila[3]) * float(fila[0])          
+                        fila[4] = round((float(fila[4]) / totParcial) * 100,2)
+                        if not Periodicas:
+                            CenGastos = fila[7]
 
-                        fila1 = limpiar_texto_informix(fila[1])
-                        fila2 = limpiar_texto_informix(fila[2])
-                        fila5 = limpiar_texto_informix(fila[5])
-                        CenGastos_str = limpiar_texto_informix(CenGastos)
+                            fila1 = limpiar_texto_informix(fila[1])
+                            fila2 = limpiar_texto_informix(fila[2])
+                            fila5 = limpiar_texto_informix(fila[5])
+                            CenGastos_str = limpiar_texto_informix(CenGastos)
 
-                        sql_detalle = ("INSERT INTO ocxxt002 VALUES('" + Compania + "','" + Division + 
-                            "','" + Agencia + "'," + str(secuenciaw) + "," + str(ordinal) + 
-                            ",'" + fila1 + "'," + str(fila[0]) + "," + str(fila[0]) + 
-                            ",'" + fila2 + "',''," + str(fila[3]) + ",''," + str(fila[4]) + 
-                            ",'" + fila5 + "','" + CenGastos_str + "'," + str(fila[8]) + "," + str(fila[9]) + ")")
+                            sql_detalle = ("INSERT INTO ocxxt002 VALUES('" + Compania + "','" + Division + 
+                                "','" + Agencia + "'," + str(secuenciaw) + "," + str(ordinal) + 
+                                ",'" + fila1 + "'," + str(fila[0]) + "," + str(fila[0]) + 
+                                ",'" + fila2 + "',''," + str(fila[3]) + ",''," + str(fila[4]) + 
+                                ",'" + fila5 + "','" + CenGastos_str + "'," + str(fila[8]) + "," + str(fila[9]) + ")")
 
-                        print(f"SQL DETALLE: {sql_detalle}")
-                        cur.execute(sql_detalle) 
-                        if cur.rowcount == 0:
-                            raise MiError("f'Error al registrar detalle {ordinal} de OC(d) {secuenciaw}' con código {fila1}}")
+                            print(f"SQL DETALLE: {sql_detalle}")
+                            cur.execute(sql_detalle) 
+                            if cur.rowcount == 0:
+                                raise MiError("f'Error al registrar detalle {ordinal} de OC(d) {secuenciaw}' con código {fila1}}")
 
-                        ordinal = ordinal + 1
-                    print("paso 4 detalle:",ordinal)
+                            ordinal = ordinal + 1
+                        print("paso 4 detalle:",ordinal)
 
-                    #valida detalle de orden
-                    ssql = "SELECT COUNT(*) FROM ocxxt002 WHERE od_division = ? AND od_agencia = ? AND od_numero = ?"
-                    detalle = consultarDato(request,ssql,(Division,Agencia,secuenciaw),db_alias)    
-                    if detalle == 0:
-                        raise MiError("f'No se registró ningún detalle de la orden de compra {secuenciaw}'}")
-                         
-                    ordenCompra = obtenerOrdenCompra(request, db_alias, Agencia, Division, secuenciaw)   
-                    if ordenCompra is None:
-                        #return JsonResponse({'error': f'No se pudo recuperar la orden de compra {secuenciaw}'}, status=400)
-                        raise MiError("f'No se pudo recuperar la orden de compra {secuenciaw}'}")
-                    guardarCtaPagar(request, db_alias, ordenCompra)
+                        #valida detalle de orden
+                        ssql = "SELECT COUNT(*) FROM ocxxt002 WHERE od_division = ? AND od_agencia = ? AND od_numero = ?"
+                        detalle = consultarDato(request,ssql,(Division,Agencia,secuenciaw),db_alias)    
+                        if detalle == 0:
+                            raise MiError("f'No se registró ningún detalle de la orden de compra {secuenciaw}'}")
+                            
+                        ordenCompra = obtenerOrdenCompra(request, db_alias, Agencia, Division, secuenciaw)   
+                        if ordenCompra is None:
+                            #return JsonResponse({'error': f'No se pudo recuperar la orden de compra {secuenciaw}'}, status=400)
+                            raise MiError("f'No se pudo recuperar la orden de compra {secuenciaw}'}")
+                        guardarCtaPagar(request, db_alias, ordenCompra)
 
         except Exception as e:
             print(f"Error al guardaFacturaCompra: {e}")
@@ -958,10 +959,11 @@ def verTransaccionResumen(request, numOrden):
         else:
             numRet = datosRetencion[0]["rt_numero"]
             #Diario Retención
-            ssql = "SELECT cc_numero FROM cgrta002 WHERE cc_compania = 'e' AND cc_descrip1 MATCHES '*RETENCION*" + str(numRet) + " *' "\
-            " AND   cc_benefic matches '" + str(codProveedor)+ " *' AND cc_estado <> 'E'"
+            ssql = "SELECT UNIQUE(cc_numero) FROM cgrta002,cgrta003 WHERE cc_compania = 'e' AND cc_descrip1 MATCHES '*RETENCION: " + str(numRet) + "'"\
+                " AND   cc_benefic MATCHES '" + str(codProveedor)+ " *' AND cc_estado <> 'E' AND cc_numero = dc_numero AND cc_tipo = dc_tipo " \
+                " AND dc_descrip MATCHES '*" + str(factura)+ "'"
         
-            numDiario = consultarDato(request, ssql, db_alias=db_alias)
+            numDiario = consultarDato(request, ssql,db_alias=db_alias)
     cur.close()
     
     #Datos generales de transaccion  

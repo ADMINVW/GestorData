@@ -12,9 +12,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
 //carga datos de archivo xml de factura seleccionada por usuario
 function leerArchivoXML() {
     return new Promise((resolve) => {
-        //mine
-        sessionStorage.removeItem("form_enviado");
-        //
         var inputElement = document.getElementById('inputGroupFileFactura');
 
         if (inputElement.files.length > 0) {
@@ -93,21 +90,12 @@ function leerArchivoXML() {
                     return;
                 }
 
-                //mine (Validacion RUC compania activa con ruc de comparador de xml)
-                var ck = sessionStorage.getItem('company_key');
-
                 identificacionComprador = xmlDoc.querySelector('infoFactura identificacionComprador');
-                if (ck.substring(0, 9) == 'ecuawagen' && identificacionComprador.textContent != '1791765842001') {
+                if (validaEmpresa(identificacionComprador) === false) {
                     alert("Factura no corresponde a la compania ")
                     resolve(false);
                     return;
                 }
-                if (ck.substring(0, 10) == 'germanmoto' && identificacionComprador.textContent != '1792121795001') {
-                    alert("Factura no corresponde a la compania")
-                    resolve(false);
-                    return;
-                }
-
 
                 //Detalle factura
                 var tablaSumaIva = "" //"<tr><th>PorcentajeIva</th><th>ValorIva</th></tr>"
@@ -310,41 +298,6 @@ function validarProveedor(provFactura) {
     return true;
 }
 
-//validacion fecha factura
-function validaFecha(fecha) {
-    let fechaStr = fecha;
-
-    // Separar día, mes y año
-    let partes = fechaStr.split("/");
-    let dia = parseInt(partes[0], 10);
-    let mes = parseInt(partes[1], 10) - 1; // Los meses en JS van de 0 a 11
-    let anio = parseInt(partes[2], 10);
-
-    // Crear objeto Date
-    let fechaFactura = new Date(anio, mes, dia);
-
-    // Fecha actual (sin horas para evitar errores)
-    let hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
-
-    // Calcular diferencia en milisegundos
-    let diferenciaMs = hoy - fechaFactura;
-
-    // Convertir a días
-    let diferenciaDias = diferenciaMs / (1000 * 60 * 60 * 24);
-
-    //validacion 5 días
-    if (diferenciaDias <= 5 && diferenciaDias >= 0) {
-        //validacion mes anterior
-        mesActual = hoy.getMonth()
-        if (mes != mesActual) {
-            return false;
-        }
-        return true;  // La fecha es válida
-    } else {
-        return false; // La fecha no es válida
-    }
-};
 
 //Clic boton editar y eliminar detalle factura
 document.getElementById("tablaDetalle").addEventListener("click", async function (e) {

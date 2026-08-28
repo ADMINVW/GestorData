@@ -3,9 +3,10 @@ from core.crypto import decrypt_credential
 from django.db import connections
 from core.db_context import get_db_from_request
 
+from globales.utils import *
+
 #Obtiene accesos habilitados del usuario, en js de menuBarraNav se hace un barrido para deshabilitar aquellos que no esten en este conjunto de datos
 def accesos_context(request):
-    print("accesos_context")
     accesos_usuario = []
 
     try:
@@ -13,17 +14,11 @@ def accesos_context(request):
         login = getattr(request, "db_user", None)
         if login:
             with connections[db_alias].cursor() as cur:
-                #SELECT TRIM(pf_codmenu) as pf_codmenu FROM ciatt004, ciatt010 WHERE us_login=? AND us_div = 'd' AND us_tipo = pf_codperfil
-                cur.execute("""
-                   SELECT TRIM(pf_codmenu) as pf_codmenu FROM tattt034, ciatt010 WHERE ur_user = ? AND ur_codperfil = pf_codperfil
-                """, [login])
-
-                accesos_usuario = [
-                    str(row[0]).strip()
-                    for row in cur.fetchall()
-                ]
-                print ("accesos_usuario",accesos_usuario);
-
+                ssql = """
+                    SELECT pf_nivelperfil, TRIM(pf_codmenu) as pf_codmenu, pf_nivelmenu, TRIM(pf_padremenu) as pf_padremenu FROM tattt034, ciatt010 WHERE ur_user = ? AND ur_codperfil = pf_codperfil
+                    GROUP BY pf_nivelperfil, pf_codmenu,pf_nivelmenu, pf_padremenu ORDER BY pf_nivelmenu ASC
+                    """
+                accesos_usuario = consultarRegistros(ssql,[login],db_alias)
     except Exception:
         print("Error al capturar accesos")
         accesos_usuario = []
