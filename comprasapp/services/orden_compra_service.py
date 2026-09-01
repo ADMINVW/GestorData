@@ -22,7 +22,7 @@ class OrdenComprasService:
         return TipoCredito.objects.using(db_alias).exclude(cre_codigo = '00')
 
     def get_solicitante(self, db_alias):
-        return Solicitante.objects.using(db_alias).filter(so_estado = 'A')
+        return Solicitante.objects.using(db_alias).filter(so_estado = 'A').order_by("so_nombres")
 
     def get_tipo_compra(self, db_alias, division):
         return TipoCompra.objects.using(db_alias).filter(to_division = division, to_cia = 'e')
@@ -35,7 +35,7 @@ class OrdenComprasService:
 
     def get_cuentas_proveedor(self, db_alias, cia, ruc):
         with connections[db_alias].cursor() as cursor:
-            sql_query = "SELECT a.*,d.ct_cuenta,c.ct_descripcion FROM ocxxt013 a, ciatt011 b, cgrta001 c, ocxxt012 d WHERE mc_codpro = pv_codigo AND c.ct_cuenta = d.ct_cuenta AND ct_compania = '" + cia + "' AND pv_cedruc = '" + ruc + "' AND ct_codgrp = mc_codgrp AND ct_secgrp = mc_secgrp"
+            sql_query = "SELECT a.*,d.ct_cuenta,c.ct_descripcion FROM ocxxt013 a, ciatt011 b, cgrta001 c, ocxxt012 d WHERE mc_codpro = pv_codigo AND c.ct_cuenta = d.ct_cuenta AND ct_compania = '" + cia + "' AND pv_cedruc = '" + ruc + "' AND ct_codgrp = mc_codgrp AND ct_secgrp = mc_secgrp ORDER BY c.ct_descripcion"
             cursor.execute(sql_query)
             rows = cursor.fetchall()
             column_names = [desc[0] for desc in cursor.description]

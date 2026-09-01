@@ -246,7 +246,7 @@ def guardaFacturaCompra(request):
                     print(f"SQL INSERT: {sql_insert}")
                     cur.execute(sql_insert)
                     if cur.rowcount == 0:
-                        raise MiError("f'No se pudo insertar cabecera de orden de compra {secuenciaw}'}")
+                        raise MiError(f"Al insertar cabecera de orden de compra {secuenciaw}")
 
                     Cantidad = 0
 
@@ -266,36 +266,39 @@ def guardaFacturaCompra(request):
                         if not Periodicas:
                             CenGastos = fila[7]
 
-                            fila1 = limpiar_texto_informix(fila[1])
-                            fila2 = limpiar_texto_informix(fila[2])
-                            fila5 = limpiar_texto_informix(fila[5])
-                            CenGastos_str = limpiar_texto_informix(CenGastos)
+                        fila1 = limpiar_texto_informix(fila[1])
+                        fila2 = limpiar_texto_informix(fila[2])
+                        fila5 = limpiar_texto_informix(fila[5])
+                        CenGastos_str = limpiar_texto_informix(CenGastos)
 
-                            sql_detalle = ("INSERT INTO ocxxt002 VALUES('" + Compania + "','" + Division + 
-                                "','" + Agencia + "'," + str(secuenciaw) + "," + str(ordinal) + 
-                                ",'" + fila1 + "'," + str(fila[0]) + "," + str(fila[0]) + 
-                                ",'" + fila2 + "',''," + str(fila[3]) + ",''," + str(fila[4]) + 
-                                ",'" + fila5 + "','" + CenGastos_str + "'," + str(fila[8]) + "," + str(fila[9]) + ")")
+                        ##caracter Ñ en descricion de factura-
+                        descripItem = fila2.replace('Ñ', 'N')
 
-                            print(f"SQL DETALLE: {sql_detalle}")
-                            cur.execute(sql_detalle) 
-                            if cur.rowcount == 0:
-                                raise MiError("f'Error al registrar detalle {ordinal} de OC(d) {secuenciaw}' con código {fila1}}")
+                        sql_detalle = ("INSERT INTO ocxxt002 VALUES('" + Compania + "','" + Division + 
+                            "','" + Agencia + "'," + str(secuenciaw) + "," + str(ordinal) + 
+                            ",'" + fila1 + "'," + str(fila[0]) + "," + str(fila[0]) + 
+                            ",'" + descripItem.rstrip() + "',''," + str(fila[3]) + ",''," + str(fila[4]) + 
+                            ",'" + fila5 + "','" + CenGastos_str + "'," + str(fila[8]) + "," + str(fila[9]) + ")")
 
-                            ordinal = ordinal + 1
+                        print(f"SQL DETALLE: {sql_detalle}")
+                        cur.execute(sql_detalle) 
+                        if cur.rowcount == 0:
+                            raise MiError("f'Error al registrar detalle {ordinal} de OC(d) {secuenciaw}' con código {fila1}}")
+
+                        ordinal = ordinal + 1
                         print("paso 4 detalle:",ordinal)
 
-                        #valida detalle de orden
-                        ssql = "SELECT COUNT(*) FROM ocxxt002 WHERE od_division = ? AND od_agencia = ? AND od_numero = ?"
-                        detalle = consultarDato(request,ssql,(Division,Agencia,secuenciaw),db_alias)    
-                        if detalle == 0:
-                            raise MiError("f'No se registró ningún detalle de la orden de compra {secuenciaw}'}")
-                            
-                        ordenCompra = obtenerOrdenCompra(request, db_alias, Agencia, Division, secuenciaw)   
-                        if ordenCompra is None:
-                            #return JsonResponse({'error': f'No se pudo recuperar la orden de compra {secuenciaw}'}, status=400)
-                            raise MiError("f'No se pudo recuperar la orden de compra {secuenciaw}'}")
-                        guardarCtaPagar(request, db_alias, ordenCompra)
+                    #valida detalle de orden
+                    ssql = "SELECT COUNT(*) FROM ocxxt002 WHERE od_division = ? AND od_agencia = ? AND od_numero = ?"
+                    detalle = consultarDato(request,ssql,(Division,Agencia,secuenciaw),db_alias)    
+                    if detalle == 0:
+                        raise MiError(f"No se registró ningún detalle de la orden de compra {secuenciaw}")
+                        
+                    ordenCompra = obtenerOrdenCompra(request, db_alias, Agencia, Division, secuenciaw)   
+                    if ordenCompra is None:
+                        #return JsonResponse({'error': f'No se pudo recuperar la orden de compra {secuenciaw}'}, status=400)
+                        raise MiError(f"No se pudo recuperar la orden de compra {secuenciaw}")
+                    guardarCtaPagar(request, db_alias, ordenCompra)
 
         except Exception as e:
             print(f"Error al guardaFacturaCompra: {e}")

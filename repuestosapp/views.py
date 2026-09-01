@@ -50,7 +50,7 @@ def comprasRepuestos(request):
 
     with connections[db_alias].cursor() as cur:
 
-        cur.execute("SELECT * FROM ocxxt006 WHERE so_estado = 'A'")
+        cur.execute("SELECT * FROM ocxxt006 WHERE so_estado = 'A' ORDER BY so_nombres")
         rows = cur.fetchall()
         column_names = [desc[0] for desc in cur.description]
         solicita = [dict(zip(column_names, row)) for row in rows]
@@ -177,8 +177,11 @@ def guardaFacturaRepuestos(request):
  
                         ##mineoctubre
                         tipoItem = "BIENES"
+
+                        ##caracter Ñ en descricion de factura-
+                        descripItem = fila[3].replace('Ñ', 'N')    
                         
-                        cur.execute("INSERT INTO ocxxt002 VALUES('" + Compania + "','" + Division + "','" + Agencia + "'," + str(Secuencia) + "," + str(ordinal) + ",'" + fila[1] + "'," + fila[0] + "," + fila[0] + ",'" + fila[3] + "',''," + str(fila[4]) + ",''," + str(fila[5]) + ",'" + tipoItem + "',NULL," + fila[7] + "," + fila[8] + ")")
+                        cur.execute("INSERT INTO ocxxt002 VALUES('" + Compania + "','" + Division + "','" + Agencia + "'," + str(Secuencia) + "," + str(ordinal) + ",'" + fila[1] + "'," + fila[0] + "," + fila[0] + ",'" + descripItem + "',''," + str(fila[4]) + ",''," + str(fila[5]) + ",'" + tipoItem + "',NULL," + fila[7] + "," + fila[8] + ")")
                         if cur.rowcount == 0:
                             raise MiError(f"Al insertar detalle de oc: {e}")
 

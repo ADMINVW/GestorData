@@ -231,7 +231,7 @@ document.getElementById("obtener-btn").addEventListener("click", async function 
             console.log(data)
             if (data) {
                 if (data.estado == "T") {
-                    alert("obtenerOrden - Orden de Compra ya se encuentra procesada!")
+                    alert("Orden de Compra ya se encuentra procesada!")
                 }
                 else {
                     if (data.tipo != 'T' && data.tipo != 'R') { //validacion tipo (solo trabajos terceros 'T' y repuestos externos 'R')

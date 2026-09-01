@@ -219,9 +219,8 @@ function obtenerSeleccion() {
 }
 
 function fetchSubTipo() {
-
-    var selectElement = document.getElementById("divisionSelect");
-    var division = selectElement.value;
+    //mine0826: se suprime combo division, ingresos solo serán division administración
+    var division = "d";
 
     if (division) {
         var ck = sessionStorage.getItem('company_key') || '';
@@ -343,7 +342,7 @@ function fetchCuentaProv() {
                         resolve(opcionesHTML);
                     } else {
                         document.getElementById('botonGuardar').disabled = true;
-                        alert('Proveedor no exixte o no tiene cuenta asignada.')
+                        alert('Proveedor no existe o no tiene cuenta asignada.')
                         resolve("<option value=''>No hay datos disponibles</option>");
                         return;
                         //var option = document.createElement("option");
@@ -421,7 +420,7 @@ async function enviarDatosFactura() {
         Compania: sessionStorage.getItem('compania'),
         Agencia: sessionStorage.getItem('agencia'),
         Bodega: sessionStorage.getItem('bodega'),
-        Division: document.getElementById("divisionSelect").value,
+        Division: "d",
         SubTipo: document.getElementById("subTipoSelect").value,
         Solicitante: document.getElementById("selSolicita").value,
         Usuario: document.getElementById("userName").value,
@@ -549,7 +548,7 @@ async function validaExisteFactura() {
 
     var Cia = String(sessionStorage.getItem('compania'));
     var Agencia = sessionStorage.getItem('agencia');
-    var Division = document.getElementById("divisionSelect").value;
+    var Division = "d";
     var Ruc = document.getElementById("rucProveedor").value;
     var NumeroFactura = document.getElementById("numeroFactura").value;
     var ck = sessionStorage.getItem('company_key') || '';
@@ -582,7 +581,6 @@ async function validaDatosFactura() {
 
     // Obtén los elementos del formulario
     const periodicas = document.getElementById('PeriodicasSwitchCheck');
-    const divisionselect = document.getElementById('divisionSelect');
     const subtiposelect = document.getElementById('subTipoSelect');
     const selsolicita = document.getElementById('selSolicita');
     const tipocredito = document.getElementById('tipoCreditoSelect')
@@ -590,13 +588,6 @@ async function validaDatosFactura() {
     const descripcionfactura = document.getElementById('descripcionFactura');
     const plazopago = document.getElementById('plazoPago');
     const factura = document.getElementById('numeroFactura');
-
-    // Validación de select
-    if (divisionselect.selectedIndex == 0) {
-        alert('Debe seleccionar una División.');
-        divisionselect.focus();
-        return false;
-    }
 
     // Valida subtipo
     if (subtiposelect.selectedIndex == 0) {
@@ -704,4 +695,9 @@ document.getElementById("inputGroupFileFactura").addEventListener("change", asyn
     const ok = await leerArchivoXML();
     console.log("change xml:", ok)
     document.getElementById('botonGuardar').disabled = !ok;
+})
+
+//Carga tipos al iniciar pagina
+document.addEventListener("DOMContentLoaded", function (event) {
+    fetchSubTipo()
 })
