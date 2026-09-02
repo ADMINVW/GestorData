@@ -16,20 +16,7 @@
   <div class="app-card-body">
     <p class="section-label">1 · Parámetros</p>
     <div class="row g-3 align-items-end">
-
-      <div class="col-12 col-md-3">
-        <label class="form-label">División</label>
-        <select id="divisionSelect" onchange="fetchSubTipo()" required class="form-select">
-          <option selected>Escoja la División</option>
-          {% if nempresa %}
-            {% for nombremp in nempresa %}
-            <option value="{{ nombremp.co_div }}">{{ nombremp.co_nomext }}</option>
-            {% endfor %}
-          {% endif %}
-        </select>
-        <div class="invalid-feedback">No ha seleccionado una división</div>
-      </div>
-
+      <!--mine0826:se elimina select de division, division constante, todos los ingresos por este modulo son administracion-->
       <div class="col-12 col-md-3">
         <label class="form-label">Tipo de Compra</label>
         <select id="subTipoSelect" class="form-select">
@@ -75,7 +62,7 @@
       <div class="col-12 col-md-4">
         <label class="form-label">XML Factura</label>
         <input type="file" class="form-control" id="inputGroupFileFactura"
-               onchange="leerArchivoXML()" accept=".xml">
+              accept=".xml">
       </div>
       <div class="col-6 col-md-2">
         <label class="form-label">Serie</label>

@@ -1,52 +1,4 @@
-function validaLogin() {
-    return new Promise(function (resolve, reject) {
-        var selectElement = document.getElementById("username");
-        var username = selectElement.value;
-        var selectElement = document.getElementById("password");
-        var password = selectElement.value;
-        var modal = document.getElementById("loginModal");
-
-
-        if (username) {
-            $.ajax({
-                url: '/menuprapp/inilogin/',  // Asegúrate de que esta URL coincida con la URL de tu vista en Django
-                method: 'GET',
-                data: {
-                    'password': password,
-                    'username': username
-
-                },
-                success: function (data) {
-
-                    //var resultado = document.getElementById("response");
-
-                    if (data.ndatuser && data.ndatuser.length > 0) {
-                        data.ndatuser.forEach(function (item) {
-                            sessionStorage.setItem('username', item.ur_user);
-                            sessionStorage.setItem('compania', item.ur_cia);
-                            sessionStorage.setItem('agencia', item.ur_age);
-                            sessionStorage.setItem('bodega', item.ur_bodprn);
-                        });
-                        resolve(true);
-
-                    } else {
-                        resultado.value = 'No hay datos disponibles';
-                        resolve(false);
-                    }
-
-                },
-                error: function (xhr, status, error) {
-                    console.error('Ha ocurrido un error:', error);
-                    resolve(false);
-                }
-            });
-        } else {
-            console.warn('Login Incorrectoo!!.');
-            resolve(false)
-        }
-    });
-}
-//mine
+//js para funciones reutilizadas por algunas apps
 function formateoDecimal(valor) {
     valor = Number.parseFloat(valor).toFixed(2);
     return valor;
@@ -100,3 +52,53 @@ function validacionesProv(item, tipo) {
     return valida;
 }
 
+//mine0826
+//validacion para ingreso de facturas
+function validaFecha(fecha) {
+    let fechaStr = fecha;
+
+    // Separar día, mes y año
+    let partes = fechaStr.split("/");
+    let dia = parseInt(partes[0], 10);
+    let mes = parseInt(partes[1], 10) - 1; // Los meses en JS van de 0 a 11
+    let anio = parseInt(partes[2], 10);
+
+    // Crear objeto Date
+    let fechaFactura = new Date(anio, mes, dia);
+
+    // Fecha actual (sin horas para evitar errores)
+    let hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    // Calcular diferencia en milisegundos
+    let diferenciaMs = hoy - fechaFactura;
+
+    // Convertir a días
+    let diferenciaDias = diferenciaMs / (1000 * 60 * 60 * 24);
+
+    //validacion 5 días(incluye mes anterior)
+    if (diferenciaDias <= 5 && diferenciaDias >= 0) {
+        //validacion mes anterior
+        mesActual = hoy.getMonth()
+        if (mes != mesActual) {
+            return false;
+        }
+        return true;  // La fecha es válida
+    } else {
+        return false; // La fecha no es válida
+    }
+};
+
+//validacion factura corresponde a empresa
+function validaEmpresa(rucFactura) {
+    //mine (Validacion RUC compania activa con ruc de comparador de xml)
+    var ck = sessionStorage.getItem('company_key');
+
+    if (ck.substring(0, 9) == 'ecuawagen' && rucFactura.textContent != '1791765842001') {
+        return false;
+    }
+    if (ck.substring(0, 10) == 'germanmoto' && rucFactura.textContent != '1792121795001') {
+        return false;
+    }
+    return true;
+}

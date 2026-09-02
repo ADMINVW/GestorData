@@ -1,9 +1,6 @@
 
 <nav class="navbar navbar-expand-lg app-navbar">
   <div class="container">
-
-    <!-- {{ accesos_usuario }} -->
-
     <!-- Brand -->
     <a class="navbar-brand" href="/mimenu?company={{ company_key }}">
       <div class="brand-vw">
@@ -16,7 +13,7 @@
       GestorData
     </a>
 
-    {{ accesos|json_script:"accesos" }}
+    {{ accesos_usuario |json_script:"accesos" }} 
     
     {% if company %}
     <span class="nav-company-badge d-none d-md-inline ms-2">{{ company.name }}</span>
@@ -29,226 +26,136 @@
     </button>
 
     <div class="collapse navbar-collapse" id="mainNav">
-      <ul class="navbar-nav ms-4 me-auto mb-2 mb-lg-0">
+      <ul class="navbar-nav ms-4 me-auto mb-2 mb-lg-0" id="modulos">
       
         
-        <!-- Taller -->
-        <li class="nav-item dropdown">
-  <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-    <i class="fas fa-tools me-1" style="font-size:12px; opacity:.7;"></i> Taller
-  </a>
-
-  <ul class="dropdown-menu">
-
-    <li>
-      <a class="dropdown-item"
-         href="/tallerapp/templates/ordenesTrabajo?company={{ company_key }}"
-
-        >Orden de Trabajo
-      </a>
-    </li>
-
-    <li>
-      <a class="dropdown-item"
-         href="#"
-         >Tempario
-      </a>
-    </li>
-
-    <li><hr class="dropdown-divider my-1"></li>
-
-    <li>
-      <a class="dropdown-item"
-         href="#"
-
-       >Torre de Control
-      </a>
-    </li>
-
-    <li><hr class="dropdown-divider my-1"></li>
-
-    <li>
-      <a class="dropdown-item"
-         href="#"
-
-        >Configuración
-      </a>
-     </li>
-
-     <li>
-      <a class="dropdown-item"
-         href="#"
-        onclick="abrirAyudaContextual(); return false"
-        >Ayuda
-      </a>
-     </li>
-
-    <li>
-      <a class="dropdown-item"
-         href="#"
-      >Reportes
-      </a>
-    </li>
- 
-  </ul>
-</li>
-        
-
-
-        
-<!-- Compras  -->
- 
-<li class="nav-item dropdown">
-  <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-    <i class="fas fa-shopping-cart me-1" style="font-size:12px; opacity:.7;"></i> Compras
-  </a>
-
-  <ul class="dropdown-menu">
-
-    <li>
-      <a class="dropdown-item"
-         href="/comprasapp/templates/ordenCompra?company={{ company_key }}"
-
-        >Orden de Compra
-      </a>
-    </li>
-
-    <li>
-      <a class="dropdown-item"
-         href="/comprasapp/cargarTmplOrdenes?company={{ company_key }}"
-
-         >Consulta
-      </a>
-    </li>
-
-    <li>
-      <a class="dropdown-item"
-         href="/comprasapp/cargarTmplPlantillas?company={{ company_key }}"
-
-         >Plantillas Periódicas
-      </a>
-    </li>
-
-    <li class="dropend">
-      <a class="dropdown-item dropdown-toggle"
-         data-bs-toggle="dropdown"
-         href="#"
-
-         >Centro de Gastos
-      </a>
-      
-
-      <ul class="dropdown-menu dropdown-submenu">
-        <li>
-          <a class="dropdown-item"
-             href="/comprasapp/cargarTmplConsultaCentroGastos?company={{ company_key }}"
-
-             >Consulta
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#">Orden de Trabajo</a></li>
-            <li><a class="dropdown-item" id = "OCT" href="/tallerapp/templates/ordenCompraT?company={{ company_key }}" >Orden de Compra</a></li>
-            <li><a class="dropdown-item" href="#">Tempario</a></li>
-            <li><hr class="dropdown-divider my-1"></li>
-            <li><a class="dropdown-item" href="#">Torre de Control</a></li>
-          </ul>
-        </li>
-
-        <!-- Compras -->
-        <li class="nav-item dropdown" data-menu-id="COMPRAS">
+          <!-- Taller -->
+          <li class="nav-item dropdown modulo" id="TA1_TALLER">
           <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-            <i class="fas fa-shopping-cart me-1" style="font-size:12px; opacity:.7;"></i> Compras
+            <i class="fas fa-tools me-1" style="font-size:12px; opacity:.7;"></i> Taller
           </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" id="CO2_ORDENCOMPRA" href="/comprasapp/templates/ordenCompra?company={{ company_key }}">Orden de Compra</a></li>
-            <li><a class="dropdown-item" id="CO2_CONSULTA" href="/comprasapp/cargarTmplOrdenes?company={{ company_key }}">Consulta</a></li>
-            <li><a class="dropdown-item" id="CO2_PLANTILLASPERIOD" href="/comprasapp/cargarTmplPlantillas?company={{ company_key }}">Plantillas Periódicas</a></li>
-            <li class="dropend">
-              <a class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" href="#">Centro de Gastos</a>
-              <ul class="dropdown-menu dropdown-submenu">
-                <li><a class="dropdown-item" id = "CO2_CENTROSGASTOS" href="/comprasapp/cargarTmplConsultaCentroGastos?company={{ company_key }}">Consulta</a></li>
-                <li><a class="dropdown-item" id = "CO3_ASIGNACIONPROVEE" href="#">Asignación a Proveedor</a></li>
-              </ul>
-            </li>
-            <li><hr class="dropdown-divider my-1"></li>
-            <li><a class="dropdown-item" id = "CO2_PROVEEDORES" href="#">Proveedores</a></li>
+
+          <ul class="dropdown-menu " id="TA1_TALLER">
+
+          <li>
+          <a class="dropdown-item" id="TA2_ORDENTRABAJO"
+            href="/tallerapp/templates/ordenesTrabajo?company={{ company_key }}"
+
+          >Orden de Trabajo
+          </a>
+          </li>
+          <li><a class="dropdown-item" id = "TA2_ORDENCOMPRA" href="/tallerapp/templates/ordenCompraT?company={{ company_key }}" >Orden de Compra</a></li>
+          <li>
+          <a class="dropdown-item" id="TA2_TEMPARIO"
+            href="#"
+            >Tempario
+          </a>
+          </li>
+
+          <li><hr class="dropdown-divider my-1"></li>
+
+          <li>
+          <a class="dropdown-item" id="TA2_TORRECONTROL"
+            href="#"
+
+          >Torre de Control
+          </a>
+          </li>
+
+          <li><hr class="dropdown-divider my-1"></li>
+
+          <li>
+          <a class="dropdown-item" id="TA2_CONFIGURACION"
+            href="#"
+
+          >Configuración
+          </a>
+          </li>
+
+          <li>
+          <a class="dropdown-item" id="TA2_AYUDA"
+            href="#"
+          onclick="abrirAyudaContextual(); return false"
+          >Ayuda
+          </a>
+          </li>
+
+          <li>
+          <a class="dropdown-item" id="TA2_REPORTES"
+            href="#"
+          >Reportes
+          </a>
+          </li>
+
           </ul>
-        </li>
-      </ul>
-    </li>
-
-    <li><hr class="dropdown-divider my-1"></li>
-
-    <li>
-      <a class="dropdown-item"
-         href="#"
-
-         >Proveedores
-      </a>
-    </li>
-
-    <li><hr class="dropdown-divider my-1"></li>
-
-    <li>
-      <a class="dropdown-item"
-         href="#"
-
-         >Configuración
-      </a>
-    </li>
-
-    <li>
-      <a class="dropdown-item"
-         href="#"
-
-         onclick="abrirAyudaContextual(); return false"
-
-         >Ayuda
-      </a>
-    </li>
-
-    <li>
-      <a class="dropdown-item"
-         href="#"
-    >
-         Reportes
-      </a>
-    </li>
+          </li>
 
 
+          <!-- Compras  -->
+          <li class="nav-item dropdown modulo" id="CO1_COMPRAS">
+            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+              <i class="fas fa-shopping-cart me-1" style="font-size:12px; opacity:.7;"></i> Compras
+            </a>
+            <ul class="dropdown-menu " id="CO1_COMPRAS">
+              <li><a class="dropdown-item" id="CO2_ORDENCOMPRA" href="/comprasapp/templates/ordenCompra?company={{ company_key }}">Orden de Compra</a></li>
+              <li><a class="dropdown-item" id="CO2_CONSULTA" href="/comprasapp/cargarTmplOrdenes?company={{ company_key }}">Consulta</a></li>
+              <li><a class="dropdown-item" id="CO2_PLANTILLASPERIOD" href="/comprasapp/cargarTmplPlantillas?company={{ company_key }}">Plantillas Periódicas</a></li>
+              <li class="dropend">
+                <a class="dropdown-item dropdown-toggle" id="CO2_CENTROSGASTOS" data-bs-toggle="dropdown" href="#">Centro de Gastos</a>
+                <ul class="dropdown-menu dropdown-submenu">
+                  <li><a class="dropdown-item" id = "CO3_CONSULTA" href="/comprasapp/cargarTmplConsultaCentroGastos?company={{ company_key }}">Consulta</a></li>
+                  <li><a class="dropdown-item" id = "CO3_ASIGNACIONPROVEE" href="#">Asignación a Proveedor</a></li>
+                </ul>
+              </li>
+              <li><hr class="dropdown-divider my-1"></li>
+              <li><a class="dropdown-item" id = "CO2_PROVEEDORES" href="#">Proveedores</a></li>
+              <li><hr class="dropdown-divider my-1"></li>
+            <li>
+              <a class="dropdown-item" id="CO2_CONFIGURACION"
+                href="#"
 
+                >Configuración
+              </a>
+            </li>
 
-  </ul>
-</li>
+          <li>
+            <a class="dropdown-item" id="CO2_AYUDA"
+              href="#"
 
+              onclick="abrirAyudaContextual(); return false"
 
+              >Ayuda
+            </a>
+          </li>
 
+          <li>
+            <a class="dropdown-item" id="CO2_REPORTES"
+              href="#"
+          >
+              Reportes
+            </a>
+          </li>
+            </ul>
+          </li>
        
 
         <!-- Repuestos -->
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown modulo" id="RE1_REPUESTOS">
           <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
             <i class="fas fa-cog me-1" style="font-size:12px; opacity:.7;"></i> Repuestos
           </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" id = "CL" href="/repuestosapp/templates/compraRepuestos?company={{ company_key }}" >Orden de Compra</a></li>
-            <li><a class="dropdown-item" href="/repuestosapp/pruebas?company={{ company_key }}">Pruebas</a></li>
-            <li><hr class="dropdown-divider my-1"></li>
-            <li><a class="dropdown-item" 
-              href="#"
-
-              >Proveedores
-            </a></li>
-
+          <ul class="dropdown-menu " id="RE1_REPUESTOS">
+            <li><a class="dropdown-item" id ="RE2_ORDENCOMPRA" href="/repuestosapp/templates/compraRepuestos?company={{ company_key }}" >Orden de Compra</a></li>
+            <li><a class="dropdown-item" id="RE2_CONSULTAS" href="">Consultas</a></li>
             <li><hr class="dropdown-divider my-1"></li>
 
-            <li><a class="dropdown-item" 
+            <li><a class="dropdown-item" id="RE2_CONFIGURACION"
               href="#"
 
             >Configuración
             </a></li>
 
-            <li><a class="dropdown-item" 
+            <li><a class="dropdown-item" id="RE2_AYUDA"
               href="#"
     
               onclick="abrirAyudaContextual(); return false"
@@ -256,7 +163,7 @@
             >Ayuda
             </a></li>
 
-            <li><a class="dropdown-item" 
+            <li><a class="dropdown-item" id="RE2_REPORTES"
               href="#"
             >Reportes
             </a></li>
@@ -264,19 +171,16 @@
           </ul>
         </li>
         
-
-      
         
         <!-- Importaciones -->
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown modulo" id="IM1_IMPORTACIONES">
           <a class="nav-link dropdown-toggle" 
           href="#" 
-         
           data-bs-toggle="dropdown">
             <i class="fas fa-truck me-1" style="font-size:12px; opacity:.7;"></i> Importaciones
           </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" 
+          <ul class="dropdown-menu " id="IM1_IMPORTACIONES">
+            <li><a class="dropdown-item" id="IM2_ORDENIMPORTACION"
               href="/importacionesapp/templates/ordenImportacion?company={{ company_key }}"
 
              >Orden de Importación
@@ -284,13 +188,13 @@
 
             <li><hr class="dropdown-divider my-1"></li>
 
-            <li><a class="dropdown-item" 
+            <li><a class="dropdown-item" id="IM2_CONFIGURACION"
               href="#"
 
               >Configuración
             </a></li>
 
-            <li><a class="dropdown-item" 
+            <li><a class="dropdown-item" id="IM2_AYUDA"
               href="#"
 
               onclick="abrirAyudaContextual(); return false"
@@ -298,7 +202,7 @@
               >Ayuda
             </a></li>
 
-             <li><a class="dropdown-item" 
+             <li><a class="dropdown-item" id="IM2_REPORTES"
               href="#"
 
              >Reportes
@@ -306,37 +210,72 @@
 
           </ul>
         </li>
-       
-
-         
 
 
+         <!-- Vehiculos -->
+        <li class="nav-item dropdown modulo" id="VH1_VEHICULOS">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+            <i class="fas fa-car me-1" style="font-size:12px; opacity:.7;"></i> Vehículos
+          </a>
+          <ul class="dropdown-menu " id="VH1_VEHICULOS">
+            <li><a class="dropdown-item" id="VH2_COMPRAS" href="">Compras</a></li>
+            <li><a class="dropdown-item" id="VH2_CONSULTAS" href="">Consultas</a></li>
+            <li class="dropend">
+                <a class="dropdown-item dropdown-toggle" id="VH2_VENTAS" data-bs-toggle="dropdown" href="#">Ventas</a>
+                <ul class="dropdown-menu dropdown-submenu">
+                  <li><a class="dropdown-item" id = "VH3_PROFORMAS" href="#">Proformas</a></li>
+                  <li><a class="dropdown-item" id = "VH3_PREFACTURACION" href="">Prefacturación</a></li>
+                </ul>
+              </li>
+              <li><hr class="dropdown-divider my-1"></li>
+
+            <li><a class="dropdown-item" id="VH2_CONFIGURACION"
+              href="#"
+
+              >Configuración
+            </a></li>
+
+            <li><a class="dropdown-item" id="VH2_AYUDA"
+              href="#"
+
+              onclick="abrirAyudaContextual(); return false"
+
+              >Ayuda
+            </a></li>
+
+             <li><a class="dropdown-item" id="VH2_REPORTES"
+              href="#"
+
+             >Reportes
+            </a></li>
+          </ul>
+        </li>
        
          <!-- Configuracion --> 
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown modulo" id="CF1_CONFIGURACION">
           <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
             <i class="fas fa-cogs me-1" style="font-size:12px; opacity:.7;"></i> Configuración
           </a>
 
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="/configurapp/templates/usuarios/?company={{ company_key }}"
+          <ul class="dropdown-menu " id="CF1_CONFIGURACION">
+            <li><a class="dropdown-item" id="CF2_USUARIOS" href="/configurapp/templates/usuarios/?company={{ company_key }}"
              >Usuarios
                  </a>
                 </li>
 
-                <li><a class="dropdown-item" 
+                <li><a class="dropdown-item"  id="CF2_CENTRO_GASTOS"
               href="/configurapp/templates/centroGastos/?company={{ company_key }}"
               >Centro de Gastos
             </a>
            </li>
 
-            <li><a class="dropdown-item"
+            <li><a class="dropdown-item" id="CF2_BODEGA"
               href="/configurapp/templates/bodegas?company={{ company_key}}"
              >Bodega
              </a>
             </li>
 
-            <li><a class="dropdown-item"
+            <li><a class="dropdown-item" id="CF2_CONFIG_MENU"
               href="/configurapp/templates/configuracion_menus/?company={{company_key}}"
             >Configuración Menús
             </a>  
@@ -344,7 +283,7 @@
 
             <li><hr class="dropdown-divider my-1"></li>
 
-            <li><a class="dropdown-item"
+            <li><a class="dropdown-item" id="CF2_AYUDA"
               href="#"
               
               
@@ -354,22 +293,9 @@
                 
           </ul>
         </li>
-
-         <!-- Vehiculos -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-            <i class="fas fa-car me-1" style="font-size:12px; opacity:.7;"></i> Vehículos
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="">Compra Local</a></li>
-            <li><a class="dropdown-item" href="">Consulta Vehículos</a></li>
-            <li><a class="dropdown-item" href="">Prefacturación</a></li>
-            <li><a class="dropdown-item" href="">Proformas</a></li>
-          </ul>
-        </li>
-
       </ul>
-
+    
+      
       <!-- Right side: user info + logout -->
       <div class="d-flex align-items-center gap-3">
         {% if username %}

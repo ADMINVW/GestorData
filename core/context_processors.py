@@ -3,27 +3,24 @@ from core.crypto import decrypt_credential
 from django.db import connections
 from core.db_context import get_db_from_request
 
+from globales.utils import *
+
+#Obtiene accesos habilitados del usuario, en js de menuBarraNav se hace un barrido para deshabilitar aquellos que no esten en este conjunto de datos
 def accesos_context(request):
     accesos_usuario = []
 
     try:
         db_alias = get_db_from_request(request)
         login = getattr(request, "db_user", None)
-
         if login:
             with connections[db_alias].cursor() as cur:
-                cur.execute("""
-                    SELECT sistema
-                    FROM acceso
-                    WHERE login = ?
-                """, [login])
-
-                accesos_usuario = [
-                    str(row[0]).strip()
-                    for row in cur.fetchall()
-                ]
-
+                ssql = """
+                    SELECT pf_nivelperfil, TRIM(pf_codmenu) as pf_codmenu, pf_nivelmenu, TRIM(pf_padremenu) as pf_padremenu FROM tattt034, ciatt010 WHERE ur_user = ? AND ur_codperfil = pf_codperfil
+                    GROUP BY pf_nivelperfil, pf_codmenu,pf_nivelmenu, pf_padremenu ORDER BY pf_nivelmenu ASC
+                    """
+                accesos_usuario = consultarRegistros(ssql,[login],db_alias)
     except Exception:
+        print("Error al capturar accesos")
         accesos_usuario = []
 
     return {
@@ -40,13 +37,15 @@ def company_context(request):
             company = Company.objects.get(key=company_key)
             db_user      = decrypt_credential(request.session.get(f'user_{session_key}'))
             db_user_name = decrypt_credential(request.session.get(f'user_name_{session_key}'))
-            print(f"CONTEXT PROCESSOR - company: {company}, db_user: {db_user}, db_user_name: {db_user_name}")
+            #mine180826
+            accesos_usuario = accesos_context
             return {
                 'company':      company,
                 'db_user':      db_user,
                 'db_user_name': db_user_name,
                 'nombre_user':  db_user_name,
-                'company_key':  session_key,  
+                'company_key':  session_key, 
+                'accesos_user':  accesos_usuario,
             }
         except Company.DoesNotExist:
             print(f"CONTEXT PROCESSOR - Company no existe para key: {session_key}")

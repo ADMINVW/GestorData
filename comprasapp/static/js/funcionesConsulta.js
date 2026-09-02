@@ -1,3 +1,4 @@
+//js para consultar y listar las ordenes de compra en base a filtro en pantalla (consultaOrdenes.html)
 let dataTable;
 let dataTableIniciada = false;
 
@@ -40,7 +41,6 @@ const listOrdenes = async () => {
         const factura = document.getElementById("numFactura").value;
         const ordenTaller = document.getElementById("numOrdenTaller").value;
 
-        console.log("filtro ", agencia)
 
         const parametros = {
             agencia: agencia,
@@ -63,13 +63,14 @@ const listOrdenes = async () => {
         let response;
         //Si parametros vacios 
         if (!filtros) {
-            response = await fetch("/comprasapp/consultarOrdenes/");
+            response = await fetch(`/comprasapp/consultarOrdenes?company=${ck}`);
         } else {
             response = await fetch(`/comprasapp/consultarOrdenes/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value, // siempre que tengp {% csrf_token %} en el formulario de html, otra opcion getCookie('csrftoken')
+                    'X-Company-Key': ck,
                 },
                 body: JSON.stringify(parametros)
             });
