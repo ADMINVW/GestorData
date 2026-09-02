@@ -202,7 +202,7 @@ def guardaFacturaImportaciones(request):
         messages.error(request, f"Hubo un fallo: no se guardó la factura")
         company_key = request.headers.get('X-Company-Key', '')
         return JsonResponse(
-            {'redirect_url': f'/comprasapp/templates/ordenCompra&company={company_key}'}
+            {'redirect_url': f'/importacionesapp/templates/ordenImportacion&company={company_key}'}
         )
         #print(f"Error crítico: {str(e)}")
         #return JsonResponse({'error': str(e)}, status=500)
