@@ -6,7 +6,6 @@ from django.http import JsonResponse, request, request
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.db import connections, transaction
-from comprasapp.models import division
 from comprasapp.serializers.tipo_compra_serializer import TipoCompraSerializer
 from comprasapp.views import *
 from core.db_context import get_db_from_request
@@ -100,19 +99,15 @@ def guardaFacturaImportaciones(request):
         cabecera_oc_data = OrdenCompraCabeceraSerializer(data=datos)
         
         if cabecera_oc_data.is_valid():
-            with transaction.atomic(using=db_alias):
+           with transaction.atomic(using=db_alias):
                service.guardar_orden_compra_cabecera(db_alias, cabecera_oc_data.validated_data)
         else:
-            return JsonResponse({'error': 'Datos de cabecera no válidos', 'details': cabecera_oc_data.errors}, status=400)       
-
-
-        #print("Datos de cabecera guardados correctamente",secuencia, codigo_proveedor)
-        #return JsonResponse({'status': 'success', 'message': 'Factura guardada correctamente', 'oc_numero': secuencia})
-        
+           return JsonResponse({'error': 'Datos de cabecera no válidos', 'details': cabecera_oc_data.errors}, status=400)       
 
         # Expandir filas por centro de gastos
         datos_tabla_expandido = []
         for fila in datos_tabla:
+            print(f"Fila original: {fila}")
             centros_gastos = fila[6]  # lista de cuentas
             cantidad_cg = len(centros_gastos)
             total_original = float(fila[5])
@@ -129,6 +124,7 @@ def guardaFacturaImportaciones(request):
                     total_fila_iva = total_iva_dividido
 
                 nueva_fila = fila[:5] + [str(total_fila)] + [[cuenta]] + fila[7:] + [str(total_fila_iva)]
+                print(f"Fila expandida: {nueva_fila}")
                 datos_tabla_expandido.append(nueva_fila)
 
         # debo dividir el precio, el descuento ademas del total para el numero de centros de gastos que tenga cada fila.
@@ -148,7 +144,7 @@ def guardaFacturaImportaciones(request):
                 'od_agencia': agencia,
                 'od_numero': secuencia,
                 'od_secuen':i,
-                'od_codigo': fila[1]+ str(nitem),
+                'od_codigo': fila[1] + str(nitem),
                 'od_canped': fila[0],
                 'od_canrec': fila[0],
                 'od_descri1': limpiar_texto_informix(fila[2]),
@@ -156,13 +152,13 @@ def guardaFacturaImportaciones(request):
                 'od_preest': fila[5],
                 'od_prefin': '',
                 'od_descto': fila[4],
-                'od_observ':'',
+                'od_observ':'SERVICIOS',
                 'od_ped_or': fila[6][0],
                 'od_poriva': fila[7], 
                 'od_valiva': fila[9],              
             }   
             detalle_oc_data = OrdenCompraDetalleSerializer(data=datos_detalle)
-            
+            print(f"Datos de detalle a guardar: {datos_detalle}")
                     
             if detalle_oc_data.is_valid():
                 with transaction.atomic(using=db_alias):
@@ -181,31 +177,31 @@ def guardaFacturaImportaciones(request):
             # probar aqui print("Factura guardada correctamente", secuencia, codigo_proveedor)
             division = 'd'
             # RECUPERAR LOS DATOS DE LA FACTURA YA INGRESADA PARA GENERAR LA CUENTA POR PAGAR
-            print(secuencia)
-            ordenCompra = obtenerOrdenCompra(request, db_alias, agencia, division, secuencia)   
-            if ordenCompra is None:
-                return JsonResponse({'error': f'No se pudo recuperar la orden de compra {secuencia}'}, status=400)
-            guardarCtaPagar(request, db_alias, ordenCompra)
-            
-            # Obtener company_key para incluir en la redirección
-            company_key = request.headers.get('X-Company-Key', '')
-            return JsonResponse({'redirect_url': f'../../comprasapp/templates/retencionCompra/{secuencia}/{division}/?Agencia={agencia}&company={company_key}'})
+        print(secuencia)
+        ordenCompra = obtenerOrdenCompra(request, db_alias, agencia, division, secuencia)   
+        if ordenCompra is None:
+            return JsonResponse({'error': f'No se pudo recuperar la orden de compra {secuencia}'}, status=400)
+        guardarCtaPagar(request, db_alias, ordenCompra)
+        generarDiario()    
+        # Obtener company_key para incluir en la redirección
+        company_key = request.headers.get('X-Company-Key', '')
+        return JsonResponse({'redirect_url': f'../../comprasapp/templates/retencionCompra/{secuencia}/{division}/?Agencia={agencia}&company={company_key}'})
             #company_key = request.headers.get('X-Company-Key', '')
             #return JsonResponse({'redirect_url': f'retencionCompra/{secuencia}/{division}/?Agencia={agencia}&company={company_key}'})
            
 
-        return JsonResponse({'status': 'success', 'message': 'Factura guardada correctamente'})
+            #return JsonResponse({'status': 'success', 'message': 'Factura guardada correctamente'})
         
 
     except Exception as e:
         print(f"Error al insertar detalle: {e}")
         messages.error(request, f"Hubo un fallo: no se guardó la factura")
         company_key = request.headers.get('X-Company-Key', '')
-        return JsonResponse(
-            {'redirect_url': f'/importacionesapp/templates/ordenImportacion&company={company_key}'}
-        )
+        #return JsonResponse(
+        #    {'redirect_url': f'/importacionesapp/templates/ordenImportacion&company={company_key}'}
+        #)
         #print(f"Error crítico: {str(e)}")
-        #return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse({'error': str(e)}, status=500)
 
         
         

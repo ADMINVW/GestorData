@@ -299,7 +299,7 @@ def guardaFacturaCompra(request):
                         #return JsonResponse({'error': f'No se pudo recuperar la orden de compra {secuenciaw}'}, status=400)
                         raise MiError(f"No se pudo recuperar la orden de compra {secuenciaw}")
                     guardarCtaPagar(request, db_alias, ordenCompra)
-
+                    
         except Exception as e:
             print(f"Error al guardaFacturaCompra: {e}")
             return JsonResponse({'status': 'error','detallerr': str(e)}, status=400)
@@ -338,7 +338,7 @@ def existe_factura(request):
     print("Existe " , existe)
     return JsonResponse({"existe": existe})
 
-##MINE      
+##MINE
 def guardarCtaPagar(request, db_alias=None, orden=None):
     if db_alias is None:
         db_alias = get_db_from_request(request)
