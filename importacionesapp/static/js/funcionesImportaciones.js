@@ -413,7 +413,7 @@ async function enviarDatosFactura() {
         oc_recargo: 0,
         oc_bodprn: sessionStorage.getItem('bodega'),
         oc_obser1: document.getElementById("descripcionFactura").value.toUpperCase(),
-        oc_obser2: '',
+        oc_obser2: document.getElementById("detalleFactura").value.toUpperCase(),
         oc_clasif1: null,
         oc_porcret1: 0,
         oc_porcret2: 0,
@@ -432,6 +432,7 @@ async function enviarDatosFactura() {
         oc_subtipo: '',
 
     };
+    //printf(datos.oc_obser2)
 
     FechaIngreso: formatoFecha()
     var tabla = document.getElementById("tablaDetalle");
@@ -460,7 +461,7 @@ async function enviarDatosFactura() {
         filaDatos.push(celdas[2].innerText);    // Item (1)
         filaDatos.push(celdas[3].innerText);    // Descripcion (2)
         filaDatos.push(celdas[4].innerText);    // Precio Unitario (3)
-        filaDatos.push(celdas[5].innerText);    // Descuento (4)
+        filaDatos.push(parseFloat(celdas[5].innerText).toFixed(2));    // Descuento (4)
 
 
         filaDatos.push(celdas[6].innerText);    // Total (6)

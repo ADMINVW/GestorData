@@ -505,7 +505,7 @@ def ingresarRetencion(request,id,codDiv):
         if datosFactura==None:
             print("Factura no existe!")
         else:
-            #print ("datos" , datosFactura[0], " ", datosFactura[1])
+            #print ("datos en retención " , datosFactura[0], " ", datosFactura[1])
             valorOriginal=datosFactura["valOriginal"]
             valorActual=datosFactura["valActual"]          
             valoresBase = calcularvaloresBase(request,codAge, codDiv, ocompra)
@@ -663,8 +663,8 @@ def guardarRetencion(request):
                             }
                             
                             guardarAjuste(request, "AC", datos)
-                        
-                            generarDiario(request, agencia, numero, fhaper.date(), otrosDatos.get("user"))  
+                            #PARAMETRO "R" PARA INDICAR QUE ES DIARIO DE RETENCION                     
+                            generarDiario(request, agencia, numero, fhaper.date(), otrosDatos.get("user"),division,"0","R")  
 
                             return JsonResponse(
                             {'status': 'success','redirect_url': f'/comprasapp/templates/verTransaccion/{ocompra}/?agencia={agencia}&division={division}&proceso=I&company={company_key}'},status=200
@@ -808,6 +808,7 @@ def calcularvaloresBase(request, codAge, codDiv, numOrden):
 def obtenerDatosFactura(db_alias, codcia, codDiv, codAge, codProv, numFac):
     with connections[db_alias].cursor() as cur:
         parametros=[codcia, codDiv, codAge, codProv, numFac]
+        print("obtenerDatosFactura parametros ", parametros)
         ssql ='''
             SELECT (dc_vcapori + dc_vintori), dc_iva, (dc_vcapact+dc_vintact), dc_fecemi,dc_fevctoo, dc_fechoa, dc_clarel,dc_trnrel,dc_numcpr FROM cpxxt001 
             WHERE dc_cia = ? AND dc_division = ? AND dc_agencia = ? AND dc_codpro = ? AND dc_numdoc = ? AND dc_secuenc in ('51','01') AND dc_cladoc = 'DO' 
@@ -1275,7 +1276,7 @@ def obtenerSecuencia(request, compania, division, agencia, tipo, bodega):
             raise MiError(f"No existe registro de secuencia para: {tipo} en Div: {division}")
     
     
-def generarDiario(request, agencia, nreten, fecha, usuario): #Estoy trabajando con fecha de ingreso y no con fecha de factura
+def generarDiario(request, agencia, ndocu, fecha, usuario,division,cuentaiva,tipdiario): #Estoy trabajando con fecha de ingreso y no con fecha de factura
     db_alias = get_db_from_request(request)
     with connections[db_alias].cursor() as cur:
         ssql="SELECT cl_fec_ca FROM cgrta050 WHERE cl_compania = 'e'"
@@ -1291,8 +1292,14 @@ def generarDiario(request, agencia, nreten, fecha, usuario): #Estoy trabajando c
         #Obtengo secuencia de diario
         ssql = "SELECT " + campo + " FROM cgrta052 WHERE nu_compania = 'e' AND nu_tipo = 'DC'"
         ndiario = consultarDato(request, ssql, db_alias=db_alias) + 1 
+
         #Ejecuto procedure para generacion de diario
-        ssql= "EXECUTE PROCEDURE sp_diario_reten(" + str(nreten) + ",'" + str(ndiario) + "','" + agencia +"','" + usuario +"')"
+        
+        if tipdiario == "R":
+            ssql= "EXECUTE PROCEDURE sp_diario_reten(" + str(ndocu) + ",'" + str(ndiario) + "','" + agencia + "','" + usuario +"')"
+        else:
+            ssql= "EXECUTE PROCEDURE sp_diario_compra(" + str(ndocu) + ",'" + str(ndiario) + "','e','" + agencia + "','" + division +  "','" + cuentaiva + "','" + usuario +"')"
+
         print("Desde generarDiario, ejecutando: ", ssql)
         cur.execute(ssql)
         #Actualizo secuencia de diario
@@ -1301,7 +1308,7 @@ def generarDiario(request, agencia, nreten, fecha, usuario): #Estoy trabajando c
         ssql = "UPDATE cgrta052 " + ssqlaux +  " WHERE nu_compania = 'e' AND nu_tipo = 'DC'" 
         cur.execute(ssql)
         if cur.rowcount ==0:
-            raise MiError(f"Error al generar Diario de {nreten}")
+            raise MiError(f"Error al generar Diario de {ndocu}")
 
 class MiError(Exception):
     pass   

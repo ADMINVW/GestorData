@@ -16,6 +16,8 @@ from comprasapp.serializers import(
 )
 import unicodedata
 
+cuentaiva = "210303030041"
+division = "d"
 def limpiar_texto_informix(texto):
     if not texto:
         return ''
@@ -35,7 +37,7 @@ def ordenImportacion(request):
     db_alias = get_db_from_request(request)
     service = OrdenComprasService()
 
-    tipooc = service.get_tipo_compra(db_alias, division='i')
+    tipooc = service.get_tipo_compra(db_alias, division='i') #tipo de compra para importaciones creada en la tabla ocxxt004
     tipos = service.get_tipo_credito(db_alias)
     solis = service.get_solicitante(db_alias)
 
@@ -149,7 +151,7 @@ def guardaFacturaImportaciones(request):
                 'od_canrec': fila[0],
                 'od_descri1': limpiar_texto_informix(fila[2]),
                 'od_descri2': '',
-                'od_preest': fila[5],
+                'od_preest': fila[3],
                 'od_prefin': '',
                 'od_descto': fila[4],
                 'od_observ':'SERVICIOS',
@@ -175,14 +177,19 @@ def guardaFacturaImportaciones(request):
             # CALCULO PORCENTAJE DESCUENTO
             
             # probar aqui print("Factura guardada correctamente", secuencia, codigo_proveedor)
-            division = 'd'
+            
             # RECUPERAR LOS DATOS DE LA FACTURA YA INGRESADA PARA GENERAR LA CUENTA POR PAGAR
         print(secuencia)
+        fhaper = datetime.now() #Definir si para todos los casos va a tomar la fecha de factura o realmente fecha de registro
         ordenCompra = obtenerOrdenCompra(request, db_alias, agencia, division, secuencia)   
         if ordenCompra is None:
             return JsonResponse({'error': f'No se pudo recuperar la orden de compra {secuencia}'}, status=400)
         guardarCtaPagar(request, db_alias, ordenCompra)
-        generarDiario()    
+
+        generarDiario(request, agencia, ordenCompra["oc_numero"], fhaper.date(), ordenCompra["oc_usring"],division,cuentaiva,"C") 
+        
+
+        #def generarDiario(request, agencia, ndocu, fecha, usuario,division,cuentaiva,tipdiario):
         # Obtener company_key para incluir en la redirección
         company_key = request.headers.get('X-Company-Key', '')
         return JsonResponse({'redirect_url': f'../../comprasapp/templates/retencionCompra/{secuencia}/{division}/?Agencia={agencia}&company={company_key}'})
