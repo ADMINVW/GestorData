@@ -1816,6 +1816,16 @@ def cargarTmplConsultaPlantillas(request):
         company = None
     return render(request,'consultaPlantillasPeriodicas.html', {'company': company, 'company_key': company_key})
 
+def cargarTmplProveedores(request):
+    from core.models import Company
+    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
+    try:
+        company = Company.objects.get(key=key)
+    except Company.DoesNotExist:
+        company = None
+    return render(request,'detalleProveedores.html', {'company': company, 'company_key': company_key})
+
 #Ejecuta consulta de plantilla de orden periodica según filtro
 def consultarPlantillas(request):
     ssql_aux = "1 = 1"

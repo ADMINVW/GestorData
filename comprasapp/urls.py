@@ -48,6 +48,7 @@ urlpatterns = [
     #minejunio
     path('comprasapp/guardarCentroGastos/', views.guardarCentroGastos, name = 'guardarCGastos'),
     path('comprasapp/eliminarCentroGastos/', views.eliminarCentroGastos, name='eliminarCGastos'),
-    #path('comprasapp/templates/ordenCompra', views.tipoOrden),
+    path('comprasapp/templates/detalleOrden', views.cargarConceptoPlantillas, name='detalleOrden'),
+    path('comprasapp/cargarTmplProveedores/', views.cargarTmplProveedores, name="cargarTmplProveedores"),
 
 ]

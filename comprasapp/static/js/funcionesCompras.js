@@ -508,6 +508,7 @@ async function enviarDatosFactura() {
     }
 
     var ck = sessionStorage.getItem('company_key') || '';
+    document.getElementById('botonGuardar').disabled = true;
 
     $.ajax({
         url: '/comprasapp/guardaFacturaCompra/',
@@ -528,7 +529,7 @@ async function enviarDatosFactura() {
             } else {
                 console.error('La secuencia no se recibió correctamente.');
             }
-            document.getElementById('botonGuardar').disabled = true;
+            
             if (data.redirect_url) {
                 // Redirige al usuario a la URL devuelta por el servidor
                 window.location.href = data.redirect_url;

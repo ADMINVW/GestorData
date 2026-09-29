@@ -495,7 +495,7 @@ async function enviarDatosFactura() {
 
         };
     }
-
+    document.getElementById('botonGuardar').disabled = true;
     var ck = sessionStorage.getItem('company_key') || '';
 
     $.ajax({
@@ -517,7 +517,7 @@ async function enviarDatosFactura() {
             } else {
                 console.error('La secuencia no se recibió correctamente.');
             }
-            document.getElementById('botonGuardar').disabled = true;
+            
             if (data.redirect_url) {
                 // Redirige al usuario a la URL devuelta por el servidor
                 window.location.href = data.redirect_url;
