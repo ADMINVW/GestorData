@@ -112,7 +112,7 @@ def guardaFacturaImportaciones(request):
             print(f"Fila original: {fila}")
             centros_gastos = fila[6]  # lista de cuentas
             cantidad_cg = len(centros_gastos)
-            total_original = float(fila[5])
+            total_original = float(fila[3]) # precio unitario
             total_iva_original = float(fila[8])
             total_dividido = round(total_original / cantidad_cg, 2)
             total_iva_dividido = round(total_iva_original / cantidad_cg, 2)
@@ -151,7 +151,7 @@ def guardaFacturaImportaciones(request):
                 'od_canrec': fila[0],
                 'od_descri1': limpiar_texto_informix(fila[2]),
                 'od_descri2': '',
-                'od_preest': fila[3],
+                'od_preest': fila[5],
                 'od_prefin': '',
                 'od_descto': fila[4],
                 'od_observ':'SERVICIOS',
