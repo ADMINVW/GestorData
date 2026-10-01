@@ -1,9 +1,10 @@
 from django.shortcuts import render
 import xml.etree.ElementTree as ET
 from django.db import connections
+from comprasapp.models.proveedor import Proveedor
 from core.db_context import get_db, get_db_from_request
 
-from django.http import JsonResponse 
+from django.http import JsonResponse,FileResponse, Http404
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -1816,15 +1817,7 @@ def cargarTmplConsultaPlantillas(request):
         company = None
     return render(request,'consultaPlantillasPeriodicas.html', {'company': company, 'company_key': company_key})
 
-def cargarTmplProveedores(request):
-    from core.models import Company
-    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
-    key = company_key.split('__')[0]
-    try:
-        company = Company.objects.get(key=key)
-    except Company.DoesNotExist:
-        company = None
-    return render(request,'detalleProveedores.html', {'company': company, 'company_key': company_key})
+
 
 #Ejecuta consulta de plantilla de orden periodica según filtro
 def consultarPlantillas(request):
@@ -2475,3 +2468,100 @@ def eliminarCentroGastos(request):
 def cargarTmplAsignacionCentro(request):
 
     return render(request,'asignacionCentroGastos.html')
+
+#CARGA TEMPLATE PARA CONSULTA DE PROVEEDORES
+def cargarTmplProveedores(request):
+    from core.models import Company
+    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
+    try:
+        company = Company.objects.get(key=key)
+    except Company.DoesNotExist:
+        company = None
+    return render(request,'detalleProveedores.html', {'company': company, 'company_key': company_key})
+
+
+
+#CONSULTA DE PROVEEDORES 
+def consultaProveedores(request):
+    from core.models import Company
+    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
+    
+    try:
+        company = Company.objects.get(key=key)
+    except Company.DoesNotExist:
+        company = None
+
+    buscar = request.GET.get('buscar', '').strip()
+    print("BUSCAR:", repr(buscar))
+
+    #FILTRO DE PROVEEDORES, EXCLUYE LOS DE ECUADOR    
+    proveedores = Proveedor.objects.exclude(pv_pais__in=['EC']).order_by('pv_nombre')  
+
+
+    # BUSCAR POR CODIGO O NOMBRE
+    from django.db.models import Q
+    if buscar:
+        proveedores = proveedores.filter(
+            Q(pv_codigo__icontains=buscar) |
+            Q(pv_nombre__icontains=buscar)
+        )
+
+    proveedores = proveedores.order_by('pv_nombre')
+
+    serializer = ProveedorSerializer(proveedores, many=True)
+    ruta_documentos = r'\\192.168.1.10\Repositorio\Proveedores'
+    #datos = ProveedorSerializer(proveedores, many=True)
+    datos = []
+    for proveedor, dato in zip(proveedores, serializer.data):
+
+        nombre_archivo = f'{proveedor.pv_codigo}.pdf'
+       
+        ruta_pdf = os.path.join(
+            ruta_documentos,
+            key,
+            nombre_archivo
+        )
+        
+        dato['pdf_disponible'] = os.path.exists(ruta_pdf)
+        datos.append(dato)
+
+    return render(
+        request,
+        'detalleProveedores.html',
+        {
+            'datos': serializer.data,
+            'company': company,
+            'company_key': company_key,
+            'buscar': buscar
+        }
+    )
+
+def ver_pdf_proveedor(request, codigo):
+    from core.models import Company
+    company_key = request.GET.get('company') or request.session.get('active_company_key', '')
+    key = company_key.split('__')[0]
+        
+    try:
+        company = Company.objects.get(key=key)
+    except Company.DoesNotExist:
+        company = None
+
+    ruta_documentos = r'\\192.168.1.10\Repositorio\Proveedores'
+    codigo = str(codigo).strip()
+    ruta_pdf = os.path.join(
+        ruta_documentos,
+        key,
+        f'{codigo}.pdf'
+    )
+
+    if not os.path.exists(ruta_pdf):
+        raise Http404("Documento no encontrado")
+
+    return FileResponse(
+        open(ruta_pdf, 'rb'),
+        content_type='application/pdf'
+    )
+   
+

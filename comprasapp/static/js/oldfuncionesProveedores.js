@@ -43,10 +43,10 @@ const listPlantillas = async () => {
 
         let response;
         if (!filtro) {
-            response = await fetch(`/comprasapp/consultarPlantillas?company=${ck}`);
+            response = await fetch(`/comprasapp/consultaProveedores?company=${ck}`);
         }
         else {
-            response = await fetch("/comprasapp/consultarPlantillas/", {
+            response = await fetch("/comprasapp/consultaProveedores/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -89,12 +89,3 @@ document.addEventListener("DOMContentLoaded", function (event) {
     iniciarDataTable();
 });
 
-$(function () {
-    $("#nomPlantilla").autocomplete({
-        source: `/comprasapp/cargarConceptoPlantillas?company=${ck}`,
-        minLength: 3,
-        select: function (event, ui) {
-            $("#codPlantilla").val(ui.item.codigo);
-        }
-    });
-});

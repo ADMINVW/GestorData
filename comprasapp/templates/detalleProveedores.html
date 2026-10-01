@@ -7,16 +7,33 @@
                     <div class="card-header">
                         <h3 class="card-title">Consulta y mantenimiento de Proveedores</h3>
                     </div>
+                        <!--<form method="GET" action="{% url 'consultaProveedores' %}"> -->
+                            <div class="input-group mb-3">
+                                <input type="text"
+                                    name="buscar"
+                                    class="form-control"
+                                    placeholder="Buscar por código o nombre..."
+                                    value="{{ buscar }}">
+                                    
+                                <input type="hidden"
+                                    name="company"
+                                    value="{{ company_key }}">
+
+                                <button type="submit" class="btn btn-primary">
+                                    Buscar
+                                </button>
+
+                                <a href="?company={{ company_key }}"
+                                class="btn btn-secondary">
+                                    Limpiar
+                                </a>
+
+                            </div>
+                        <!--</form> -->
                     <div class="card-body">
 
                         <div class="form-group row mt-3">
-                            <label for="codPlantilla" class="col-sm-2 col-form-label">Plantilla</label>
-                            <div class="col-sm-2">
-                                <input type="text" class="form-control" id="codPlantilla" name="ncodPlan"  style="text-transform: uppercase;"/>
-                            </div>
-                            <div class="col-sm-8">
-                                <input type="text" class="form-control" id="nomPlantilla" name="nnomPlantilla" style="text-transform: uppercase;"/>
-                            </div>
+                            
                         </div>
                         <hr class="hr hr-blurry my-5" />
                         <div class="container">
@@ -35,7 +52,29 @@
                                                 </tr>
                                             </thead>
                                             <tbody id="tablebody_plantillas">
-
+                                                 {% for fila in datos %}
+                                                <tr>
+                                                    <td>{{ fila.pv_codigo }}</td>
+                                                    <td>{{ fila.pv_nombre }}</td>
+                                                    <td>{{ fila.pv_refere1 }}</td>
+                                                    <td>
+                                                        {% if fila.pdf_disponible %}
+                                                            <a href="{% url 'ver_pdf_proveedor' fila.pv_codigo %}"
+                                                            target="_blank">
+                                                                📄 Disponible
+                                                            </a>
+                                                        {% else %}
+                                                            <span>No disponible</span>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                {% empty %}
+                                                <tr>
+                                                    <td colspan="4" class="text-center">
+                                                        No existen registros
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
                                             </tbody>
                                         </table>
                                     </div>
@@ -49,17 +88,18 @@
                         <!-- type="button" solo ejecuta el onclick sin enviar el formulario o recargar pagina esto lo hace con type ="submit"-->
                         <button class="btn btn-primary" type="button" id="consultar-btn"
                             onclick="iniciarDataTable()">Consultar</button>
-                        <a class="btn btn-danger" role="button" href="{% url 'mimenu' %}?company={{ company_key }}" id="cancelar-btn">Cancelar</a>
-                        <a class="btn btn-success" role="button" href="{% url 'crearPlantilla' %}?company={{ company_key }}"
-                            id="nuevo-btn">Nueva</a>
+                       
+                        
                     </div>
                 </div>
             </form>
         </div>
 {% endblock %} 
+<!--
 {% block footer_scripts %}
 
    {{ block.super }}
    <script src="/static/js/funcionesProveedores.js" ></script>
 
 {% endblock %}
+-->

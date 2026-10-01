@@ -49,6 +49,7 @@ urlpatterns = [
     path('comprasapp/guardarCentroGastos/', views.guardarCentroGastos, name = 'guardarCGastos'),
     path('comprasapp/eliminarCentroGastos/', views.eliminarCentroGastos, name='eliminarCGastos'),
     path('comprasapp/templates/detalleOrden', views.cargarConceptoPlantillas, name='detalleOrden'),
-    path('comprasapp/cargarTmplProveedores/', views.cargarTmplProveedores, name="cargarTmplProveedores"),
+    path('comprasapp/consultaProveedores/', views.consultaProveedores, name="consultaProveedores"),
+    path('ver_pdf_proveedor/<str:codigo>/', views.ver_pdf_proveedor, name='ver_pdf_proveedor'),
 
 ]
